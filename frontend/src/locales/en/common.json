@@ -144,6 +144,8 @@
   "common": {
     "signOut": "Sign out",
     "loading": "Loading…",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "delete": "Delete",
+    "confirmDelete": "Delete this record? This cannot be undone."
   }
 }

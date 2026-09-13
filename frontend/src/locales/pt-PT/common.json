@@ -144,6 +144,8 @@
   "common": {
     "signOut": "Terminar sessão",
     "loading": "A carregar…",
-    "error": "Ocorreu um erro. Tente novamente."
+    "error": "Ocorreu um erro. Tente novamente.",
+    "delete": "Eliminar",
+    "confirmDelete": "Eliminar este registo? Esta ação não pode ser revertida."
   }
 }

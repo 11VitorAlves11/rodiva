@@ -56,24 +56,38 @@ export const odometer = {
   list: (vehicleId: string) => request<OdometerReading[]>(`/api/vehicles/${vehicleId}/odometer-readings`),
   create: (vehicleId: string, body: OdometerReadingInput) =>
     request<OdometerReading>(`/api/vehicles/${vehicleId}/odometer-readings`, { method: "POST", body }),
+  remove: (vehicleId: string, id: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/odometer-readings/${id}`, { method: "DELETE" }),
 };
 
 export const fuel = {
   list: (vehicleId: string) => request<FuelRecord[]>(`/api/vehicles/${vehicleId}/fuel-records`),
   create: (vehicleId: string, body: FuelRecordInput) =>
     request<FuelRecord>(`/api/vehicles/${vehicleId}/fuel-records`, { method: "POST", body }),
+  update: (vehicleId: string, id: string, body: Partial<FuelRecordInput>) =>
+    request<FuelRecord>(`/api/vehicles/${vehicleId}/fuel-records/${id}`, { method: "PATCH", body }),
+  remove: (vehicleId: string, id: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/fuel-records/${id}`, { method: "DELETE" }),
 };
 
 export const workRecords = {
   list: (vehicleId: string) => request<WorkRecord[]>(`/api/vehicles/${vehicleId}/work-records`),
   create: (vehicleId: string, body: WorkRecordInput) =>
     request<WorkRecord>(`/api/vehicles/${vehicleId}/work-records`, { method: "POST", body }),
+  update: (vehicleId: string, id: string, body: Partial<WorkRecordInput>) =>
+    request<WorkRecord>(`/api/vehicles/${vehicleId}/work-records/${id}`, { method: "PATCH", body }),
+  remove: (vehicleId: string, id: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/work-records/${id}`, { method: "DELETE" }),
 };
 
 export const expenses = {
   list: (vehicleId: string) => request<ExpenseRecord[]>(`/api/vehicles/${vehicleId}/expenses`),
   create: (vehicleId: string, body: ExpenseRecordInput) =>
     request<ExpenseRecord>(`/api/vehicles/${vehicleId}/expenses`, { method: "POST", body }),
+  update: (vehicleId: string, id: string, body: Partial<ExpenseRecordInput>) =>
+    request<ExpenseRecord>(`/api/vehicles/${vehicleId}/expenses/${id}`, { method: "PATCH", body }),
+  remove: (vehicleId: string, id: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/expenses/${id}`, { method: "DELETE" }),
 };
 
 export const reminders = {
@@ -90,6 +104,10 @@ export const notes = {
   list: (vehicleId: string) => request<Note[]>(`/api/vehicles/${vehicleId}/notes`),
   create: (vehicleId: string, body: NoteInput) =>
     request<Note>(`/api/vehicles/${vehicleId}/notes`, { method: "POST", body }),
+  update: (vehicleId: string, id: string, body: Partial<NoteInput>) =>
+    request<Note>(`/api/vehicles/${vehicleId}/notes/${id}`, { method: "PATCH", body }),
+  remove: (vehicleId: string, id: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/notes/${id}`, { method: "DELETE" }),
 };
 
 export const attachments = {
@@ -98,4 +116,6 @@ export const attachments = {
     request<Attachment>(`/api/vehicles/${vehicleId}/attachments`, { method: "POST", body }),
   downloadUrl: (vehicleId: string, attachmentId: string) =>
     `/api/vehicles/${vehicleId}/attachments/${attachmentId}/download`,
+  remove: (vehicleId: string, id: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/attachments/${id}`, { method: "DELETE" }),
 };

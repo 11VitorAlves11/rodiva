@@ -124,7 +124,15 @@ export function Vehicle() {
                 <p className="text-sm text-slate-500">{formatDate(item.recorded_on)}{item.is_adjustment ? ` · ${t("odometer.adjustment")}` : ""}</p>
                 {item.notes && <p className="mt-1 text-sm text-slate-600">{item.notes}</p>}
               </div>
-              <p className="text-sm text-slate-500">{item.distance === null ? "—" : `+${item.distance.toLocaleString(i18n.language)} ${vehicle.distance_unit}`}</p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-slate-500">{item.distance === null ? "—" : `+${item.distance.toLocaleString(i18n.language)} ${vehicle.distance_unit}`}</p>
+                <button
+                  onClick={() => { if (window.confirm(t("common.confirmDelete"))) void odometer.remove(vehicleId, item.id).then(load); }}
+                  className="text-xs font-medium text-red-700"
+                >
+                  {t("common.delete")}
+                </button>
+              </div>
             </li>)}
           </ul>
         )}
@@ -147,7 +155,8 @@ export function Vehicle() {
 function WorkSection({ records, vehicleId, currentReading, onCreated }: { records: WorkRecord[]; vehicleId: string; currentReading: number | null; onCreated: () => void }) {
   const { t, i18n } = useTranslation(); const [show, setShow] = useState(false); const [description, setDescription] = useState(""); const [cost, setCost] = useState(""); const [kind, setKind] = useState<WorkKind>("maintenance"); const [saving, setSaving] = useState(false); const [error, setError] = useState<string | null>(null);
   async function submit(event: FormEvent) { event.preventDefault(); setSaving(true); setError(null); try { await workRecords.create(vehicleId, { recorded_on: new Date().toISOString().slice(0, 10), kind, description, total_cost: cost.replace(",", ".") || undefined, odometer_reading: currentReading ?? undefined }); setShow(false); setDescription(""); setCost(""); onCreated(); } catch (cause) { setError(cause instanceof ApiError ? cause.message : t("common.error")); } finally { setSaving(false); } }
-  return <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"><div className="flex items-center justify-between gap-4"><div><h2 className="text-lg font-semibold text-slate-900">{t("work.title")}</h2><p className="text-sm text-slate-500">{t("work.description")}</p></div><button onClick={() => setShow((value) => !value)} className="rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark">{t("work.add")}</button></div>{show && <form onSubmit={submit} className="grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2"><select value={kind} onChange={(event) => setKind(event.target.value as WorkKind)} className="rounded-md border border-slate-300 bg-white px-3 py-2"><option value="maintenance">{t("work.maintenance")}</option><option value="repair">{t("work.repair")}</option><option value="modification">{t("work.modification")}</option></select><input required placeholder={t("work.placeholder")} value={description} onChange={(event) => setDescription(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" /><input inputMode="decimal" placeholder={t("work.cost")} value={cost} onChange={(event) => setCost(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" />{error && <p className="text-sm text-red-700">{error}</p>}<button disabled={saving} className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white disabled:opacity-60">{t("garage.save")}</button></form>}<ul className="divide-y divide-slate-100">{records.map((record) => <li key={record.id} className="flex justify-between gap-4 py-3"><div><p className="font-medium text-slate-900">{record.description}</p><p className="text-sm text-slate-500">{t(`work.${record.kind}`)}{record.supplier ? ` · ${record.supplier}` : ""}</p></div><p className="text-sm text-slate-500">{record.total_cost ? Number(record.total_cost).toLocaleString(i18n.language, { style: "currency", currency: "EUR" }) : "—"}</p></li>)}</ul></section>;
+  async function remove(id: string) { if (window.confirm(t("common.confirmDelete"))) { await workRecords.remove(vehicleId, id); onCreated(); } }
+  return <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"><div className="flex items-center justify-between gap-4"><div><h2 className="text-lg font-semibold text-slate-900">{t("work.title")}</h2><p className="text-sm text-slate-500">{t("work.description")}</p></div><button onClick={() => setShow((value) => !value)} className="rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark">{t("work.add")}</button></div>{show && <form onSubmit={submit} className="grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2"><select value={kind} onChange={(event) => setKind(event.target.value as WorkKind)} className="rounded-md border border-slate-300 bg-white px-3 py-2"><option value="maintenance">{t("work.maintenance")}</option><option value="repair">{t("work.repair")}</option><option value="modification">{t("work.modification")}</option></select><input required placeholder={t("work.placeholder")} value={description} onChange={(event) => setDescription(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" /><input inputMode="decimal" placeholder={t("work.cost")} value={cost} onChange={(event) => setCost(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" />{error && <p className="text-sm text-red-700">{error}</p>}<button disabled={saving} className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white disabled:opacity-60">{t("garage.save")}</button></form>}<ul className="divide-y divide-slate-100">{records.map((record) => <li key={record.id} className="flex justify-between gap-4 py-3"><div><p className="font-medium text-slate-900">{record.description}</p><p className="text-sm text-slate-500">{t(`work.${record.kind}`)}{record.supplier ? ` · ${record.supplier}` : ""}</p></div><div className="flex items-center gap-3"><p className="text-sm text-slate-500">{record.total_cost ? Number(record.total_cost).toLocaleString(i18n.language, { style: "currency", currency: "EUR" }) : "—"}</p><button onClick={() => void remove(record.id)} className="text-xs font-medium text-red-700">{t("common.delete")}</button></div></li>)}</ul></section>;
 }
 
 function FuelSection({
@@ -174,7 +183,15 @@ function FuelSection({
     {records.length === 0 ? <p className="py-4 text-sm text-slate-500">{t("fuel.empty")}</p> : <ul className="divide-y divide-slate-100">
       {records.map((record) => <li key={record.id} className="flex items-center justify-between gap-4 py-3">
         <div><p className="font-medium text-slate-900">{Number(record.volume_litres).toLocaleString(i18n.language)} L · {Number(record.total_price).toLocaleString(i18n.language, { style: "currency", currency: "EUR" })}</p><p className="text-sm text-slate-500">{formatDate(record.recorded_on)}{record.station ? ` · ${record.station}` : ""}</p></div>
-        <p className="text-sm text-slate-500">{record.consumption_l_per_100km ? `${Number(record.consumption_l_per_100km).toLocaleString(i18n.language)} L/100 km` : "—"}</p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-slate-500">{record.consumption_l_per_100km ? `${Number(record.consumption_l_per_100km).toLocaleString(i18n.language)} L/100 km` : "—"}</p>
+          <button
+            onClick={() => { if (window.confirm(t("common.confirmDelete"))) void fuel.remove(vehicleId, record.id).then(onCreated); }}
+            className="text-xs font-medium text-red-700"
+          >
+            {t("common.delete")}
+          </button>
+        </div>
       </li>)}
     </ul>}
   </section>;
