@@ -3,8 +3,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import (
+    attachments,
     auth,
     expenses,
     fuel,
@@ -46,6 +48,8 @@ app.include_router(work_records.router, prefix="/api")
 app.include_router(expenses.router, prefix="/api")
 app.include_router(reminders.router, prefix="/api")
 app.include_router(notes.router, prefix="/api")
+app.include_router(attachments.router, prefix="/api")
+app.mount("/storage", StaticFiles(directory=settings.storage_path, check_dir=False), name="storage")
 
 
 @app.get("/api")

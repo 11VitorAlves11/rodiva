@@ -1,3 +1,4 @@
+from app.models.attachment import Attachment
 from app.models.base import Base
 from app.models.enums import Role, VehicleStatus
 from app.models.expense_record import ExpenseRecord
@@ -12,6 +13,7 @@ from app.models.vehicle import Vehicle
 from app.models.work_record import WorkRecord
 
 __all__ = [
+    "Attachment",
     "Base",
     "ExpenseRecord",
     "FuelRecord",
