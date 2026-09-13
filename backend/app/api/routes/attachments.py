@@ -97,3 +97,25 @@ async def download_attachment(
         media_type=attachment.content_type,
         filename=attachment.filename,
     )
+
+
+@router.delete("/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_attachment(
+    vehicle_id: uuid.UUID,
+    attachment_id: uuid.UUID,
+    membership: CurrentMembership,
+    db: DbSession,
+    settings: AppSettings,
+) -> None:
+    await _vehicle_in_household(vehicle_id, membership, db)
+    if membership.role not in _CAN_WRITE:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot delete records"
+        )
+    attachment = await db.get(Attachment, attachment_id)
+    if attachment is None or attachment.vehicle_id != vehicle_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attachment not found")
+    path = Path(settings.storage_path) / attachment.storage_key
+    await db.delete(attachment)
+    await db.commit()
+    path.unlink(missing_ok=True)

@@ -41,6 +41,19 @@ class FuelRecordIn(BaseModel):
         return self
 
 
+class FuelRecordUpdate(BaseModel):
+    recorded_on: date | None = None
+    odometer_reading: int | None = Field(default=None, ge=0, le=9_999_999)
+    volume_litres: Decimal | None = Field(default=None, gt=0, max_digits=10, decimal_places=3)
+    total_price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)
+    unit_price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=3)
+    fuel_type: str | None = Field(default=None, max_length=50)
+    station: str | None = Field(default=None, max_length=200)
+    full_tank: bool | None = None
+    excluded_from_consumption: bool | None = None
+    notes: str | None = Field(default=None, max_length=2_000)
+
+
 class FuelRecordOut(BaseModel):
     id: uuid.UUID
     vehicle_id: uuid.UUID

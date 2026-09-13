@@ -6,7 +6,7 @@ from sqlalchemy import select
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
 from app.models import Note, Role
-from app.schemas.notes import NoteIn, NoteOut
+from app.schemas.notes import NoteIn, NoteOut, NoteUpdate
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/notes", tags=["notes"])
 _CAN_WRITE = {Role.OWNER, Role.MANAGER, Role.EDITOR}
@@ -43,3 +43,45 @@ async def create_note(
     await db.commit()
     await db.refresh(note)
     return note
+
+
+async def _note_in_vehicle(vehicle_id: uuid.UUID, note_id: uuid.UUID, db: DbSession) -> Note:
+    note = await db.get(Note, note_id)
+    if note is None or note.vehicle_id != vehicle_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+    return note
+
+
+@router.patch("/{note_id}", response_model=NoteOut)
+async def update_note(
+    vehicle_id: uuid.UUID,
+    note_id: uuid.UUID,
+    payload: NoteUpdate,
+    membership: CurrentMembership,
+    db: DbSession,
+) -> Note:
+    await _vehicle_in_household(vehicle_id, membership, db)
+    if membership.role not in _CAN_WRITE:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot update records"
+        )
+    note = await _note_in_vehicle(vehicle_id, note_id, db)
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(note, field, value)
+    await db.commit()
+    await db.refresh(note)
+    return note
+
+
+@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_note(
+    vehicle_id: uuid.UUID, note_id: uuid.UUID, membership: CurrentMembership, db: DbSession
+) -> None:
+    await _vehicle_in_household(vehicle_id, membership, db)
+    if membership.role not in _CAN_WRITE:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot delete records"
+        )
+    note = await _note_in_vehicle(vehicle_id, note_id, db)
+    await db.delete(note)
+    await db.commit()

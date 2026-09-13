@@ -35,3 +35,26 @@ async def test_pinned_notes_are_listed_before_unpinned_ones(user_client: AsyncCl
     listed = await user_client.get(f"/api/vehicles/{vehicle_id}/notes")
     assert listed.status_code == 200
     assert [item["title"] for item in listed.json()] == ["Nota fixada", "Nota normal"]
+
+
+async def test_update_and_delete_note(user_client: AsyncClient) -> None:
+    vehicle_id = await _vehicle(user_client)
+    created = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/notes",
+        json={"title": "Rascunho", "content": "Primeira versão."},
+    )
+    note_id = created.json()["id"]
+
+    updated = await user_client.patch(
+        f"/api/vehicles/{vehicle_id}/notes/{note_id}",
+        json={"content": "Versão revista.", "pinned": True},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["content"] == "Versão revista."
+    assert updated.json()["pinned"] is True
+
+    deleted = await user_client.delete(f"/api/vehicles/{vehicle_id}/notes/{note_id}")
+    assert deleted.status_code == 204
+
+    listed = await user_client.get(f"/api/vehicles/{vehicle_id}/notes")
+    assert listed.json() == []

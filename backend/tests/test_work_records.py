@@ -52,3 +52,27 @@ async def test_list_work_records_orders_most_recent_first(user_client: AsyncClie
         "Segunda intervenção",
         "Primeira intervenção",
     ]
+
+
+async def test_update_and_delete_work_record(user_client: AsyncClient) -> None:
+    vehicle_id = await _vehicle(user_client)
+    created = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/work-records",
+        json={"recorded_on": "2026-01-05", "kind": "repair", "description": "Travões"},
+    )
+    record_id = created.json()["id"]
+
+    updated = await user_client.patch(
+        f"/api/vehicles/{vehicle_id}/work-records/{record_id}",
+        json={"total_cost": "89.90", "supplier": "Oficina Central"},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["total_cost"] == "89.90"
+    assert updated.json()["supplier"] == "Oficina Central"
+    assert updated.json()["description"] == "Travões"
+
+    deleted = await user_client.delete(f"/api/vehicles/{vehicle_id}/work-records/{record_id}")
+    assert deleted.status_code == 204
+
+    listed = await user_client.get(f"/api/vehicles/{vehicle_id}/work-records")
+    assert listed.json() == []

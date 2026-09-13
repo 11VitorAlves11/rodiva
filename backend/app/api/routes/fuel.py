@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _recalculate, _vehicle_in_household
 from app.models import FuelRecord, OdometerReading, Role
-from app.schemas.fuel import FuelRecordIn, FuelRecordOut
+from app.schemas.fuel import FuelRecordIn, FuelRecordOut, FuelRecordUpdate
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/fuel-records", tags=["fuel"])
 
@@ -94,3 +94,51 @@ async def create_fuel_record(
     await db.commit()
     await db.refresh(record)
     return record
+
+
+async def _fuel_record_in_vehicle(
+    vehicle_id: uuid.UUID, record_id: uuid.UUID, db: AsyncSession
+) -> FuelRecord:
+    record = await db.get(FuelRecord, record_id)
+    if record is None or record.vehicle_id != vehicle_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fuel record not found")
+    return record
+
+
+@router.patch("/{record_id}", response_model=FuelRecordOut)
+async def update_fuel_record(
+    vehicle_id: uuid.UUID,
+    record_id: uuid.UUID,
+    payload: FuelRecordUpdate,
+    membership: CurrentMembership,
+    db: DbSession,
+) -> FuelRecord:
+    await _vehicle_in_household(vehicle_id, membership, db)
+    if membership.role not in _CAN_WRITE_RECORDS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot update records"
+        )
+    record = await _fuel_record_in_vehicle(vehicle_id, record_id, db)
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(record, field, value)
+    await db.flush()
+    await _recalculate_consumption(vehicle_id, db)
+    await db.commit()
+    await db.refresh(record)
+    return record
+
+
+@router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_fuel_record(
+    vehicle_id: uuid.UUID, record_id: uuid.UUID, membership: CurrentMembership, db: DbSession
+) -> None:
+    await _vehicle_in_household(vehicle_id, membership, db)
+    if membership.role not in _CAN_WRITE_RECORDS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot delete records"
+        )
+    record = await _fuel_record_in_vehicle(vehicle_id, record_id, db)
+    await db.delete(record)
+    await db.flush()
+    await _recalculate_consumption(vehicle_id, db)
+    await db.commit()

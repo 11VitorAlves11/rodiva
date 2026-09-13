@@ -38,6 +38,30 @@ async def test_upload_and_download_attachment(user_client: AsyncClient) -> None:
     assert downloaded.content == content
 
 
+async def test_delete_attachment_removes_it(user_client: AsyncClient) -> None:
+    vehicle_id = await _vehicle(user_client)
+    uploaded = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/attachments",
+        json={
+            "filename": "fatura.pdf",
+            "content_type": "application/pdf",
+            "content_base64": base64.b64encode(b"conteudo").decode(),
+        },
+    )
+    attachment_id = uploaded.json()["id"]
+
+    deleted = await user_client.delete(f"/api/vehicles/{vehicle_id}/attachments/{attachment_id}")
+    assert deleted.status_code == 204
+
+    listed = await user_client.get(f"/api/vehicles/{vehicle_id}/attachments")
+    assert listed.json() == []
+
+    downloaded = await user_client.get(
+        f"/api/vehicles/{vehicle_id}/attachments/{attachment_id}/download"
+    )
+    assert downloaded.status_code == 404
+
+
 async def test_rejects_unsupported_content_type(user_client: AsyncClient) -> None:
     vehicle_id = await _vehicle(user_client)
     response = await user_client.post(

@@ -16,6 +16,14 @@ class ExpenseRecordIn(BaseModel):
     status: ExpenseStatus = "paid"
 
 
+class ExpenseRecordUpdate(BaseModel):
+    issued_on: date | None = None
+    category: str | None = Field(default=None, min_length=1, max_length=50)
+    amount: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)
+    supplier: str | None = Field(default=None, max_length=200)
+    status: ExpenseStatus | None = None
+
+
 class ExpenseRecordOut(ExpenseRecordIn):
     id: uuid.UUID
     vehicle_id: uuid.UUID
