@@ -1,0 +1,15 @@
+name: Pedido de funcionalidade
+description: Propor uma nova funcionalidade ou melhoria
+labels: [enhancement]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição
+    validations:
+      required: true
+  - type: input
+    id: spec-ref
+    attributes:
+      label: Referência na especificação
+      placeholder: Ex. RF-LEM-004, secção 12 Lembretes e calendário

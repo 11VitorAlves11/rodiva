@@ -1,0 +1,16 @@
+# A imagem do backend constrói a partir da raiz do repositório.
+.git/
+.github/
+PRD/
+frontend/
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/htmlcov/
+**/.coverage
+backend/tests/
+.env
+.env.local

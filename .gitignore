@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+dev-dist/
+coverage/
+
+# Ambiente
+.env
+.env.local
+
+# Dados locais
+storage/
+pgdata/
+
+# Editores / SO
+.DS_Store
+.idea/
+.vscode/
+
+# Ferramentas de assistência (locais, não publicadas)
+CLAUDE.md
+.claude/
+.agents/
+skills-lock.json

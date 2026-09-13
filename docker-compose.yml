@@ -1,0 +1,49 @@
+# Implantação. Requer .env (ver .env.example) com SECRET_KEY definido.
+#   docker compose up --build -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rodiva}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-rodiva}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rodiva} -d ${POSTGRES_DB:-rodiva}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-rodiva}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-rodiva}
+      ENVIRONMENT: prod
+      AUTH_MODE: ${AUTH_MODE:-local}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+      ALLOW_PUBLIC_REGISTRATION: ${ALLOW_PUBLIC_REGISTRATION:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-[]}
+    volumes:
+      - storage:/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  storage:
