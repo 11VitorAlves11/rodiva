@@ -6,6 +6,7 @@ from app.models.membership import Membership
 from app.models.odometer_reading import OdometerReading
 from app.models.user import User
 from app.models.vehicle import Vehicle
+from app.models.work_record import WorkRecord
 
 __all__ = [
     "Base",
@@ -17,4 +18,5 @@ __all__ = [
     "User",
     "Vehicle",
     "VehicleStatus",
+    "WorkRecord",
 ]
