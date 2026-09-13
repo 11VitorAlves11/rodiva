@@ -43,6 +43,15 @@
     "fuelType": "Fuel",
     "fuelActivity": "Fuel fill-up"
   },
+  "invite": {
+    "invalid": "This invite is invalid or has expired.",
+    "description": "You've been invited to {{household}} as {{role}}.",
+    "accept": "Accept as {{email}}",
+    "joinAsNewAccount": "Create account and join",
+    "joinWithExistingAccount": "Sign in and join",
+    "haveAccount": "Already have an account? Sign in",
+    "needAccount": "Don't have an account? Create one"
+  },
   "register": {
     "title": "Create the household",
     "householdName": "Household name",
@@ -98,7 +107,18 @@
   "settings": {
     "title": "Settings",
     "preferences": "Preferences",
-    "language": "Language"
+    "language": "Language",
+    "members": "Household members",
+    "invite": "Invite",
+    "inviteEmail": "Email (optional)",
+    "inviteReady": "Invite created. Share this link:",
+    "copyLink": "Copy",
+    "createInvite": "Create invite",
+    "role": "Role",
+    "remove": "Remove",
+    "pendingInvites": "Pending invites",
+    "revoke": "Revoke",
+    "roles": { "owner": "Owner", "manager": "Manager", "editor": "Editor", "reader": "Reader" }
   },
   "common": {
     "signOut": "Sign out",

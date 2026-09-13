@@ -43,6 +43,15 @@
     "fuelType": "Combustível",
     "fuelActivity": "Abastecimento"
   },
+  "invite": {
+    "invalid": "Este convite é inválido ou já expirou.",
+    "description": "Foi convidado para {{household}} como {{role}}.",
+    "accept": "Aceitar como {{email}}",
+    "joinAsNewAccount": "Criar conta e juntar-me",
+    "joinWithExistingAccount": "Iniciar sessão e juntar-me",
+    "haveAccount": "Já tem conta? Iniciar sessão",
+    "needAccount": "Não tem conta? Criar uma"
+  },
   "register": {
     "title": "Criar o agregado",
     "householdName": "Nome do agregado",
@@ -98,7 +107,18 @@
   "settings": {
     "title": "Definições",
     "preferences": "Preferências",
-    "language": "Idioma"
+    "language": "Idioma",
+    "members": "Membros do agregado",
+    "invite": "Convidar",
+    "inviteEmail": "Correio eletrónico (opcional)",
+    "inviteReady": "Convite criado. Partilhe esta ligação:",
+    "copyLink": "Copiar",
+    "createInvite": "Criar convite",
+    "role": "Perfil",
+    "remove": "Remover",
+    "pendingInvites": "Convites pendentes",
+    "revoke": "Revogar",
+    "roles": { "owner": "Proprietário", "manager": "Gestor", "editor": "Editor", "reader": "Leitor" }
   },
   "common": {
     "signOut": "Terminar sessão",

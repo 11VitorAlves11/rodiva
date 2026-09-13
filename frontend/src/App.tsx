@@ -8,6 +8,7 @@ import { useSession } from "./lib/session";
 import { Garage } from "./pages/Garage";
 import { History } from "./pages/History";
 import { Dashboard } from "./pages/Dashboard";
+import { InviteAccept } from "./pages/InviteAccept";
 import { Login } from "./pages/Login";
 import { Reminders } from "./pages/Reminders";
 import { Settings } from "./pages/Settings";
@@ -35,6 +36,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/invite/:token" element={<InviteAccept />} />
       <Route
         path="/"
         element={

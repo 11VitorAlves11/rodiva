@@ -18,6 +18,29 @@ export type Me = {
   membership: Membership;
 };
 
+export type Member = {
+  user_id: string;
+  email: string;
+  name: string | null;
+  role: Role;
+  joined_at: string;
+};
+
+export type Invite = {
+  id: string;
+  role: Role;
+  email: string | null;
+  token: string;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+};
+
+export type InviteInput = { role: Role; email?: string; expires_in_hours?: number };
+
+export type InvitePreview = { household_name: string; role: Role };
+
 export type VehicleStatus = "active" | "parked" | "sold" | "archived";
 
 export type Vehicle = {

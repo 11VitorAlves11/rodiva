@@ -5,13 +5,18 @@ import type {
   ExpenseRecordInput,
   FuelRecord,
   FuelRecordInput,
+  Invite,
+  InviteInput,
+  InvitePreview,
   Me,
+  Member,
   Note,
   NoteInput,
   OdometerReading,
   OdometerReadingInput,
   Reminder,
   ReminderInput,
+  Role,
   Vehicle,
   VehicleInput,
   WorkRecord,
@@ -20,11 +25,23 @@ import type {
 
 export const auth = {
   me: () => request<Me>("/auth/me"),
-  register: (body: { email: string; password: string; household_name: string; name?: string }) =>
+  register: (body: { email: string; password: string; name?: string; household_name?: string; invite_token?: string }) =>
     request<Me>("/auth/register", { method: "POST", body }),
   login: (body: { email: string; password: string }) =>
     request<Me>("/auth/login", { method: "POST", body }),
   logout: () => request<void>("/auth/logout", { method: "POST" }),
+  previewInvite: (token: string) => request<InvitePreview>(`/auth/invites/${token}`),
+  acceptInvite: (token: string) => request<Me>(`/auth/invites/${token}/accept`, { method: "POST" }),
+};
+
+export const household = {
+  members: () => request<Member[]>("/api/household/members"),
+  updateMemberRole: (userId: string, role: Role) =>
+    request<Member>(`/api/household/members/${userId}`, { method: "PATCH", body: { role } }),
+  removeMember: (userId: string) => request<void>(`/api/household/members/${userId}`, { method: "DELETE" }),
+  invites: () => request<Invite[]>("/api/household/invites"),
+  createInvite: (body: InviteInput) => request<Invite>("/api/household/invites", { method: "POST", body }),
+  revokeInvite: (id: string) => request<void>(`/api/household/invites/${id}`, { method: "DELETE" }),
 };
 
 export const vehicles = {
