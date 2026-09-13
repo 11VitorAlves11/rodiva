@@ -35,6 +35,16 @@ const activityIcons: Record<Activity["kind"], string> = {
 
 const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
+/** Rounds a scale ceiling up to a "nice" step (1/2/5 × a power of ten) so axis
+ * labels read like 100/200/300 instead of an arbitrary data maximum. */
+function niceScaleMax(value: number): number {
+  if (value <= 0) return 100;
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const normalized = value / magnitude;
+  const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+  return step * magnitude;
+}
+
 export function Dashboard() {
   const { t, i18n } = useTranslation();
   const { me } = useSession();
@@ -145,7 +155,9 @@ export function Dashboard() {
   if (!summaries || !data) return <Skeleton lines={8} />;
 
   const primary = summaries[selected];
-  const maxMonth = Math.max(...data.monthlyTotals, 1);
+  const scaleMax = niceScaleMax(Math.max(...data.monthlyTotals));
+  const axisSteps = [4, 3, 2, 1, 0].map((step) => (scaleMax / 4) * step);
+  const compactCurrency = (value: number) => value.toLocaleString(i18n.language, { maximumFractionDigits: 0 }) + " €";
   const yearOptions = [year, year - 1, year - 2];
   const monthLabels = new Intl.DateTimeFormat(i18n.language, { month: "short" });
 
@@ -270,19 +282,41 @@ export function Dashboard() {
                   ))}
                 </select>
               </div>
-              <div className="flex h-40 items-end gap-1.5">
-                {data.monthlyTotals.map((value, month) => (
-                  <div key={month} className="flex flex-1 flex-col items-center gap-1">
-                    <div className="flex h-32 w-full items-end">
-                      <div
-                        className="w-full rounded-t bg-copper"
-                        style={{ height: `${Math.max((value / maxMonth) * 100, value > 0 ? 4 : 0)}%` }}
-                        title={currency(value)}
-                      />
-                    </div>
-                    <span className="text-[10px] uppercase text-graphite/40 dark:text-cream/40">{monthLabels.format(new Date(year, month, 1))}</span>
+              <div className="flex gap-2">
+                <div className="flex h-36 flex-col justify-between text-right text-[10px] text-graphite/40 dark:text-cream/40">
+                  {axisSteps.map((step) => (
+                    <span key={step}>{compactCurrency(step)}</span>
+                  ))}
+                </div>
+                <div className="relative flex-1">
+                  <div className="pointer-events-none absolute inset-0 flex h-36 flex-col justify-between">
+                    {axisSteps.map((step) => (
+                      <div key={step} className="border-t border-graphite/10 dark:border-white/10" />
+                    ))}
                   </div>
-                ))}
+                  <div className="relative flex h-36 items-end gap-1.5">
+                    {data.monthlyTotals.map((value, month) => (
+                      <div key={month} className="group relative flex h-full flex-1 items-end justify-center">
+                        <div
+                          className="w-full max-w-6 rounded-t bg-copper"
+                          style={{ height: `${Math.max((value / scaleMax) * 100, value > 0 ? 2 : 0)}%` }}
+                        />
+                        {value > 0 && (
+                          <span className="pointer-events-none absolute bottom-full mb-1 hidden whitespace-nowrap rounded bg-graphite px-1.5 py-0.5 text-[10px] font-medium text-cream group-hover:block dark:bg-cream dark:text-graphite">
+                            {currency(value)}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-1 flex gap-1.5">
+                    {months.map((month) => (
+                      <span key={month} className="flex-1 text-center text-[10px] uppercase text-graphite/40 dark:text-cream/40">
+                        {monthLabels.format(new Date(year, month, 1))}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </section>
           </div>
