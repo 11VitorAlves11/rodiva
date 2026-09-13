@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+body {
+  background-color: #f5f3ef;
+  color: #171c20;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme="dark"] body { background: #090d0f; color: #f5f3ef; }
+html[data-theme="dark"] .bg-white { background-color: #12181a !important; }
+html[data-theme="dark"] .bg-slate-50 { background-color: #0d1315 !important; }
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-700 { color: #f8fafc !important; }
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-slate-300 { border-color: #2a3437 !important; }
+html[data-theme="dark"] input,
+html[data-theme="dark"] select { background-color: #12181a !important; color: #f8fafc; }
+
+@media (max-width: 767px) {
+  html[data-theme="dark"] .rodiva-dashboard .bg-white { background-color: #12181a !important; }
+  .rodiva-dashboard .bg-white { background-color: #12181a !important; }
+  .rodiva-dashboard .text-slate-900,
+  .rodiva-dashboard .text-slate-950 { color: #f8fafc !important; }
+  .rodiva-dashboard .border-slate-200 { border-color: #263033 !important; }
+  .rodiva-dashboard .divide-slate-100 > :not(:last-child) { border-color: #263033 !important; }
+}
+
+:focus-visible {
+  outline: 2px solid #155bc4;
+  outline-offset: 2px;
+}

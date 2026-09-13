@@ -1,0 +1,55 @@
+import type { ReactNode } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+
+import { AppShell } from "./components/layout/AppShell";
+import { ErrorState } from "./components/ui/ErrorState";
+import { Skeleton } from "./components/ui/Skeleton";
+import { useSession } from "./lib/session";
+import { Garage } from "./pages/Garage";
+import { History } from "./pages/History";
+import { Dashboard } from "./pages/Dashboard";
+import { Login } from "./pages/Login";
+import { Reminders } from "./pages/Reminders";
+import { Vehicle } from "./pages/Vehicle";
+
+function RequireSession({ children }: { children: ReactNode }) {
+  const { me, loading, error, refresh } = useSession();
+  const location = useLocation();
+
+  if (loading) return <Skeleton className="p-8" lines={6} />;
+  // A session we could not check is not a session that does not exist: bouncing
+  // to the login screen on a network blip reads as being signed out.
+  if (error && !me) {
+    return (
+      <div className="p-8">
+        <ErrorState onRetry={() => void refresh()} />
+      </div>
+    );
+  }
+  if (!me) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  return <AppShell>{children}</AppShell>;
+}
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <RequireSession>
+            <Dashboard />
+          </RequireSession>
+        }
+      />
+      <Route path="/garage" element={<RequireSession><Garage /></RequireSession>} />
+      <Route path="/history" element={<RequireSession><History /></RequireSession>} />
+      <Route path="/reminders" element={<RequireSession><Reminders /></RequireSession>} />
+      <Route
+        path="/vehicles/:vehicleId"
+        element={<RequireSession><Vehicle /></RequireSession>}
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}

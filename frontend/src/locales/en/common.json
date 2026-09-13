@@ -1,0 +1,77 @@
+{
+  "login": {
+    "title": "Sign in to Rodiva",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "noAccount": "Don't have an account yet?",
+    "register": "Create household"
+  },
+  "nav": { "dashboard": "Dashboard", "vehicle": "Vehicle" },
+  "theme": { "toggle": "Switch theme", "light": "Light theme", "dark": "Dark theme" },
+  "network": { "offline": "You are offline. Changes cannot be saved." },
+  "reminders": { "title": "Reminders", "description": "Maintenance and obligation deadlines by date or mileage.", "add": "Create reminder", "empty": "There are no reminders. Everything is up to date.", "name": "Reminder title", "dueDate": "Due date", "dueOdometer": "Due odometer", "complete": "Mark as complete", "future": "Future", "upcoming": "Upcoming", "urgent": "Urgent", "very_urgent": "Very urgent", "overdue": "Overdue", "completed": "Completed" },
+  "history": { "title": "History", "search": "Search history", "all": "All records", "empty": "No records found." },
+  "notes": { "title": "Notes", "description": "Free-form information linked to the vehicle.", "add": "Create note", "name": "Title", "content": "Write the note", "pin": "Pin this note", "pinned": "Pinned note", "empty": "There are no notes yet." },
+  "documents": { "title": "Documents", "description": "Invoices, policies, inspections and vehicle photos.", "add": "Add file", "uploading": "Uploading…", "empty": "There are no documents yet." },
+  "dashboard": {
+    "title": "My garage", "subtitle": "Manage vehicles, costs and maintenance in one place.", "greeting": "Have a good trip", "addRecord": "Add record", "openGarage": "Open garage", "vehicles": "Vehicles", "totalCost": "Expenses", "averageConsumption": "Average consumption", "noVehicles": "Add your first vehicle to get started.", "costByVehicle": "Expenses by vehicle", "recentActivity": "Recent activity", "fuelActivity": "Fuel fill-up"
+  },
+  "register": {
+    "title": "Create the household",
+    "householdName": "Household name",
+    "name": "Your name",
+    "submit": "Create account and household"
+  },
+  "garage": {
+    "title": "Garage",
+    "empty": "No vehicles yet. Add the first one to get started.",
+    "add": "Add vehicle",
+    "name": "Name",
+    "make": "Make",
+    "model": "Model",
+    "year": "Year",
+    "save": "Save"
+  },
+  "vehicle": {
+    "back": "← Garage",
+    "currentOdometer": "Current odometer",
+    "sections": "Vehicle sections",
+    "addPhoto": "Add photo",
+    "changePhoto": "Change photo"
+  },
+  "odometer": {
+    "title": "Odometer",
+    "description": "Record readings to keep the vehicle history up to date.",
+    "add": "Record reading",
+    "empty": "There are no odometer readings yet.",
+    "date": "Date",
+    "reading": "Reading ({{unit}})",
+    "notes": "Notes",
+    "adjustment": "Odometer adjustment",
+    "adjustmentCheck": "This reading is a documented odometer adjustment"
+  },
+  "fuel": {
+    "title": "Fuel fill-ups",
+    "description": "Record fuel and track consumption between full tanks.",
+    "add": "Record fill-up",
+    "empty": "There are no fuel fill-ups yet.",
+    "date": "Date",
+    "odometer": "Odometer (km)",
+    "volume": "Litres",
+    "total": "Total (€)",
+    "station": "Station",
+    "fullTank": "Full tank"
+  },
+  "work": {
+    "title": "Maintenance and repairs", "description": "Keep a history of work on the vehicle.", "add": "Record work", "maintenance": "Maintenance", "repair": "Repair", "modification": "Modification", "placeholder": "Work description", "cost": "Cost (€)"
+  },
+  "expenses": {
+    "title": "Expenses and obligations", "total": "Total paid: {{value}}", "add": "Record expense", "empty": "There are no expenses yet.", "amount": "Amount (€)", "supplier": "Supplier", "insurance": "Insurance", "tax": "Road tax", "inspection": "Inspection", "tolls": "Tolls", "other": "Other expense", "paid": "Paid", "pending": "Pending", "planned": "Planned", "cancelled": "Cancelled"
+  },
+  "common": {
+    "signOut": "Sign out",
+    "loading": "Loading…",
+    "error": "Something went wrong. Please try again."
+  }
+}

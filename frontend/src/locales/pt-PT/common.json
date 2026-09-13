@@ -1,0 +1,77 @@
+{
+  "login": {
+    "title": "Entrar na Rodiva",
+    "email": "Correio eletrónico",
+    "password": "Palavra-passe",
+    "submit": "Entrar",
+    "noAccount": "Ainda não tem conta?",
+    "register": "Criar agregado"
+  },
+  "nav": { "dashboard": "Dashboard", "vehicle": "Veículo" },
+  "theme": { "toggle": "Alternar tema", "light": "Tema claro", "dark": "Tema escuro" },
+  "network": { "offline": "Sem ligação à rede. Não é possível guardar alterações." },
+  "reminders": { "title": "Lembretes", "description": "Prazos de manutenção e obrigações por data ou quilometragem.", "add": "Criar lembrete", "empty": "Não existem lembretes. Está tudo em dia.", "name": "Título do lembrete", "dueDate": "Data limite", "dueOdometer": "Quilometragem limite", "complete": "Marcar como concluído", "future": "Futuro", "upcoming": "Próximo", "urgent": "Urgente", "very_urgent": "Muito urgente", "overdue": "Vencido", "completed": "Concluído" },
+  "history": { "title": "Histórico", "search": "Pesquisar no histórico", "all": "Todos os registos", "empty": "Nenhum registo encontrado." },
+  "notes": { "title": "Notas", "description": "Informação livre associada ao veículo.", "add": "Criar nota", "name": "Título", "content": "Escreva a nota", "pin": "Afixar esta nota", "pinned": "Nota afixada", "empty": "Ainda não existem notas." },
+  "documents": { "title": "Documentos", "description": "Faturas, apólices, inspeções e fotografias do veículo.", "add": "Adicionar ficheiro", "uploading": "A enviar…", "empty": "Ainda não existem documentos." },
+  "dashboard": {
+    "title": "A minha garagem", "subtitle": "Gerir os seus veículos, acompanhar custos e manutenções, tudo num só lugar.", "greeting": "Boa viagem", "addRecord": "Adicionar registo", "openGarage": "Abrir garagem", "vehicles": "Veículos", "totalCost": "Despesas", "averageConsumption": "Consumo médio", "noVehicles": "Adicione o primeiro veículo para começar.", "costByVehicle": "Despesas por veículo", "recentActivity": "Atividade recente", "fuelActivity": "Abastecimento"
+  },
+  "register": {
+    "title": "Criar o agregado",
+    "householdName": "Nome do agregado",
+    "name": "O seu nome",
+    "submit": "Criar conta e agregado"
+  },
+  "garage": {
+    "title": "Garagem",
+    "empty": "Ainda não tem veículos. Adicione o primeiro para começar.",
+    "add": "Adicionar veículo",
+    "name": "Nome",
+    "make": "Marca",
+    "model": "Modelo",
+    "year": "Ano",
+    "save": "Guardar"
+  },
+  "vehicle": {
+    "back": "← Garagem",
+    "currentOdometer": "Quilometragem atual",
+    "sections": "Áreas do veículo",
+    "addPhoto": "Adicionar fotografia",
+    "changePhoto": "Alterar fotografia"
+  },
+  "odometer": {
+    "title": "Quilometragem",
+    "description": "Registe leituras para manter o histórico do veículo atualizado.",
+    "add": "Registar leitura",
+    "empty": "Ainda não existem leituras de quilometragem.",
+    "date": "Data",
+    "reading": "Leitura ({{unit}})",
+    "notes": "Notas",
+    "adjustment": "Ajuste de odómetro",
+    "adjustmentCheck": "Esta leitura é um ajuste documentado do odómetro"
+  },
+  "fuel": {
+    "title": "Abastecimentos",
+    "description": "Registe combustível e acompanhe o consumo entre depósitos cheios.",
+    "add": "Registar abastecimento",
+    "empty": "Ainda não existem abastecimentos.",
+    "date": "Data",
+    "odometer": "Odómetro (km)",
+    "volume": "Litros",
+    "total": "Total (€)",
+    "station": "Posto",
+    "fullTank": "Depósito cheio"
+  },
+  "work": {
+    "title": "Manutenção e reparações", "description": "Guarde o histórico de intervenções do veículo.", "add": "Registar intervenção", "maintenance": "Manutenção", "repair": "Reparação", "modification": "Modificação", "placeholder": "Descrição da intervenção", "cost": "Custo (€)"
+  },
+  "expenses": {
+    "title": "Despesas e obrigações", "total": "Total pago: {{value}}", "add": "Registar despesa", "empty": "Ainda não existem despesas.", "amount": "Valor (€)", "supplier": "Fornecedor", "insurance": "Seguro", "tax": "IUC", "inspection": "IPO", "tolls": "Portagens", "other": "Outra despesa", "paid": "Paga", "pending": "Pendente", "planned": "Planeada", "cancelled": "Cancelada"
+  },
+  "common": {
+    "signOut": "Terminar sessão",
+    "loading": "A carregar…",
+    "error": "Ocorreu um erro. Tente novamente."
+  }
+}
