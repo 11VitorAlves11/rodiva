@@ -4,6 +4,7 @@ from app.models.expense_record import ExpenseRecord
 from app.models.fuel_record import FuelRecord
 from app.models.household import Household
 from app.models.membership import Membership
+from app.models.note import Note
 from app.models.odometer_reading import OdometerReading
 from app.models.reminder import Reminder
 from app.models.user import User
@@ -16,6 +17,7 @@ __all__ = [
     "FuelRecord",
     "Household",
     "Membership",
+    "Note",
     "OdometerReading",
     "Reminder",
     "Role",

@@ -4,7 +4,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, expenses, fuel, health, odometer, reminders, vehicles, work_records
+from app.api.routes import (
+    auth,
+    expenses,
+    fuel,
+    health,
+    notes,
+    odometer,
+    reminders,
+    vehicles,
+    work_records,
+)
 from app.core.config import get_settings
 from app.db.session import dispose_engine
 
@@ -35,6 +45,7 @@ app.include_router(fuel.router, prefix="/api")
 app.include_router(work_records.router, prefix="/api")
 app.include_router(expenses.router, prefix="/api")
 app.include_router(reminders.router, prefix="/api")
+app.include_router(notes.router, prefix="/api")
 
 
 @app.get("/api")
