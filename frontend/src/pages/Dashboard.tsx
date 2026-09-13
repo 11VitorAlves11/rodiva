@@ -1,11 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { ErrorState } from "../components/ui/ErrorState";
 import { Skeleton } from "../components/ui/Skeleton";
 import { expenses, fuel, odometer, reminders, vehicles, workRecords } from "../lib/api";
-import type { ExpenseRecord, FuelRecord, OdometerReading, Reminder, Vehicle, WorkRecord } from "../lib/api/types";
+import { useSession } from "../lib/session";
+import type {
+  ExpenseRecord,
+  FuelRecord,
+  OdometerReading,
+  Reminder,
+  Vehicle,
+  WorkRecord,
+} from "../lib/api/types";
 
 type VehicleSummary = {
   vehicle: Vehicle;
@@ -16,70 +24,330 @@ type VehicleSummary = {
   reminders: Reminder[];
 };
 
-type Activity = {
-  id: string;
-  vehicleId: string;
-  vehicleName: string;
-  date: string;
-  title: string;
-  detail: string;
+type Activity = { id: string; kind: "fuel" | "work" | "expenses" | "odometer"; date: string; title: string; detail: string; value: string };
+
+const activityIcons: Record<Activity["kind"], string> = {
+  fuel: "M6 3h9v18H6V3Zm2 2v5h5V5H8Zm11 2 2 2v8a2 2 0 0 1-4 0v-4h-2v-2h4V9l-1.5-1.5L19 7Z",
+  work: "M14.7 6.3a4 4 0 0 0-5-5L12 3.6 9.6 6 7.3 3.7a4 4 0 0 0 5 5L4 17l3 3 8.3-8.3a4 4 0 0 0-.6-5.4Z",
+  expenses: "M3 6h18v13H3V6Zm2 3v7h14V9H5Zm7 1a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z",
+  odometer: "M12 4a8 8 0 1 0 8 8 8 8 0 0 0-8-8Zm0 2a6 6 0 0 1 5.2 9H6.8A6 6 0 0 1 12 6Zm0 2-3 5h6l-3-5Z",
 };
+
+const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 export function Dashboard() {
   const { t, i18n } = useTranslation();
+  const { me } = useSession();
   const [summaries, setSummaries] = useState<VehicleSummary[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [selected, setSelected] = useState(0);
+  const [year, setYear] = useState(new Date().getFullYear());
 
   const load = () => {
     setError(null);
-    vehicles.list().then(async (items) => Promise.all(items.map(async (vehicle) => {
-      const [readings, fuelRecords, work, expenseRecords, reminderRecords] = await Promise.all([
-        odometer.list(vehicle.id), fuel.list(vehicle.id), workRecords.list(vehicle.id), expenses.list(vehicle.id), reminders.list(vehicle.id),
-      ]);
-      return { vehicle, readings, fuel: fuelRecords, work, expenses: expenseRecords, reminders: reminderRecords };
-    }))).then(setSummaries).catch(setError);
+    vehicles
+      .list()
+      .then(async (items) =>
+        Promise.all(
+          items.map(async (vehicle) => {
+            const [readings, fuelRecords, work, expenseRecords, reminderRecords] = await Promise.all([
+              odometer.list(vehicle.id),
+              fuel.list(vehicle.id),
+              workRecords.list(vehicle.id),
+              expenses.list(vehicle.id),
+              reminders.list(vehicle.id),
+            ]);
+            return { vehicle, readings, fuel: fuelRecords, work, expenses: expenseRecords, reminders: reminderRecords };
+          }),
+        ),
+      )
+      .then(setSummaries)
+      .catch(setError);
   };
 
   useEffect(load, []);
 
+  const currency = useCallback(
+    (value: number) => value.toLocaleString(i18n.language, { style: "currency", currency: "EUR", maximumFractionDigits: 2 }),
+    [i18n.language],
+  );
+
   const data = useMemo(() => {
-    if (!summaries) return null;
-    const costs = summaries.map((summary) => ({
-      id: summary.vehicle.id,
-      name: summary.vehicle.name,
-      value: summary.fuel.reduce((sum, item) => sum + Number(item.total_price), 0)
-        + summary.work.reduce((sum, item) => sum + Number(item.total_cost ?? 0), 0)
-        + summary.expenses.filter((item) => item.status === "paid").reduce((sum, item) => sum + Number(item.amount), 0),
-    }));
-    const consumptions = summaries.flatMap((summary) => summary.fuel.map((item) => Number(item.consumption_l_per_100km)).filter(Boolean));
-    const activities: Activity[] = summaries.flatMap((summary) => [
-      ...summary.fuel.map((item) => ({ id: `fuel-${item.id}`, vehicleId: summary.vehicle.id, vehicleName: summary.vehicle.name, date: item.recorded_on, title: t("dashboard.fuelActivity"), detail: `${Number(item.volume_litres).toLocaleString(i18n.language)} L` })),
-      ...summary.work.map((item) => ({ id: `work-${item.id}`, vehicleId: summary.vehicle.id, vehicleName: summary.vehicle.name, date: item.recorded_on, title: item.description, detail: t(`work.${item.kind}`) })),
-      ...summary.expenses.map((item) => ({ id: `expense-${item.id}`, vehicleId: summary.vehicle.id, vehicleName: summary.vehicle.name, date: item.issued_on, title: t(`expenses.${item.category}`), detail: Number(item.amount).toLocaleString(i18n.language, { style: "currency", currency: "EUR" }) })),
-    ]).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
-    return { costs, totalCost: costs.reduce((sum, item) => sum + item.value, 0), averageConsumption: consumptions.length ? consumptions.reduce((sum, value) => sum + value, 0) / consumptions.length : null, activities };
-  }, [summaries, i18n.language, t]);
+    const primary = summaries?.[selected];
+    if (!primary) return null;
+
+    const currentReading = primary.readings.reduce((highest, item) => Math.max(highest, item.reading), 0);
+    const consumptions = primary.fuel.map((item) => Number(item.consumption_l_per_100km)).filter(Boolean);
+    const averageConsumption = consumptions.length
+      ? consumptions.reduce((sum, value) => sum + value, 0) / consumptions.length
+      : null;
+
+    const now = new Date();
+    const inCurrentMonth = (date: string) => {
+      const parsed = new Date(`${date}T12:00:00`);
+      return parsed.getFullYear() === now.getFullYear() && parsed.getMonth() === now.getMonth();
+    };
+    const monthCost =
+      primary.fuel.filter((item) => inCurrentMonth(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_price), 0) +
+      primary.work.filter((item) => inCurrentMonth(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_cost ?? 0), 0) +
+      primary.expenses
+        .filter((item) => item.status === "paid" && inCurrentMonth(item.issued_on))
+        .reduce((sum, item) => sum + Number(item.amount), 0);
+
+    const activities: Activity[] = [
+      ...primary.fuel.map((item) => ({
+        id: `fuel-${item.id}`,
+        kind: "fuel" as const,
+        date: item.recorded_on,
+        title: t("dashboard.fuelActivity"),
+        detail: item.station ?? "",
+        value: currency(Number(item.total_price)),
+      })),
+      ...primary.work.map((item) => ({
+        id: `work-${item.id}`,
+        kind: "work" as const,
+        date: item.recorded_on,
+        title: item.description,
+        detail: item.supplier ?? t(`work.${item.kind}`),
+        value: item.total_cost ? currency(Number(item.total_cost)) : "—",
+      })),
+      ...primary.expenses.map((item) => ({
+        id: `expense-${item.id}`,
+        kind: "expenses" as const,
+        date: item.issued_on,
+        title: t(`expenses.${item.category}`),
+        detail: item.supplier ?? "",
+        value: currency(Number(item.amount)),
+      })),
+    ].sort((a, b) => b.date.localeCompare(a.date));
+
+    const monthlyTotals = months.map((month) => {
+      const of = (date: string) => {
+        const parsed = new Date(`${date}T12:00:00`);
+        return parsed.getFullYear() === year && parsed.getMonth() === month;
+      };
+      return (
+        primary.fuel.filter((item) => of(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_price), 0) +
+        primary.work.filter((item) => of(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_cost ?? 0), 0) +
+        primary.expenses
+          .filter((item) => item.status === "paid" && of(item.issued_on))
+          .reduce((sum, item) => sum + Number(item.amount), 0)
+      );
+    });
+
+    const upcoming = primary.reminders.filter((item) => item.status !== "completed").slice(0, 3);
+    const latestFuelType = [...primary.fuel].sort((a, b) => b.recorded_on.localeCompare(a.recorded_on))[0]?.fuel_type;
+
+    return { currentReading, averageConsumption, monthCost, activities, monthlyTotals, upcoming, latestFuelType };
+  }, [summaries, selected, year, currency, t]);
 
   if (error) return <ErrorState onRetry={load} />;
   if (!summaries || !data) return <Skeleton lines={8} />;
-  const currency = (value: number) => value.toLocaleString(i18n.language, { style: "currency", currency: "EUR" });
-  const maxCost = Math.max(...data.costs.map((item) => item.value), 1);
-  const primary = summaries[0];
-  const currentReading = primary?.readings.reduce((highest, item) => Math.max(highest, item.reading), 0) ?? 0;
-  const latestConsumption = primary?.fuel.find((item) => item.consumption_l_per_100km)?.consumption_l_per_100km;
 
-  return <div className="rodiva-dashboard space-y-7">
-    <div className="flex items-end justify-between gap-4"><div><p className="text-sm font-medium text-[#ef5b2a] md:hidden">{t("dashboard.greeting")}</p><h1 className="text-2xl font-bold text-white md:text-3xl md:text-slate-950">{t("dashboard.title")}</h1><p className="mt-1 hidden text-sm text-slate-500 md:block">{t("dashboard.subtitle")}</p></div><Link to="/garage" className="hidden rounded-lg bg-[#c8471c] px-5 py-3 text-sm font-semibold text-white md:block">＋ {t("dashboard.addRecord")}</Link></div>
-    {primary && <Link to={`/vehicles/${primary.vehicle.id}`} className="grid overflow-hidden rounded-xl border border-white/10 bg-[#12181a] shadow-sm md:grid-cols-[300px_1fr] md:border-slate-200 md:bg-white"><div className="grid min-h-44 place-items-center bg-gradient-to-br from-slate-400 via-slate-600 to-slate-900"><svg viewBox="0 0 260 110" className="w-4/5 text-slate-100" aria-hidden="true"><path fill="currentColor" d="M38 70 56 38c5-9 13-14 24-16h87c12 1 21 7 28 17l17 26 22 7c8 3 12 9 12 18v7h-19a24 24 0 0 0-47 0H80a24 24 0 0 0-47 0H14V85c0-8 6-13 24-15Zm33-34L58 65h128l-14-24c-3-4-7-6-13-6H82c-5 0-9 0-11 1Z"/><circle cx="57" cy="96" r="16" fill="#171c20" stroke="currentColor" strokeWidth="5"/><circle cx="203" cy="96" r="16" fill="#171c20" stroke="currentColor" strokeWidth="5"/></svg></div><div className="p-4 md:p-6"><h2 className="text-xl font-bold text-white md:text-2xl md:text-slate-950">{primary.vehicle.name}</h2><p className="text-sm text-slate-400 md:text-slate-500">{[primary.vehicle.make, primary.vehicle.model, primary.vehicle.year].filter(Boolean).join(" · ")}</p><div className="mt-5 grid grid-cols-3 gap-2"><HeroMetric label={t("vehicle.currentOdometer")} value={`${currentReading.toLocaleString(i18n.language)} km`} /><HeroMetric label={t("dashboard.averageConsumption")} value={latestConsumption ? `${Number(latestConsumption).toLocaleString(i18n.language)} L/100 km` : "—"} /><HeroMetric label={t("dashboard.totalCost")} value={currency(data.costs[0]?.value ?? 0)} /></div></div></Link>}
-    <div className="grid gap-3 sm:grid-cols-3"><Metric label={t("dashboard.vehicles")} value={String(summaries.length)} /><Metric label={t("dashboard.totalCost")} value={currency(data.totalCost)} /><Metric label={t("dashboard.averageConsumption")} value={data.averageConsumption === null ? "—" : `${data.averageConsumption.toLocaleString(i18n.language, { maximumFractionDigits: 2 })} L/100 km`} /></div>
-    {summaries.length === 0 ? <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center"><p className="font-medium text-slate-900">{t("dashboard.noVehicles")}</p><Link to="/garage" className="mt-3 inline-block text-sm font-medium text-[#9E3E1D]">{t("garage.add")}</Link></div> : <div className="grid gap-5 lg:grid-cols-2"><section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="font-semibold text-slate-900">{t("dashboard.costByVehicle")}</h2><div className="mt-5 space-y-4">{data.costs.map((item) => <div key={item.id}><div className="mb-1 flex justify-between text-sm"><span>{item.name}</span><span className="font-medium">{currency(item.value)}</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#B94A22]" style={{ width: `${Math.max(item.value / maxCost * 100, 2)}%` }} /></div></div>)}</div></section><section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="font-semibold text-slate-900">{t("dashboard.recentActivity")}</h2><ul className="mt-3 divide-y divide-slate-100">{data.activities.map((item) => <li key={item.id}><Link to={`/vehicles/${item.vehicleId}`} className="flex items-center justify-between gap-3 py-3"><div><p className="text-sm font-medium text-slate-900">{item.title}</p><p className="text-xs text-slate-500">{item.vehicleName} · {item.date}</p></div><span className="text-sm text-slate-600">{item.detail}</span></Link></li>)}</ul></section></div>}
-  </div>;
+  const primary = summaries[selected];
+  const maxMonth = Math.max(...data.monthlyTotals, 1);
+  const yearOptions = [year, year - 1, year - 2];
+  const monthLabels = new Intl.DateTimeFormat(i18n.language, { month: "short" });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("dashboard.title")}</h1>
+          <p className="mt-1 hidden text-sm text-graphite/50 dark:text-cream/50 md:block">{t("dashboard.subtitle")}</p>
+          <p className="text-sm font-medium text-copper md:hidden">
+            {t("dashboard.greeting", { name: me?.user.name?.split(" ")[0] ?? me?.user.email })}
+          </p>
+        </div>
+        <Link to="/garage?new=1" className="hidden rounded-lg bg-copper px-5 py-3 text-sm font-semibold text-white hover:bg-copper-dark md:block">
+          ＋ {t("dashboard.addRecord")}
+        </Link>
+      </div>
+
+      {summaries.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-graphite/20 bg-white p-8 text-center dark:border-white/20 dark:bg-surface-dark-raised">
+          <p className="font-medium text-graphite dark:text-cream">{t("dashboard.noVehicles")}</p>
+          <Link to="/garage?new=1" className="mt-3 inline-block text-sm font-medium text-copper">
+            {t("garage.add")}
+          </Link>
+        </div>
+      ) : (
+        <>
+          {summaries.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {summaries.map((summary, index) => (
+                <button
+                  key={summary.vehicle.id}
+                  onClick={() => setSelected(index)}
+                  className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
+                    index === selected
+                      ? "bg-copper text-white"
+                      : "bg-white text-graphite/60 dark:bg-surface-dark-raised dark:text-cream/60"
+                  }`}
+                >
+                  {summary.vehicle.name}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <section className="grid overflow-hidden rounded-xl border border-graphite/10 bg-white shadow-sm dark:border-white/10 dark:bg-surface-dark-raised md:grid-cols-[300px_1fr]">
+            <div className="grid min-h-44 place-items-center bg-gradient-to-br from-slate-400 via-slate-600 to-slate-900">
+              {primary.vehicle.photo_url ? (
+                <img src={primary.vehicle.photo_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <svg viewBox="0 0 260 110" className="w-4/5 text-slate-100" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M38 70 56 38c5-9 13-14 24-16h87c12 1 21 7 28 17l17 26 22 7c8 3 12 9 12 18v7h-19a24 24 0 0 0-47 0H80a24 24 0 0 0-47 0H14V85c0-8 6-13 24-15Zm33-34L58 65h128l-14-24c-3-4-7-6-13-6H82c-5 0-9 0-11 1Z"
+                  />
+                  <circle cx={57} cy={96} r={16} fill="#171c20" stroke="currentColor" strokeWidth={5} />
+                  <circle cx={203} cy={96} r={16} fill="#171c20" stroke="currentColor" strokeWidth={5} />
+                </svg>
+              )}
+            </div>
+            <div className="p-4 md:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-bold text-graphite dark:text-cream md:text-2xl">{primary.vehicle.name}</h2>
+                  <p className="text-sm text-graphite/50 dark:text-cream/50">
+                    {[primary.vehicle.make, primary.vehicle.model, primary.vehicle.year, data.latestFuelType].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                <Link to={`/vehicles/${primary.vehicle.id}`} className="rounded-md border border-graphite/15 px-3 py-1.5 text-sm font-medium text-graphite dark:border-white/15 dark:text-cream">
+                  {t("dashboard.edit")}
+                </Link>
+              </div>
+              <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <StatTile label={t("vehicle.currentOdometer")} value={`${data.currentReading.toLocaleString(i18n.language)} ${primary.vehicle.distance_unit}`} />
+                <StatTile label={t("dashboard.averageConsumption")} value={data.averageConsumption === null ? "—" : `${data.averageConsumption.toLocaleString(i18n.language, { maximumFractionDigits: 1 })} L/100 km`} />
+                <StatTile label={t("dashboard.monthCost")} value={currency(data.monthCost)} />
+              </div>
+            </div>
+          </section>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.recentHistory")}</h2>
+                <Link to="/history" className="text-sm font-medium text-copper">
+                  {t("dashboard.viewAll")} →
+                </Link>
+              </div>
+              {data.activities.length === 0 ? (
+                <p className="py-4 text-sm text-graphite/50 dark:text-cream/50">{t("history.empty")}</p>
+              ) : (
+                <ul className="divide-y divide-graphite/5 dark:divide-white/5">
+                  {data.activities.slice(0, 5).map((item) => (
+                    <li key={item.id} className="flex items-center gap-3 py-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-copper/10 text-copper dark:bg-copper/20 dark:text-copper-bright">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current"><path d={activityIcons[item.kind]} /></svg>
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-graphite dark:text-cream">{item.title}</p>
+                        <p className="truncate text-xs text-graphite/50 dark:text-cream/50">
+                          {new Intl.DateTimeFormat(i18n.language).format(new Date(`${item.date}T12:00:00`))}
+                          {item.detail ? ` · ${item.detail}` : ""}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-sm font-medium text-graphite/70 dark:text-cream/70">{item.value}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.monthlyExpenses")}</h2>
+                <select
+                  value={year}
+                  onChange={(event) => setYear(Number(event.target.value))}
+                  className="rounded-md border border-graphite/15 bg-white px-2 py-1 text-sm dark:border-white/15 dark:bg-surface-dark"
+                >
+                  {yearOptions.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex h-40 items-end gap-1.5">
+                {data.monthlyTotals.map((value, month) => (
+                  <div key={month} className="flex flex-1 flex-col items-center gap-1">
+                    <div className="flex h-32 w-full items-end">
+                      <div
+                        className="w-full rounded-t bg-copper"
+                        style={{ height: `${Math.max((value / maxMonth) * 100, value > 0 ? 4 : 0)}%` }}
+                        title={currency(value)}
+                      />
+                    </div>
+                    <span className="text-[10px] uppercase text-graphite/40 dark:text-cream/40">{monthLabels.format(new Date(year, month, 1))}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.upcomingMaintenance")}</h2>
+                <Link to="/reminders" className="text-sm font-medium text-copper">
+                  {t("dashboard.viewAll")} →
+                </Link>
+              </div>
+              {data.upcoming.length === 0 ? (
+                <p className="py-4 text-sm text-graphite/50 dark:text-cream/50">{t("reminders.empty")}</p>
+              ) : (
+                <ul className="divide-y divide-graphite/5 dark:divide-white/5">
+                  {data.upcoming.map((item) => (
+                    <li key={item.id} className="flex items-center justify-between gap-3 py-3">
+                      <span className="text-sm font-medium text-graphite dark:text-cream">{item.title}</span>
+                      <span className="text-sm text-graphite/50 dark:text-cream/50">
+                        {[item.due_date, item.due_odometer ? `${item.due_odometer.toLocaleString(i18n.language)} km` : null].filter(Boolean).join(" · ")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.vehicleInfo")}</h2>
+                <Link to={`/vehicles/${primary.vehicle.id}`} className="text-sm font-medium text-copper">
+                  {t("dashboard.edit")}
+                </Link>
+              </div>
+              <dl className="space-y-2 text-sm">
+                <InfoRow label={t("dashboard.licensePlate")} value={primary.vehicle.license_plate ?? "—"} />
+                <InfoRow label={t("dashboard.brandModel")} value={[primary.vehicle.make, primary.vehicle.model].filter(Boolean).join(" ") || "—"} />
+                <InfoRow label={t("garage.year")} value={primary.vehicle.year?.toString() ?? "—"} />
+                <InfoRow label={t("dashboard.fuelType")} value={data.latestFuelType ?? "—"} />
+                <InfoRow label={t("dashboard.averageConsumption")} value={data.averageConsumption === null ? "—" : `${data.averageConsumption.toLocaleString(i18n.language, { maximumFractionDigits: 1 })} L/100 km`} />
+                <InfoRow label="VIN" value={primary.vehicle.vin ?? "—"} />
+              </dl>
+            </section>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold text-slate-900">{value}</p></div>;
+function StatTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-graphite/5 p-3 dark:bg-white/5">
+      <p className="truncate text-[10px] font-medium uppercase tracking-wide text-graphite/50 dark:text-cream/50">{label}</p>
+      <p className="mt-1 text-sm font-bold text-graphite dark:text-cream md:text-base">{value}</p>
+    </div>
+  );
 }
 
-function HeroMetric({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-lg border border-white/10 bg-white/5 p-3 md:border-slate-200 md:bg-[#fbfaf8]"><p className="truncate text-[10px] font-medium uppercase tracking-wide text-slate-400 md:text-slate-500">{label}</p><p className="mt-2 text-sm font-bold text-white md:text-lg md:text-slate-950">{value}</p></div>;
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-graphite/5 py-2 last:border-0 dark:border-white/5">
+      <dt className="text-graphite/50 dark:text-cream/50">{label}</dt>
+      <dd className="font-medium text-graphite dark:text-cream">{value}</dd>
+    </div>
+  );
 }

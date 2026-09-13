@@ -73,18 +73,18 @@ export function Vehicle() {
 
   return (
     <div className="space-y-6">
-      <Link to="/garage" className="text-sm font-medium text-[#9E3E1D] hover:text-[#7E3016]">{t("vehicle.back")}</Link>
+      <Link to="/garage" className="text-sm font-medium text-copper hover:text-copper-dark">{t("vehicle.back")}</Link>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex items-center gap-4">
           {vehicle.photo_url && <img src={vehicle.photo_url} alt="" className="h-20 w-28 rounded-lg object-cover" />}
           <div>
           <p className="text-sm text-slate-500">{[vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(" · ")}</p>
           <h1 className="text-2xl font-semibold text-slate-900">{vehicle.name}</h1>
-          <label className="mt-2 inline-block cursor-pointer text-sm font-medium text-[#B94A22]">{vehicle.photo_url ? t("vehicle.changePhoto") : t("vehicle.addPhoto")}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadPhoto(file); }} /></label>
+          <label className="mt-2 inline-block cursor-pointer text-sm font-medium text-copper">{vehicle.photo_url ? t("vehicle.changePhoto") : t("vehicle.addPhoto")}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadPhoto(file); }} /></label>
           </div>
         </div>
-        <div className="rounded-lg bg-[#FBE8DF] px-4 py-3 text-right">
-          <p className="text-xs font-medium uppercase tracking-wide text-[#7E3016]">{t("vehicle.currentOdometer")}</p>
+        <div className="rounded-lg bg-copper/10 px-4 py-3 text-right">
+          <p className="text-xs font-medium uppercase tracking-wide text-copper-dark">{t("vehicle.currentOdometer")}</p>
           <p className="text-xl font-semibold text-slate-900">{currentReading === null ? "—" : `${currentReading.toLocaleString(i18n.language)} ${vehicle.distance_unit}`}</p>
         </div>
       </div>
@@ -94,7 +94,7 @@ export function Vehicle() {
           <button
             key={section}
             onClick={() => setSearchParams({ section })}
-            className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ${activeSection === section ? "bg-[#B94A22] text-white" : "text-slate-600 hover:bg-slate-100"}`}
+            className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ${activeSection === section ? "bg-copper text-white" : "text-slate-600 hover:bg-slate-100"}`}
           >
             {t(`${section}.title`)}
           </button>
@@ -107,7 +107,7 @@ export function Vehicle() {
             <h2 className="text-lg font-semibold text-slate-900">{t("odometer.title")}</h2>
             <p className="text-sm text-slate-500">{t("odometer.description")}</p>
           </div>
-          <button onClick={() => setShowForm((value) => !value)} className="rounded-md bg-[#B94A22] px-3 py-2 text-sm font-medium text-white hover:bg-[#9E3E1D]">
+          <button onClick={() => setShowForm((value) => !value)} className="rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark">
             {t("odometer.add")}
           </button>
         </div>
@@ -147,7 +147,7 @@ export function Vehicle() {
 function WorkSection({ records, vehicleId, currentReading, onCreated }: { records: WorkRecord[]; vehicleId: string; currentReading: number | null; onCreated: () => void }) {
   const { t, i18n } = useTranslation(); const [show, setShow] = useState(false); const [description, setDescription] = useState(""); const [cost, setCost] = useState(""); const [kind, setKind] = useState<WorkKind>("maintenance"); const [saving, setSaving] = useState(false); const [error, setError] = useState<string | null>(null);
   async function submit(event: FormEvent) { event.preventDefault(); setSaving(true); setError(null); try { await workRecords.create(vehicleId, { recorded_on: new Date().toISOString().slice(0, 10), kind, description, total_cost: cost.replace(",", ".") || undefined, odometer_reading: currentReading ?? undefined }); setShow(false); setDescription(""); setCost(""); onCreated(); } catch (cause) { setError(cause instanceof ApiError ? cause.message : t("common.error")); } finally { setSaving(false); } }
-  return <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"><div className="flex items-center justify-between gap-4"><div><h2 className="text-lg font-semibold text-slate-900">{t("work.title")}</h2><p className="text-sm text-slate-500">{t("work.description")}</p></div><button onClick={() => setShow((value) => !value)} className="rounded-md bg-[#B94A22] px-3 py-2 text-sm font-medium text-white hover:bg-[#9E3E1D]">{t("work.add")}</button></div>{show && <form onSubmit={submit} className="grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2"><select value={kind} onChange={(event) => setKind(event.target.value as WorkKind)} className="rounded-md border border-slate-300 bg-white px-3 py-2"><option value="maintenance">{t("work.maintenance")}</option><option value="repair">{t("work.repair")}</option><option value="modification">{t("work.modification")}</option></select><input required placeholder={t("work.placeholder")} value={description} onChange={(event) => setDescription(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" /><input inputMode="decimal" placeholder={t("work.cost")} value={cost} onChange={(event) => setCost(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" />{error && <p className="text-sm text-red-700">{error}</p>}<button disabled={saving} className="rounded-md bg-[#B94A22] px-4 py-2 text-sm font-medium text-white disabled:opacity-60">{t("garage.save")}</button></form>}<ul className="divide-y divide-slate-100">{records.map((record) => <li key={record.id} className="flex justify-between gap-4 py-3"><div><p className="font-medium text-slate-900">{record.description}</p><p className="text-sm text-slate-500">{t(`work.${record.kind}`)}{record.supplier ? ` · ${record.supplier}` : ""}</p></div><p className="text-sm text-slate-500">{record.total_cost ? Number(record.total_cost).toLocaleString(i18n.language, { style: "currency", currency: "EUR" }) : "—"}</p></li>)}</ul></section>;
+  return <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"><div className="flex items-center justify-between gap-4"><div><h2 className="text-lg font-semibold text-slate-900">{t("work.title")}</h2><p className="text-sm text-slate-500">{t("work.description")}</p></div><button onClick={() => setShow((value) => !value)} className="rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark">{t("work.add")}</button></div>{show && <form onSubmit={submit} className="grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2"><select value={kind} onChange={(event) => setKind(event.target.value as WorkKind)} className="rounded-md border border-slate-300 bg-white px-3 py-2"><option value="maintenance">{t("work.maintenance")}</option><option value="repair">{t("work.repair")}</option><option value="modification">{t("work.modification")}</option></select><input required placeholder={t("work.placeholder")} value={description} onChange={(event) => setDescription(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" /><input inputMode="decimal" placeholder={t("work.cost")} value={cost} onChange={(event) => setCost(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2" />{error && <p className="text-sm text-red-700">{error}</p>}<button disabled={saving} className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white disabled:opacity-60">{t("garage.save")}</button></form>}<ul className="divide-y divide-slate-100">{records.map((record) => <li key={record.id} className="flex justify-between gap-4 py-3"><div><p className="font-medium text-slate-900">{record.description}</p><p className="text-sm text-slate-500">{t(`work.${record.kind}`)}{record.supplier ? ` · ${record.supplier}` : ""}</p></div><p className="text-sm text-slate-500">{record.total_cost ? Number(record.total_cost).toLocaleString(i18n.language, { style: "currency", currency: "EUR" }) : "—"}</p></li>)}</ul></section>;
 }
 
 function FuelSection({
@@ -168,7 +168,7 @@ function FuelSection({
   return <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
     <div className="flex items-center justify-between gap-4">
       <div><h2 className="text-lg font-semibold text-slate-900">{t("fuel.title")}</h2><p className="text-sm text-slate-500">{t("fuel.description")}</p></div>
-      <button onClick={() => setShowForm((value) => !value)} className="rounded-md bg-[#B94A22] px-3 py-2 text-sm font-medium text-white hover:bg-[#9E3E1D]">{t("fuel.add")}</button>
+      <button onClick={() => setShowForm((value) => !value)} className="rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark">{t("fuel.add")}</button>
     </div>
     {showForm && <FuelForm vehicleId={vehicleId} currentReading={currentReading} onCreated={() => { setShowForm(false); onCreated(); }} />}
     {records.length === 0 ? <p className="py-4 text-sm text-slate-500">{t("fuel.empty")}</p> : <ul className="divide-y divide-slate-100">
@@ -208,7 +208,7 @@ function FuelForm({ vehicleId, currentReading, onCreated }: { vehicleId: string;
     <label className="text-sm sm:col-span-2"><span className="mb-1 block font-medium text-slate-700">{t("fuel.station")}</span><input value={station} onChange={(event) => setStation(event.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-2" /></label>
     <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2"><input type="checkbox" checked={fullTank} onChange={(event) => setFullTank(event.target.checked)} />{t("fuel.fullTank")}</label>
     {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
-    <button type="submit" disabled={submitting} className="rounded-md bg-[#B94A22] px-4 py-2 text-sm font-medium text-white hover:bg-[#9E3E1D] disabled:opacity-60 sm:col-span-2">{t("garage.save")}</button>
+    <button type="submit" disabled={submitting} className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white hover:bg-copper-dark disabled:opacity-60 sm:col-span-2">{t("garage.save")}</button>
   </form>;
 }
 
@@ -237,6 +237,6 @@ function OdometerForm({ vehicleId, unit, onCreated }: { vehicleId: string; unit:
     <label className="text-sm sm:col-span-2"><span className="mb-1 block font-medium text-slate-700">{t("odometer.notes")}</span><input value={notes} onChange={(event) => setNotes(event.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-2" /></label>
     <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2"><input type="checkbox" checked={adjustment} onChange={(event) => setAdjustment(event.target.checked)} />{t("odometer.adjustmentCheck")}</label>
     {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
-    <button type="submit" disabled={submitting} className="rounded-md bg-[#B94A22] px-4 py-2 text-sm font-medium text-white hover:bg-[#9E3E1D] disabled:opacity-60 sm:col-span-2">{t("garage.save")}</button>
+    <button type="submit" disabled={submitting} className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white hover:bg-copper-dark disabled:opacity-60 sm:col-span-2">{t("garage.save")}</button>
   </form>;
 }
