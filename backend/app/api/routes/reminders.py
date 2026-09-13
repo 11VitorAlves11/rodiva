@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import func, select
@@ -97,6 +97,7 @@ async def create_reminder(
 async def complete_reminder(
     vehicle_id: uuid.UUID,
     reminder_id: uuid.UUID,
+    user: CurrentUser,
     membership: CurrentMembership,
     db: DbSession,
 ) -> ReminderOut:
@@ -110,6 +111,35 @@ async def complete_reminder(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reminder not found")
     reminder.status = "completed"
     reminder.completed_at = datetime.now(UTC)
+
+    if reminder.repeat_days or reminder.repeat_distance:
+        # RF-LEM-004/005: renew from the actual completion date and reading,
+        # not the reminder's original due date.
+        current = (
+            await db.scalar(
+                select(func.max(OdometerReading.reading)).where(
+                    OdometerReading.vehicle_id == vehicle_id
+                )
+            )
+            or 0
+        )
+        db.add(
+            Reminder(
+                vehicle_id=vehicle_id,
+                created_by=user.id,
+                title=reminder.title,
+                due_date=date.today() + timedelta(days=reminder.repeat_days)
+                if reminder.repeat_days
+                else None,
+                due_odometer=current + reminder.repeat_distance
+                if reminder.repeat_distance
+                else None,
+                repeat_days=reminder.repeat_days,
+                repeat_distance=reminder.repeat_distance,
+                notes=reminder.notes,
+            )
+        )
+
     await db.commit()
     await db.refresh(reminder)
     return _out(reminder, 0)

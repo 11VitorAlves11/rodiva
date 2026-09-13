@@ -69,3 +69,49 @@ async def test_completing_a_reminder_marks_it_completed(user_client: AsyncClient
     assert completed.json()["status"] == "completed"
     assert completed.json()["urgency"] == "completed"
     assert completed.json()["completed_at"] is not None
+
+
+async def test_completing_a_repeating_reminder_renews_it(user_client: AsyncClient) -> None:
+    vehicle_id = await _vehicle(user_client)
+    await user_client.post(
+        f"/api/vehicles/{vehicle_id}/odometer-readings",
+        json={"recorded_on": date.today().isoformat(), "reading": 40_000},
+    )
+    created = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/reminders",
+        json={
+            "title": "Mudança de óleo",
+            "due_odometer": 45_000,
+            "repeat_days": 180,
+            "repeat_distance": 10_000,
+        },
+    )
+    reminder_id = created.json()["id"]
+
+    completed = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/reminders/{reminder_id}/complete"
+    )
+    assert completed.status_code == 200
+
+    listed = await user_client.get(f"/api/vehicles/{vehicle_id}/reminders")
+    titles = [item for item in listed.json() if item["title"] == "Mudança de óleo"]
+    assert len(titles) == 2
+    renewed = next(item for item in titles if item["status"] != "completed")
+    assert renewed["due_date"] == (date.today() + timedelta(days=180)).isoformat()
+    assert renewed["due_odometer"] == 50_000
+
+
+async def test_completing_a_non_repeating_reminder_does_not_renew_it(
+    user_client: AsyncClient,
+) -> None:
+    vehicle_id = await _vehicle(user_client)
+    created = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/reminders",
+        json={"title": "Inspeção", "due_odometer": 60_000},
+    )
+    reminder_id = created.json()["id"]
+
+    await user_client.post(f"/api/vehicles/{vehicle_id}/reminders/{reminder_id}/complete")
+
+    listed = await user_client.get(f"/api/vehicles/{vehicle_id}/reminders")
+    assert len([item for item in listed.json() if item["title"] == "Inspeção"]) == 1
