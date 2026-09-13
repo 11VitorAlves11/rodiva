@@ -10,6 +10,8 @@
   "nav": {
     "garage": "Garage",
     "history": "History",
+    "maintenance": "Maintenance",
+    "expenses": "Expenses",
     "reminders": "Reminders",
     "settings": "Settings",
     "more": "More",

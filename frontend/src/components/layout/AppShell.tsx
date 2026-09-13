@@ -77,6 +77,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/reminders", label: t("nav.reminders"), icon: "reminders" as const, end: false },
     { to: "/settings", label: t("nav.settings"), icon: "settings" as const, end: false },
   ];
+  // Not yet standalone pages — they reuse History's filter until each grows into its own view.
+  const secondary = [
+    { to: "/history?type=work", label: t("nav.maintenance"), icon: "work" as const, match: "work" },
+    { to: "/history?type=expenses", label: t("nav.expenses"), icon: "expenses" as const, match: "expenses" },
+  ];
   const mobileTabs = [
     { to: "/", label: t("nav.garage"), icon: "garage" as const, end: true },
     { to: "/history", label: t("nav.history"), icon: "history" as const, end: false },
@@ -134,7 +139,23 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
 
         <nav className="space-y-1">
-          {primary.map((item) => (
+          {primary.slice(0, 2).map((item) => (
+            <NavLink key={item.to} end={item.end} to={item.to} className={({ isActive }) => sidebarLinkClass(isActive)}>
+              <Icon name={item.icon} />
+              {item.label}
+            </NavLink>
+          ))}
+          {secondary.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={sidebarLinkClass(location.pathname === "/history" && new URLSearchParams(location.search).get("type") === item.match)}
+            >
+              <Icon name={item.icon} />
+              {item.label}
+            </Link>
+          ))}
+          {primary.slice(2).map((item) => (
             <NavLink key={item.to} end={item.end} to={item.to} className={({ isActive }) => sidebarLinkClass(isActive)}>
               <Icon name={item.icon} />
               {item.label}

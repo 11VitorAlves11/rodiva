@@ -10,6 +10,8 @@
   "nav": {
     "garage": "Garagem",
     "history": "Histórico",
+    "maintenance": "Manutenção",
+    "expenses": "Despesas",
     "reminders": "Lembretes",
     "settings": "Definições",
     "more": "Mais",
