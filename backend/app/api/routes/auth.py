@@ -5,6 +5,7 @@ for now (app.core.config.Settings), so there is nothing to branch on here yet.
 """
 
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
@@ -17,14 +18,29 @@ from app.core.security import (
     issue_session,
     verify_password,
 )
-from app.models import Household, Membership, Role, User
+from app.models import Household, Invite, Membership, Role, User
 from app.schemas.auth import LoginIn, MembershipOut, MeOut, RegisterIn, UserOut
+from app.schemas.households import InvitePreviewOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 # Hashing a throwaway password on unknown emails keeps the response time of a wrong
 # email and a wrong password comparable, so login cannot be used to enumerate users.
 _DUMMY_HASH = hash_password("not-a-real-password-but-long-enough")
+
+
+async def _valid_invite(token: str, db: DbSession) -> Invite:
+    invite = await db.scalar(select(Invite).where(Invite.token == token))
+    if (
+        invite is None
+        or invite.revoked_at is not None
+        or invite.accepted_at is not None
+        or invite.expires_at < datetime.now(UTC)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Invite not found or expired"
+        )
+    return invite
 
 
 def _set_session_cookie(response: Response, user_id: uuid.UUID, settings: Settings) -> None:
@@ -55,20 +71,34 @@ async def register(
     except PasswordTooLongError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
-    # RF-AGR-001: the first account creates its household in the same step.
-    household = Household(
-        name=payload.household_name,
-        locale=settings.default_locale,
-        currency=settings.default_currency,
-        distance_unit=settings.default_distance_unit,
-        timezone=settings.default_timezone,
-    )
-    user = User(email=payload.email, password_hash=password_hash, name=payload.name)
-    db.add_all([household, user])
-    await db.flush()
+    invite = await _valid_invite(payload.invite_token, db) if payload.invite_token else None
 
-    membership = Membership(user_id=user.id, household_id=household.id, role=Role.OWNER)
-    db.add(membership)
+    user = User(email=payload.email, password_hash=password_hash, name=payload.name)
+    db.add(user)
+
+    if invite is not None:
+        # RF-AGR-002: an accepted invite places the new account straight into
+        # the inviting household, instead of creating one of its own.
+        household = await db.get(Household, invite.household_id)
+        assert household is not None
+        await db.flush()
+        membership = Membership(user_id=user.id, household_id=household.id, role=Role(invite.role))
+        invite.accepted_at = datetime.now(UTC)
+        db.add(membership)
+    else:
+        # RF-AGR-001: the first account creates its household in the same step.
+        household = Household(
+            name=payload.household_name,
+            locale=settings.default_locale,
+            currency=settings.default_currency,
+            distance_unit=settings.default_distance_unit,
+            timezone=settings.default_timezone,
+        )
+        db.add(household)
+        await db.flush()
+        membership = Membership(user_id=user.id, household_id=household.id, role=Role.OWNER)
+        db.add(membership)
+
     await db.commit()
 
     _set_session_cookie(response, user.id, settings)
@@ -121,6 +151,45 @@ async def logout(response: Response, settings: AppSettings) -> None:
 async def me(user: CurrentUser, membership: CurrentMembership, db: DbSession) -> MeOut:
     household = await db.get(Household, membership.household_id)
     assert household is not None
+    return MeOut(
+        user=UserOut.model_validate(user),
+        membership=MembershipOut(
+            household_id=household.id, household_name=household.name, role=membership.role
+        ),
+    )
+
+
+@router.get("/invites/{token}", response_model=InvitePreviewOut)
+async def preview_invite(token: str, db: DbSession) -> InvitePreviewOut:
+    invite = await _valid_invite(token, db)
+    household = await db.get(Household, invite.household_id)
+    assert household is not None
+    return InvitePreviewOut(household_name=household.name, role=Role(invite.role))
+
+
+@router.post("/invites/{token}/accept", response_model=MeOut)
+async def accept_invite(
+    token: str, user: CurrentUser, response: Response, settings: AppSettings, db: DbSession
+) -> MeOut:
+    invite = await _valid_invite(token, db)
+    existing = await db.scalar(
+        select(Membership).where(
+            Membership.user_id == user.id, Membership.household_id == invite.household_id
+        )
+    )
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Already a member of this household"
+        )
+    membership = Membership(
+        user_id=user.id, household_id=invite.household_id, role=Role(invite.role)
+    )
+    invite.accepted_at = datetime.now(UTC)
+    db.add(membership)
+    await db.commit()
+    household = await db.get(Household, invite.household_id)
+    assert household is not None
+    _set_session_cookie(response, user.id, settings)
     return MeOut(
         user=UserOut.model_validate(user),
         membership=MembershipOut(

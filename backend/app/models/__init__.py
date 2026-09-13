@@ -4,6 +4,7 @@ from app.models.enums import Role, VehicleStatus
 from app.models.expense_record import ExpenseRecord
 from app.models.fuel_record import FuelRecord
 from app.models.household import Household
+from app.models.invite import Invite
 from app.models.membership import Membership
 from app.models.note import Note
 from app.models.odometer_reading import OdometerReading
@@ -18,6 +19,7 @@ __all__ = [
     "ExpenseRecord",
     "FuelRecord",
     "Household",
+    "Invite",
     "Membership",
     "Note",
     "OdometerReading",

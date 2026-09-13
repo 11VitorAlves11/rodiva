@@ -11,6 +11,7 @@ from app.api.routes import (
     expenses,
     fuel,
     health,
+    households,
     notes,
     odometer,
     reminders,
@@ -41,6 +42,7 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api")
 app.include_router(auth.router)
+app.include_router(households.router, prefix="/api")
 app.include_router(vehicles.router, prefix="/api")
 app.include_router(odometer.router, prefix="/api")
 app.include_router(fuel.router, prefix="/api")
