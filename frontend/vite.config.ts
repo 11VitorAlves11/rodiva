@@ -23,13 +23,14 @@ export default defineConfig({
         short_name: "Rodiva",
         description: "Gestão pessoal e familiar de veículos",
         lang: "pt-PT",
-        theme_color: "#155BC4",
-        background_color: "#F3F6FB",
+        theme_color: "#B94A22",
+        background_color: "#F5F3EF",
         display: "standalone",
         start_url: "/",
         icons: [
-          // Placeholders — replace with real 192/512/maskable PNGs before
-          // shipping the PWA (RF-PWA-001, spec §34 question 1).
+          // SVG works for modern install prompts; still needs real 192/512
+          // and maskable PNGs before shipping (RF-PWA-001, spec §34 question 1).
+          { src: "/favicon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
         ],
       },
     }),

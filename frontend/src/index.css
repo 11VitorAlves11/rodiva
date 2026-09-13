@@ -1,32 +1,48 @@
 @import "tailwindcss";
 
+/* The theme toggle in AppShell sets data-theme on <html>; drive the `dark:`
+   variant from that instead of prefers-color-scheme so the manual switch wins. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  /* Brand tokens (spec §3.3) — the only hex values allowed in the codebase (RF-IDV-002). */
+  --color-graphite: #171c20;
+  --color-copper: #b94a22;
+  --color-copper-dark: #9a3c1a;
+  --color-copper-bright: #f07a45;
+  --color-cream: #f5f3ef;
+  --color-surface-dark: #0e1215;
+  --color-surface-dark-raised: #171d20;
+  --color-surface-dark-line: #2a3437;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
 body {
-  background-color: #f5f3ef;
-  color: #171c20;
+  background-color: var(--color-cream);
+  color: var(--color-graphite);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-html[data-theme="dark"] body { background: #090d0f; color: #f5f3ef; }
-html[data-theme="dark"] .bg-white { background-color: #12181a !important; }
-html[data-theme="dark"] .bg-slate-50 { background-color: #0d1315 !important; }
-html[data-theme="dark"] .text-slate-900,
-html[data-theme="dark"] .text-slate-950,
-html[data-theme="dark"] .text-slate-700 { color: #f8fafc !important; }
-html[data-theme="dark"] .border-slate-200,
-html[data-theme="dark"] .border-slate-300 { border-color: #2a3437 !important; }
-html[data-theme="dark"] input,
-html[data-theme="dark"] select { background-color: #12181a !important; color: #f8fafc; }
-
-@media (max-width: 767px) {
-  html[data-theme="dark"] .rodiva-dashboard .bg-white { background-color: #12181a !important; }
-  .rodiva-dashboard .bg-white { background-color: #12181a !important; }
-  .rodiva-dashboard .text-slate-900,
-  .rodiva-dashboard .text-slate-950 { color: #f8fafc !important; }
-  .rodiva-dashboard .border-slate-200 { border-color: #263033 !important; }
-  .rodiva-dashboard .divide-slate-100 > :not(:last-child) { border-color: #263033 !important; }
+html[data-theme="dark"] body {
+  background-color: var(--color-surface-dark);
+  color: var(--color-cream);
 }
 
+/* Compatibility shim for the pages not yet rewritten with `dark:` variants
+   (Garage, Vehicle, History, Reminders, Login) — remove as each is migrated. */
+html[data-theme="dark"] .bg-white { background-color: var(--color-surface-dark-raised) !important; }
+html[data-theme="dark"] .bg-slate-50 { background-color: var(--color-surface-dark) !important; }
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-700 { color: var(--color-cream) !important; }
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-slate-300 { border-color: var(--color-surface-dark-line) !important; }
+html[data-theme="dark"] input,
+html[data-theme="dark"] select { background-color: var(--color-surface-dark-raised) !important; color: var(--color-cream); }
+
 :focus-visible {
-  outline: 2px solid #155bc4;
+  outline: 2px solid var(--color-copper-bright);
   outline-offset: 2px;
 }

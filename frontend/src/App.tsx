@@ -10,6 +10,7 @@ import { History } from "./pages/History";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
 import { Reminders } from "./pages/Reminders";
+import { Settings } from "./pages/Settings";
 import { Vehicle } from "./pages/Vehicle";
 
 function RequireSession({ children }: { children: ReactNode }) {
@@ -45,6 +46,7 @@ export function App() {
       <Route path="/garage" element={<RequireSession><Garage /></RequireSession>} />
       <Route path="/history" element={<RequireSession><History /></RequireSession>} />
       <Route path="/reminders" element={<RequireSession><Reminders /></RequireSession>} />
+      <Route path="/settings" element={<RequireSession><Settings /></RequireSession>} />
       <Route
         path="/vehicles/:vehicleId"
         element={<RequireSession><Vehicle /></RequireSession>}
