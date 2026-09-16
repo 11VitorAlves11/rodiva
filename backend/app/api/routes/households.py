@@ -15,6 +15,7 @@ from sqlalchemy import select
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.models import Invite, Membership, Role, User
 from app.schemas.households import InviteIn, InviteOut, MemberOut, MemberRoleIn
+from app.services import audit
 
 router = APIRouter(prefix="/household", tags=["household"])
 _CAN_MANAGE_MEMBERS = {Role.OWNER, Role.MANAGER}
@@ -69,10 +70,15 @@ async def list_members(membership: CurrentMembership, db: DbSession) -> list[Mem
 
 @router.patch("/members/{user_id}", response_model=MemberOut)
 async def update_member_role(
-    user_id: uuid.UUID, payload: MemberRoleIn, membership: CurrentMembership, db: DbSession
+    user_id: uuid.UUID,
+    payload: MemberRoleIn,
+    user: CurrentUser,
+    membership: CurrentMembership,
+    db: DbSession,
 ) -> MemberOut:
     _require_manager(membership.role)
     target = await _get_member(membership.household_id, user_id, db)
+    previous_role = target.role
     if target.role == Role.OWNER and membership.role != Role.OWNER:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Only an owner can change an owner's role"
@@ -90,20 +96,33 @@ async def update_member_role(
             status_code=status.HTTP_409_CONFLICT, detail="A household needs at least one owner"
         )
     target.role = payload.role
+    member_user = await db.get(User, user_id)
+    assert member_user is not None
+    member_label = member_user.name or member_user.email
+    audit.record(
+        db,
+        household_id=membership.household_id,
+        actor=user,
+        action=audit.MEMBER_ROLE_CHANGED,
+        entity_type="membership",
+        entity_id=user_id,
+        summary=f"{member_label}: {previous_role.value} → {payload.role.value}",
+        context={"from": previous_role.value, "to": payload.role.value},
+    )
     await db.commit()
-    user = await db.get(User, user_id)
-    assert user is not None
     return MemberOut(
-        user_id=user.id,
-        email=user.email,
-        name=user.name,
+        user_id=member_user.id,
+        email=member_user.email,
+        name=member_user.name,
         role=target.role,
         joined_at=target.created_at,
     )
 
 
 @router.delete("/members/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remove_member(user_id: uuid.UUID, membership: CurrentMembership, db: DbSession) -> None:
+async def remove_member(
+    user_id: uuid.UUID, user: CurrentUser, membership: CurrentMembership, db: DbSession
+) -> None:
     _require_manager(membership.role)
     target = await _get_member(membership.household_id, user_id, db)
     if target.role == Role.OWNER and membership.role != Role.OWNER:
@@ -114,6 +133,17 @@ async def remove_member(user_id: uuid.UUID, membership: CurrentMembership, db: D
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="A household needs at least one owner"
         )
+    removed = await db.get(User, user_id)
+    audit.record(
+        db,
+        household_id=membership.household_id,
+        actor=user,
+        action=audit.MEMBER_REMOVED,
+        entity_type="membership",
+        entity_id=user_id,
+        summary=removed.name or removed.email if removed else str(user_id),
+        context={"role": target.role.value},
+    )
     await db.delete(target)
     await db.commit()
 
@@ -147,16 +177,37 @@ async def create_invite(
         expires_at=datetime.now(UTC) + timedelta(hours=payload.expires_in_hours),
     )
     db.add(invite)
+    audit.record(
+        db,
+        household_id=membership.household_id,
+        actor=user,
+        action=audit.INVITE_CREATED,
+        entity_type="invite",
+        entity_id=invite.id,
+        summary=f"{payload.email or 'any address'} as {payload.role.value}",
+        context={"role": payload.role.value, "email": payload.email},
+    )
     await db.commit()
     await db.refresh(invite)
     return invite
 
 
 @router.delete("/invites/{invite_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def revoke_invite(invite_id: uuid.UUID, membership: CurrentMembership, db: DbSession) -> None:
+async def revoke_invite(
+    invite_id: uuid.UUID, user: CurrentUser, membership: CurrentMembership, db: DbSession
+) -> None:
     _require_manager(membership.role)
     invite = await db.get(Invite, invite_id)
     if invite is None or invite.household_id != membership.household_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invite not found")
     invite.revoked_at = datetime.now(UTC)
+    audit.record(
+        db,
+        household_id=membership.household_id,
+        actor=user,
+        action=audit.INVITE_REVOKED,
+        entity_type="invite",
+        entity_id=invite.id,
+        summary=invite.email or "any address",
+    )
     await db.commit()

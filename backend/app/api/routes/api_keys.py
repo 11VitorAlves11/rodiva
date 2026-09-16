@@ -11,6 +11,7 @@ from sqlalchemy import select
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
 from app.models import ApiKey, Role
+from app.services import audit
 
 router = APIRouter(prefix="/api-keys", tags=["api-keys"])
 
@@ -69,6 +70,16 @@ async def create_key(
         expires_at=datetime.now(UTC) + timedelta(days=payload.expires_in_days),
     )
     db.add(key)
+    audit.record(
+        db,
+        household_id=membership.household_id,
+        actor=user,
+        action=audit.API_KEY_CREATED,
+        entity_type="api_key",
+        entity_id=key.id,
+        summary=f"{payload.name} ({payload.scope})",
+        context={"scope": payload.scope, "vehicle_ids": key.vehicle_ids},
+    )
     await db.commit()
     return CreatedKey(**KeyOut.model_validate(key).model_dump(), token=token)
 
@@ -81,4 +92,13 @@ async def revoke_key(
     if key is None or key.user_id != user.id or key.household_id != membership.household_id:
         raise HTTPException(status_code=404, detail="API key not found")
     key.revoked_at = datetime.now(UTC)
+    audit.record(
+        db,
+        household_id=membership.household_id,
+        actor=user,
+        action=audit.API_KEY_REVOKED,
+        entity_type="api_key",
+        entity_id=key.id,
+        summary=key.name,
+    )
     await db.commit()
