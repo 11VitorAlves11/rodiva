@@ -14,6 +14,7 @@ import { InviteAccept } from "./pages/InviteAccept";
 import { Inventory } from "./pages/Inventory";
 import { Inspections } from "./pages/Inspections";
 import { PasswordRecovery } from "./pages/PasswordRecovery";
+import { ImportRecords } from "./pages/ImportRecords";
 import { Login } from "./pages/Login";
 import { Planner } from "./pages/Planner";
 import { Reminders } from "./pages/Reminders";
@@ -65,6 +66,7 @@ export function App() {
       <Route path="/equipment" element={<RequireSession><Equipment /></RequireSession>} />
       <Route path="/inspections" element={<RequireSession><Inspections /></RequireSession>} />
       <Route path="/planner" element={<RequireSession><Planner /></RequireSession>} />
+      <Route path="/import" element={<RequireSession><ImportRecords /></RequireSession>} />
       <Route path="/settings" element={<RequireSession><Settings /></RequireSession>} />
       <Route
         path="/vehicles/:vehicleId"
