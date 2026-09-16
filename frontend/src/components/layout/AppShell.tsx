@@ -214,10 +214,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <div className="mt-auto space-y-2 border-t border-line pt-3">
+        <div className="mt-auto flex items-center gap-2 border-t border-line pt-3">
           <button
             onClick={() => void signOut()}
-            className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-2 text-left"
           >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-copper text-sm font-semibold text-white">
               {me ? initials(me.user.name, me.user.email) : ""}
@@ -228,6 +228,20 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               <span className="block text-xs text-ink-subtle">{t("common.signOut")}</span>
             </span>
+          </button>
+          {/* A sibling of the account button, not nested in it: a button inside
+              a button is invalid, and signing out is not what this does. */}
+          <button
+            aria-label={t("theme.toggle")}
+            title={t("theme.toggle")}
+            onClick={toggleTheme}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line text-ink hover:bg-sunken"
+          >
+            {theme === "dark" ? (
+              <SunIcon aria-hidden="true" className="h-5 w-5" />
+            ) : (
+              <MoonIcon aria-hidden="true" className="h-5 w-5" />
+            )}
           </button>
         </div>
       </aside>
