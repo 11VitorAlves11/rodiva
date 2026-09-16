@@ -20,6 +20,7 @@ from app.api.routes import (
     odometer,
     plans,
     reminders,
+    search,
     storage,
     vehicles,
     work_records,
@@ -62,6 +63,7 @@ for resource in [
     work_records,
     expenses,
     reminders,
+    search,
     notes,
     attachments,
 ]:

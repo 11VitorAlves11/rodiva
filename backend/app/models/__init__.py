@@ -17,6 +17,7 @@ from app.models.note import Note
 from app.models.odometer_reading import OdometerReading
 from app.models.plan import Plan
 from app.models.reminder import Reminder
+from app.models.saved_view import SavedView
 from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.models.work_record import WorkRecord
@@ -45,6 +46,7 @@ __all__ = [
     "Plan",
     "Reminder",
     "Role",
+    "SavedView",
     "StockMovement",
     "TireRotation",
     "User",
