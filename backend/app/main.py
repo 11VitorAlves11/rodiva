@@ -14,6 +14,7 @@ from app.api.routes import (
     fuel,
     health,
     households,
+    imports,
     inspections,
     inventory,
     notes,
@@ -50,6 +51,7 @@ app.add_middleware(
 
 # Preserve existing clients while making v1 the documented integration API.
 for resource in [
+    imports,
     health,
     calendar,
     equipment,

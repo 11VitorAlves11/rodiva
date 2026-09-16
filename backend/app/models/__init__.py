@@ -9,6 +9,7 @@ from app.models.expense_record import ExpenseRecord
 from app.models.fuel_record import FuelRecord
 from app.models.google_calendar import CalendarSyncEvent, GoogleCalendarConnection
 from app.models.household import Household
+from app.models.import_batch import ImportBatch
 from app.models.inspection import Inspection, InspectionTemplate
 from app.models.inventory import InventoryItem, StockMovement
 from app.models.invite import Invite
@@ -35,6 +36,7 @@ __all__ = [
     "FuelRecord",
     "GoogleCalendarConnection",
     "Household",
+    "ImportBatch",
     "Inspection",
     "InspectionTemplate",
     "Invite",
