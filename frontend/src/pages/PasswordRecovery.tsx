@@ -33,9 +33,9 @@ export function PasswordRecovery({ reset = false }: { reset?: boolean }) {
     } finally { setBusy(false); }
   }
 
-  const input = "mt-1 w-full rounded-lg border border-graphite/20 px-3 py-2 dark:border-white/20 dark:bg-surface-dark";
-  return <div className="flex min-h-screen items-center justify-center bg-cream px-4 dark:bg-surface-dark">
-    <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-xl border border-graphite/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+  const input = "mt-1 w-full rounded-lg border border-line-strong px-3 py-2 bg-raised";
+  return <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+    <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-xl border border-line bg-raised p-6 shadow-sm">
       <h1 className="text-xl font-semibold">{t(reset ? "recovery.reset" : "recovery.forgot")}</h1>
       {done ? <p role="status" className="text-sm">{t(reset ? "recovery.resetDone" : "recovery.sent")}</p> : <>
         {reset ? <>

@@ -17,7 +17,7 @@ const urgencyStyles = {
   very_urgent: "border-orange-500 bg-orange-50 text-orange-900 dark:bg-orange-950/40 dark:text-orange-100",
   urgent: "border-amber-500 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100",
   upcoming: "border-blue-400 bg-blue-50 text-blue-900 dark:bg-blue-950/40 dark:text-blue-100",
-  future: "border-graphite/20 bg-white text-graphite dark:border-white/20 dark:bg-surface-dark-raised dark:text-cream",
+  future: "border-line-strong bg-raised text-ink",
   completed: "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100",
 };
 
@@ -86,8 +86,8 @@ export function Reminders() {
     <div className="space-y-6">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("reminders.title")}</h1>
-          <p className="mt-1 text-sm text-graphite/50 dark:text-cream/50">{t("reminders.description")}</p>
+          <h1 className="text-2xl font-bold text-ink">{t("reminders.title")}</h1>
+          <p className="mt-1 text-sm text-ink-subtle">{t("reminders.description")}</p>
         </div>
         {canWrite && (
           <button
@@ -123,7 +123,7 @@ export function Reminders() {
       {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
 
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-graphite/20 bg-white p-8 text-center text-sm text-graphite/50 dark:border-white/20 dark:bg-surface-dark-raised dark:text-cream/50">
+        <div className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-sm text-ink-subtle">
           {t("reminders.empty")}
         </div>
       ) : (
@@ -241,25 +241,25 @@ function ReminderForm({
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-3 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised sm:grid-cols-2">
+    <form onSubmit={submit} className="grid gap-3 rounded-xl border border-line bg-raised p-4 sm:grid-cols-2">
       <select
         value={vehicleId}
         onChange={(event) => setVehicleId(event.target.value)}
         disabled={Boolean(initial)}
         aria-label={t("nav.vehicle")}
-        className="rounded-lg border border-graphite/15 px-3 py-2.5 disabled:opacity-60 dark:border-white/15 dark:bg-surface-dark sm:col-span-2"
+        className="rounded-lg border border-line px-3 py-2.5 disabled:opacity-60 bg-raised sm:col-span-2"
       >
         {vehicleList.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name}</option>)}
       </select>
-      <input required placeholder={t("reminders.name")} value={title} onChange={(event) => setTitle(event.target.value)} className="rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark sm:col-span-2" />
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("reminders.dueDate")}<input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("reminders.dueOdometer")}<input type="number" inputMode="numeric" min="0" value={dueOdometer} onChange={(event) => setDueOdometer(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("reminders.repeatDays")}<input type="number" inputMode="numeric" min="1" value={repeatDays} onChange={(event) => setRepeatDays(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("reminders.repeatDistance")}<input type="number" inputMode="numeric" min="1" value={repeatDistance} onChange={(event) => setRepeatDistance(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70 sm:col-span-2">{t("reminders.notes")}<textarea rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      {error && <p role="alert" className="text-sm text-red-700 dark:text-red-300 sm:col-span-2">{error}</p>}
+      <input required placeholder={t("reminders.name")} value={title} onChange={(event) => setTitle(event.target.value)} className="rounded-lg border border-line px-3 py-2.5 bg-raised sm:col-span-2" />
+      <label className="text-sm text-ink-muted">{t("reminders.dueDate")}<input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("reminders.dueOdometer")}<input type="number" inputMode="numeric" min="0" value={dueOdometer} onChange={(event) => setDueOdometer(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("reminders.repeatDays")}<input type="number" inputMode="numeric" min="1" value={repeatDays} onChange={(event) => setRepeatDays(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("reminders.repeatDistance")}<input type="number" inputMode="numeric" min="1" value={repeatDistance} onChange={(event) => setRepeatDistance(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted sm:col-span-2">{t("reminders.notes")}<textarea rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      {error && <p role="alert" className="text-sm text-danger sm:col-span-2">{error}</p>}
       <div className="flex justify-end gap-3 sm:col-span-2">
-        <button type="button" onClick={onCancel} className="rounded-lg border border-graphite/15 px-4 py-2.5 text-sm font-semibold dark:border-white/15">{t("common.cancel")}</button>
+        <button type="button" onClick={onCancel} className="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold">{t("common.cancel")}</button>
         <button disabled={saving || (!dueDate && !dueOdometer)} className="rounded-lg bg-copper px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{initial ? t("reminders.update") : t("garage.save")}</button>
       </div>
     </form>

@@ -5,7 +5,7 @@ import { charging } from "../../lib/api";
 import type { ChargingInput, ChargingRecord } from "../../lib/api/types";
 import { useSession } from "../../lib/session";
 
-const inputClass = "mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark";
+const inputClass = "mt-1 w-full rounded-lg border border-line px-3 py-2 bg-raised";
 function blank(): ChargingInput {
   const today = new Date();
   return { recorded_on: `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`, energy_kwh: "", total_cost: "", charger_type: "home" };
@@ -39,9 +39,9 @@ export function ChargingSection({ vehicleId, unit }: { vehicleId: string; unit: 
     finally { setBusy(false); }
   }
   const currency = (value: string) => Number(value).toLocaleString(i18n.language, { style: "currency", currency: "EUR" });
-  return <section className="space-y-4 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised">
+  return <section className="space-y-4 rounded-xl border border-line bg-raised p-4">
     <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">{t("charging.title")}</h2>{canWrite && <button onClick={() => { setForm(blank()); setEditing(null); }} className="rounded-lg bg-copper px-4 py-2 font-semibold text-white">{t("charging.add")}</button>}</div>
-    <p className="text-sm text-graphite/60 dark:text-cream/60">{t("charging.efficiencyHint")}</p>
+    <p className="text-sm text-ink-muted">{t("charging.efficiencyHint")}</p>
     {error && <p role="alert" className="text-sm text-red-700">{error}<button className="ml-2 underline" onClick={() => { setError(null); setAttempt((value) => value + 1); }}>{t("common.retry")}</button></p>}
     {form && <form onSubmit={save}><fieldset disabled={busy} className="grid gap-3 sm:grid-cols-2">
       <label className="text-sm">{t("import.fields.recorded_on")}<input type="date" required value={form.recorded_on} onChange={(event) => setForm({ ...form, recorded_on: event.target.value })} className={inputClass} /></label>

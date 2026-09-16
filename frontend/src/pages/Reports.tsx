@@ -74,10 +74,10 @@ export function Reports() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Link to="/import" className="text-sm font-semibold text-copper">{t("import.title")}</Link>
-      <h1 className="text-2xl font-bold text-graphite dark:text-cream">
+      <h1 className="text-2xl font-bold text-ink">
             {t("reports.title")}
           </h1>
-          <p className="mt-1 text-sm text-graphite/50 dark:text-cream/50">
+          <p className="mt-1 text-sm text-ink-subtle">
             {t("reports.description")}
           </p>
         </div>
@@ -85,7 +85,7 @@ export function Reports() {
           <a
             href={reports.csvUrl(query)}
             download
-            className="rounded-lg border border-graphite/15 px-3 py-2.5 text-sm font-semibold dark:border-white/15"
+            className="rounded-lg border border-line px-3 py-2.5 text-sm font-semibold"
           >
             {t("reports.exportCsv")}
           </a>
@@ -98,7 +98,7 @@ export function Reports() {
         </div>
       </div>
 
-      <section className="space-y-3 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised print:hidden">
+      <section className="space-y-3 rounded-xl border border-line bg-raised p-4 print:hidden">
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm">
             {t("reports.from")}
@@ -106,7 +106,7 @@ export function Reports() {
               type="date"
               value={from}
               onChange={(event) => setFrom(event.target.value)}
-              className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+              className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
             />
           </label>
           <label className="text-sm">
@@ -115,7 +115,7 @@ export function Reports() {
               type="date"
               value={to}
               onChange={(event) => setTo(event.target.value)}
-              className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+              className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
             />
           </label>
         </div>
@@ -127,7 +127,7 @@ export function Reports() {
             {vehicleList.map((vehicle) => (
               <label
                 key={vehicle.id}
-                className="flex min-h-11 items-center gap-2 rounded-lg border border-graphite/10 px-3 text-sm dark:border-white/10"
+                className="flex min-h-11 items-center gap-2 rounded-lg border border-line px-3 text-sm"
               >
                 <input
                   type="checkbox"
@@ -185,12 +185,12 @@ function ReportContent({ report }: { report: ReportSummary }) {
         {metrics.map(([label, value]) => (
           <div
             key={label}
-            className="min-w-0 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised"
+            className="min-w-0 rounded-xl border border-line bg-raised p-4"
           >
-            <p className="break-words text-xs text-graphite/50 dark:text-cream/50">
+            <p className="break-words text-xs text-ink-subtle">
               {label}
             </p>
-            <p className="mt-1 break-words text-xl font-bold text-graphite dark:text-cream">
+            <p className="mt-1 break-words text-xl font-bold text-ink">
               {value}
             </p>
           </div>
@@ -226,10 +226,10 @@ function VehicleReportBlock({
     [vehicle.categories],
   );
   return (
-    <section className="break-inside-avoid space-y-4 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised">
+    <section className="break-inside-avoid space-y-4 rounded-xl border border-line bg-raised p-4">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <h2 className="text-lg font-bold">{vehicle.vehicle_name}</h2>
-        <p className="text-sm text-graphite/60 dark:text-cream/60">
+        <p className="text-sm text-ink-muted">
           {currency(vehicle.total_cost, i18n.language, currencyCode)} ·{" "}
           {vehicle.distance.toLocaleString(i18n.language)}{" "}
           {vehicle.distance_unit}
@@ -294,7 +294,7 @@ function VehicleReportBlock({
       <div className="overflow-x-auto">
         <h3 className="mb-3 font-semibold">{t("reports.monthly")}</h3>
         <table className="w-full min-w-[560px] text-left text-sm">
-          <thead className="text-xs text-graphite/50 dark:text-cream/50">
+          <thead className="text-xs text-ink-subtle">
             <tr>
               <th className="py-2">{t("reports.month")}</th>
               <th>{t("reports.fuel")}</th>
@@ -332,7 +332,7 @@ function VehicleReportBlock({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-lg bg-graphite/[.03] p-3 dark:bg-white/[.04]">
-      <p className="break-words text-[11px] text-graphite/50 dark:text-cream/50">
+      <p className="break-words text-[11px] text-ink-subtle">
         {label}
       </p>
       <p className="mt-1 break-words text-sm font-semibold">{value}</p>

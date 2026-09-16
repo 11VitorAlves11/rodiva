@@ -152,18 +152,18 @@ export function Calendar() {
   return (
     <div className="min-w-0 space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("calendar.title")}</h1>
-        <p className="mt-1 text-sm text-graphite/50 dark:text-cream/50">{t("calendar.description")}</p>
+        <h1 className="text-2xl font-bold text-ink">{t("calendar.title")}</h1>
+        <p className="mt-1 text-sm text-ink-subtle">{t("calendar.description")}</p>
       </div>
-      <div className="flex items-center justify-between gap-2 rounded-xl border border-graphite/10 bg-white p-2 dark:border-white/10 dark:bg-surface-dark-raised">
-        <button aria-label={t("calendar.previous")} onClick={() => changeMonth(-1)} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-graphite hover:bg-graphite/5 dark:text-cream dark:hover:bg-white/5"><ChevronLeftIcon aria-hidden="true" className="h-5 w-5" /></button>
-        <h2 className="min-w-0 text-center font-semibold capitalize text-graphite dark:text-cream">{monthLabel}</h2>
-        <button aria-label={t("calendar.next")} onClick={() => changeMonth(1)} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-graphite hover:bg-graphite/5 dark:text-cream dark:hover:bg-white/5"><ChevronRightIcon aria-hidden="true" className="h-5 w-5" /></button>
+      <div className="flex items-center justify-between gap-2 rounded-xl border border-line bg-raised p-2">
+        <button aria-label={t("calendar.previous")} onClick={() => changeMonth(-1)} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink hover:bg-graphite/5 dark:hover:bg-white/5"><ChevronLeftIcon aria-hidden="true" className="h-5 w-5" /></button>
+        <h2 className="min-w-0 text-center font-semibold capitalize text-ink">{monthLabel}</h2>
+        <button aria-label={t("calendar.next")} onClick={() => changeMonth(1)} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink hover:bg-graphite/5 dark:hover:bg-white/5"><ChevronRightIcon aria-hidden="true" className="h-5 w-5" /></button>
       </div>
 
       <section className="space-y-3 md:hidden">
         {monthData.events.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-graphite/20 bg-white p-8 text-center text-sm text-graphite/50 dark:border-white/20 dark:bg-surface-dark-raised dark:text-cream/50">{t("calendar.empty")}</p>
+          <p className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-sm text-ink-subtle">{t("calendar.empty")}</p>
         ) : monthData.events.map((item) => (
           <Link key={item.id} to={item.href} className={`flex min-w-0 items-center gap-3 rounded-xl border-l-4 p-4 ${eventStyles[item.type]}`}>
             <span className="w-12 shrink-0 text-center"><span className="block text-xl font-bold">{Number(item.date.slice(8, 10))}</span><span className="block text-[10px] font-semibold uppercase">{new Intl.DateTimeFormat(i18n.language, { weekday: "short" }).format(new Date(`${item.date}T12:00:00`))}</span></span>
@@ -172,8 +172,8 @@ export function Calendar() {
         ))}
       </section>
 
-      <section className="hidden overflow-hidden rounded-xl border border-graphite/10 bg-white shadow-sm dark:border-white/10 dark:bg-surface-dark-raised md:block">
-        <div className="grid grid-cols-7 border-b border-graphite/10 dark:border-white/10">
+      <section className="hidden overflow-hidden rounded-xl border border-line bg-raised shadow-sm md:block">
+        <div className="grid grid-cols-7 border-b border-line">
           {weekdayLabels.map((label) => <div key={label} className="px-2 py-3 text-center text-xs font-semibold uppercase text-graphite/45 dark:text-cream/45">{label}</div>)}
         </div>
         <div className="grid grid-cols-7">
@@ -182,7 +182,7 @@ export function Calendar() {
             const dayEvents = day ? monthData.events.filter((item) => item.date === key) : [];
             return (
               <div key={key} className="min-h-32 min-w-0 border-b border-r border-graphite/5 p-2 dark:border-white/5">
-                {day && <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-medium ${key === today ? "bg-copper text-white" : "text-graphite/60 dark:text-cream/60"}`}>{day.getDate()}</span>}
+                {day && <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-medium ${key === today ? "bg-copper text-white" : "text-ink-muted"}`}>{day.getDate()}</span>}
                 <div className="mt-1 space-y-1">
                   {dayEvents.map((item) => <Link key={item.id} to={item.href} title={`${item.title} · ${item.vehicle}`} className={`block truncate rounded border px-1.5 py-1 text-[11px] ${eventStyles[item.type]}`}>{item.title}</Link>)}
                 </div>
@@ -192,17 +192,17 @@ export function Calendar() {
         </div>
       </section>
 
-      <div className="flex flex-wrap gap-3 text-xs text-graphite/60 dark:text-cream/60">
+      <div className="flex flex-wrap gap-3 text-xs text-ink-muted">
         {(["reminder", "expense", "plan"] as const).map((type) => <span key={type} className="flex items-center gap-1.5"><span className={`h-3 w-3 rounded-sm border ${eventStyles[type]}`} />{t(`calendar.types.${type}`)}</span>)}
       </div>
 
-      <section className="min-w-0 rounded-xl border border-graphite/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised sm:p-5">
-        <h2 className="font-semibold text-graphite dark:text-cream">{t("calendar.feedTitle")}</h2>
+      <section className="min-w-0 rounded-xl border border-line bg-raised p-4 shadow-sm sm:p-5">
+        <h2 className="font-semibold text-ink">{t("calendar.feedTitle")}</h2>
         <p className="mt-1 text-sm text-graphite/55 dark:text-cream/55">{t("calendar.feedDescription")}</p>
         {feedUrl && (
           <div className="mt-4 min-w-0 rounded-lg bg-graphite/5 p-3 dark:bg-white/5">
-            <p className="text-xs font-semibold text-graphite/60 dark:text-cream/60">{t("calendar.feedCopyNow")}</p>
-            <code className="mt-2 block overflow-x-auto whitespace-nowrap rounded bg-white p-2 text-xs text-graphite dark:bg-surface-dark dark:text-cream">{feedUrl}</code>
+            <p className="text-xs font-semibold text-ink-muted">{t("calendar.feedCopyNow")}</p>
+            <code className="mt-2 block overflow-x-auto whitespace-nowrap rounded bg-raised p-2 text-xs text-ink">{feedUrl}</code>
             <button onClick={() => void navigator.clipboard.writeText(feedUrl)} className="mt-2 rounded-md border border-copper/30 px-3 py-2 text-sm font-semibold text-copper">{t("settings.copyLink")}</button>
           </div>
         )}

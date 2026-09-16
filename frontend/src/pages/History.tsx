@@ -8,7 +8,7 @@ import type { Vehicle } from "../lib/api/types";
 
 type Item = { id: string; vehicleId: string; vehicle: string; date: string; type: string; title: string; value: string };
 const types = ["fuel", "charging", "work", "expenses", "odometer"] as const;
-const inputClass = "w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark";
+const inputClass = "w-full rounded-lg border border-line px-3 py-2.5 bg-raised";
 
 export function History() {
   const { t, i18n } = useTranslation();
@@ -77,8 +77,8 @@ export function History() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("history.title")}</h1>
-      <div className="grid gap-3 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised sm:grid-cols-2 lg:grid-cols-3">
+      <h1 className="text-2xl font-bold text-ink">{t("history.title")}</h1>
+      <div className="grid gap-3 rounded-xl border border-line bg-raised p-4 sm:grid-cols-2 lg:grid-cols-3">
         <label className="text-sm">{t("history.search")}
           <input type="search" value={query} onChange={(event) => updateFilter("q", event.target.value)} className={inputClass} />
         </label>
@@ -111,20 +111,20 @@ export function History() {
           const next = new URLSearchParams(current);
           for (const key of ["q", "type", "vehicle", "from", "to", "sort"]) next.delete(key);
           return next;
-        }, { replace: true })} className="justify-self-start text-sm font-semibold text-copper dark:text-copper-bright">{t("history.clearFilters")}</button>}
+        }, { replace: true })} className="justify-self-start text-sm font-semibold text-brand">{t("history.clearFilters")}</button>}
       </div>
-      <p role="status" className="text-sm text-graphite/60 dark:text-cream/60">{t("history.results", { count: visible.length })}</p>
-      <section className="overflow-hidden rounded-xl border border-graphite/10 bg-white shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
-        {visible.length === 0 ? <p className="p-8 text-center text-sm text-graphite/50 dark:text-cream/50">{t("history.empty")}</p> : (
+      <p role="status" className="text-sm text-ink-muted">{t("history.results", { count: visible.length })}</p>
+      <section className="overflow-hidden rounded-xl border border-line bg-raised shadow-sm">
+        {visible.length === 0 ? <p className="p-8 text-center text-sm text-ink-subtle">{t("history.empty")}</p> : (
           <ul className="divide-y divide-graphite/5 dark:divide-white/5">
             {visible.map((item) => (
               <li key={`${item.type}-${item.id}`}>
                 <Link to={`/vehicles/${item.vehicleId}?section=${item.type}`} className="flex min-w-0 flex-col gap-1 p-4 sm:flex-row sm:justify-between sm:gap-4">
                   <div className="min-w-0">
-                    <p className="break-words font-medium text-graphite dark:text-cream">{item.title}</p>
-                    <p className="text-sm text-graphite/50 dark:text-cream/50"><time dateTime={item.date}>{new Intl.DateTimeFormat(i18n.language).format(new Date(`${item.date}T12:00:00`))}</time> · {item.vehicle}</p>
+                    <p className="break-words font-medium text-ink">{item.title}</p>
+                    <p className="text-sm text-ink-subtle"><time dateTime={item.date}>{new Intl.DateTimeFormat(i18n.language).format(new Date(`${item.date}T12:00:00`))}</time> · {item.vehicle}</p>
                   </div>
-                  <span className="shrink-0 text-sm font-medium text-graphite/70 dark:text-cream/70">{item.value}</span>
+                  <span className="shrink-0 text-sm font-medium text-ink-muted">{item.value}</span>
                 </Link>
               </li>
             ))}

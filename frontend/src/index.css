@@ -15,12 +15,63 @@
   --color-surface-dark-raised: #171d20;
   --color-surface-dark-line: #2a3437;
 
+  /* Semantic tokens. Utilities compile to var() references, so redefining the
+     variable under [data-theme="dark"] repaints the whole app without every
+     call site carrying a `dark:` twin. */
+  --color-surface: var(--color-cream);
+  --color-raised: #ffffff;
+  --color-sunken: color-mix(in srgb, var(--color-graphite) 3%, transparent);
+  --color-line: color-mix(in srgb, var(--color-graphite) 12%, transparent);
+  --color-line-strong: color-mix(in srgb, var(--color-graphite) 22%, transparent);
+  --color-ink: var(--color-graphite);
+  --color-ink-muted: color-mix(in srgb, var(--color-graphite) 62%, transparent);
+  --color-ink-subtle: color-mix(in srgb, var(--color-graphite) 42%, transparent);
+
+  /* Brand accent for text and active states; the filled action keeps the brand
+     copper in both themes so the primary button reads the same everywhere. */
+  --color-brand: var(--color-copper);
+  --color-brand-hover: var(--color-copper-dark);
+
+  /* RF-IDV-003: status carries its own meaning and never borrows brand copper. */
+  --color-success: #1b7a4b;
+  --color-success-soft: #e6f4ec;
+  --color-warning: #8a5a06;
+  --color-warning-soft: #fbf0dc;
+  --color-danger: #b02a1f;
+  --color-danger-soft: #fceae7;
+  --color-info: #1c5e8a;
+  --color-info-soft: #e6f1f8;
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
+html[data-theme="dark"] {
+  --color-surface: var(--color-surface-dark);
+  --color-raised: var(--color-surface-dark-raised);
+  --color-sunken: color-mix(in srgb, var(--color-cream) 4%, transparent);
+  --color-line: color-mix(in srgb, var(--color-cream) 12%, transparent);
+  --color-line-strong: color-mix(in srgb, var(--color-cream) 22%, transparent);
+  --color-ink: var(--color-cream);
+  --color-ink-muted: color-mix(in srgb, var(--color-cream) 62%, transparent);
+  --color-ink-subtle: color-mix(in srgb, var(--color-cream) 42%, transparent);
+
+  --color-brand: var(--color-copper-bright);
+  --color-brand-hover: var(--color-copper);
+
+  /* Lightened so each status keeps its meaning against the dark ground. */
+  --color-success: #57d39a;
+  --color-success-soft: color-mix(in srgb, #57d39a 14%, transparent);
+  --color-warning: #f0b45e;
+  --color-warning-soft: color-mix(in srgb, #f0b45e 14%, transparent);
+  --color-danger: #f28b7d;
+  --color-danger-soft: color-mix(in srgb, #f28b7d 14%, transparent);
+  --color-info: #7cc0ec;
+  --color-info-soft: color-mix(in srgb, #7cc0ec 14%, transparent);
+}
+
 body {
-  background-color: var(--color-cream);
-  color: var(--color-graphite);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
@@ -84,25 +135,18 @@ textarea {
   }
 }
 
-html[data-theme="dark"] body {
-  background-color: var(--color-surface-dark);
-  color: var(--color-cream);
-}
-
-/* Compatibility shim for the pages not yet rewritten with `dark:` variants
-   (Garage, Vehicle, History, Reminders, Login) — remove as each is migrated. */
-html[data-theme="dark"] .bg-white { background-color: var(--color-surface-dark-raised) !important; }
-html[data-theme="dark"] .bg-slate-50 { background-color: var(--color-surface-dark) !important; }
-html[data-theme="dark"] .text-slate-900,
-html[data-theme="dark"] .text-slate-950,
-html[data-theme="dark"] .text-slate-700 { color: var(--color-cream) !important; }
-html[data-theme="dark"] .border-slate-200,
-html[data-theme="dark"] .border-slate-300 { border-color: var(--color-surface-dark-line) !important; }
-html[data-theme="dark"] input,
-html[data-theme="dark"] select,
-html[data-theme="dark"] textarea { background-color: var(--color-surface-dark-raised) !important; color: var(--color-cream); }
-
 :focus-visible {
   outline: 2px solid var(--color-copper-bright);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

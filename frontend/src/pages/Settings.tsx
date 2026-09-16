@@ -24,16 +24,16 @@ export function Settings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("settings.title")}</h1>
+      <h1 className="text-2xl font-bold text-ink">{t("settings.title")}</h1>
 
-      <section className="flex items-center gap-4 rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+      <section className="flex items-center gap-4 rounded-xl border border-line bg-raised p-5 shadow-sm">
         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-copper text-lg font-semibold text-white">
           {me ? initials(me.user.name, me.user.email) : ""}
         </span>
         <div className="min-w-0">
-          <p className="truncate font-semibold text-graphite dark:text-cream">{me?.user.name ?? me?.user.email}</p>
-          <p className="truncate text-sm text-graphite/50 dark:text-cream/50">{me?.user.email}</p>
-          <p className="mt-1 text-sm text-graphite/50 dark:text-cream/50">{me?.membership.household_name}</p>
+          <p className="truncate font-semibold text-ink">{me?.user.name ?? me?.user.email}</p>
+          <p className="truncate text-sm text-ink-subtle">{me?.user.email}</p>
+          <p className="mt-1 text-sm text-ink-subtle">{me?.membership.household_name}</p>
         </div>
       </section>
 
@@ -46,7 +46,7 @@ export function Settings() {
 
       <button
         onClick={() => void signOut()}
-        className="w-full rounded-lg border border-copper/30 px-4 py-3 text-sm font-semibold text-copper hover:bg-copper/5 dark:text-copper-bright"
+        className="w-full rounded-lg border border-copper/30 px-4 py-3 text-sm font-semibold text-brand hover:bg-copper/5"
       >
         {t("common.signOut")}
       </button>
@@ -105,9 +105,9 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
   const pendingInvites = invites?.filter((invite) => !invite.accepted_at && !invite.revoked_at) ?? [];
 
   return (
-    <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+    <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
       <div className="mb-4 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="font-semibold text-graphite dark:text-cream">{t("settings.members")}</h2>
+        <h2 className="font-semibold text-ink">{t("settings.members")}</h2>
         {canManage && (
           <button
             onClick={() => setShowInviteForm((value) => !value)}
@@ -132,8 +132,8 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
 
       {lastInviteLink && (
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-copper/10 p-3 text-sm">
-          <span className="font-medium text-copper-dark dark:text-copper-bright">{t("settings.inviteReady")}</span>
-          <code className="min-w-0 flex-1 truncate rounded bg-white px-2 py-1 text-graphite dark:bg-surface-dark dark:text-cream">
+          <span className="font-medium text-brand">{t("settings.inviteReady")}</span>
+          <code className="min-w-0 flex-1 truncate rounded bg-raised px-2 py-1 text-ink">
             {lastInviteLink}
           </code>
           <button
@@ -146,28 +146,28 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
       )}
 
       {!members ? (
-        <p className="text-sm text-graphite/50 dark:text-cream/50">{t("common.loading")}</p>
+        <p className="text-sm text-ink-subtle">{t("common.loading")}</p>
       ) : (
         <ul className="divide-y divide-graphite/5 dark:divide-white/5">
           {members.map((member) => (
             <li key={member.user_id} className="flex flex-wrap items-center justify-between gap-3 py-3">
               <div className="min-w-0">
-                <p className="truncate font-medium text-graphite dark:text-cream">{member.name ?? member.email}</p>
-                <p className="truncate text-sm text-graphite/50 dark:text-cream/50">{member.email}</p>
+                <p className="truncate font-medium text-ink">{member.name ?? member.email}</p>
+                <p className="truncate text-sm text-ink-subtle">{member.email}</p>
               </div>
               <div className="flex items-center gap-2">
                 {canManage ? (
                   <select
                     value={member.role}
                     onChange={(event) => void changeRole(member.user_id, event.target.value as Role)}
-                    className="rounded-md border border-graphite/15 bg-white px-2 py-1.5 text-sm dark:border-white/15 dark:bg-surface-dark"
+                    className="rounded-md border border-line bg-raised px-2 py-1.5 text-sm"
                   >
                     {roles.map((role) => (
                       <option key={role} value={role}>{t(`settings.roles.${role}`)}</option>
                     ))}
                   </select>
                 ) : (
-                  <span className="rounded-full bg-graphite/5 px-3 py-1 text-xs font-medium text-graphite/70 dark:bg-white/10 dark:text-cream/70">
+                  <span className="rounded-full bg-graphite/5 px-3 py-1 text-xs font-medium text-ink-muted dark:bg-white/10">
                     {t(`settings.roles.${member.role}`)}
                   </span>
                 )}
@@ -183,12 +183,12 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
       )}
 
       {canManage && pendingInvites.length > 0 && (
-        <div className="mt-5 border-t border-graphite/10 pt-4 dark:border-white/10">
-          <h3 className="mb-2 text-sm font-semibold text-graphite/70 dark:text-cream/70">{t("settings.pendingInvites")}</h3>
+        <div className="mt-5 border-t border-line pt-4">
+          <h3 className="mb-2 text-sm font-semibold text-ink-muted">{t("settings.pendingInvites")}</h3>
           <ul className="space-y-2">
             {pendingInvites.map((invite) => (
               <li key={invite.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                <span className="text-graphite dark:text-cream">
+                <span className="text-ink">
                   {invite.email ?? t(`settings.roles.${invite.role}`)}
                 </span>
                 <button onClick={() => void revoke(invite.id)} className="font-medium text-red-700">
@@ -226,11 +226,11 @@ function InviteForm({ onCreated }: { onCreated: (invite: Invite) => void }) {
   return (
     <form onSubmit={submit} className="mb-4 grid gap-3 rounded-lg bg-graphite/5 p-4 dark:bg-white/5 sm:grid-cols-2">
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">{t("settings.role")}</span>
+        <span className="mb-1 block font-medium text-ink-muted">{t("settings.role")}</span>
         <select
           value={role}
           onChange={(event) => setRole(event.target.value as Role)}
-          className="w-full rounded-md border border-graphite/15 bg-white px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         >
           {roles.filter((item) => item !== "owner").map((item) => (
             <option key={item} value={item}>{t(`settings.roles.${item}`)}</option>
@@ -238,12 +238,12 @@ function InviteForm({ onCreated }: { onCreated: (invite: Invite) => void }) {
         </select>
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">{t("settings.inviteEmail")}</span>
+        <span className="mb-1 block font-medium text-ink-muted">{t("settings.inviteEmail")}</span>
         <input
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-md border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+          className="w-full rounded-md border border-line px-3 py-2 bg-raised"
         />
       </label>
       {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
@@ -360,14 +360,14 @@ function GoogleCalendarSection() {
   if (!status) return null;
 
   return (
-    <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
-      <h2 className="mb-1 font-semibold text-graphite dark:text-cream">{t("calendar.google.title")}</h2>
-      <p className="mb-4 text-sm text-graphite/60 dark:text-cream/60">{t("calendar.google.description")}</p>
+    <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
+      <h2 className="mb-1 font-semibold text-ink">{t("calendar.google.title")}</h2>
+      <p className="mb-4 text-sm text-ink-muted">{t("calendar.google.description")}</p>
 
       {error && <p className="mb-3 text-sm text-red-700">{error}</p>}
 
       {!status.configured && (
-        <p className="rounded-lg bg-graphite/5 p-3 text-sm text-graphite/70 dark:bg-white/5 dark:text-cream/70">
+        <p className="rounded-lg bg-graphite/5 p-3 text-sm text-ink-muted dark:bg-white/5">
           {t("calendar.google.notConfigured")}
         </p>
       )}
@@ -383,19 +383,19 @@ function GoogleCalendarSection() {
 
       {status.configured && status.connected && !showPicker && (
         <div className="space-y-3">
-          <div className="text-sm text-graphite/70 dark:text-cream/70">
+          <div className="text-sm text-ink-muted">
             <p>
-              <span className="font-medium text-graphite dark:text-cream">{t("calendar.google.account")}: </span>
+              <span className="font-medium text-ink">{t("calendar.google.account")}: </span>
               {status.google_account_email}
             </p>
             {status.calendar_id && (
               <p>
-                <span className="font-medium text-graphite dark:text-cream">{t("calendar.google.calendarLabel")}: </span>
+                <span className="font-medium text-ink">{t("calendar.google.calendarLabel")}: </span>
                 {status.calendar_id}
               </p>
             )}
             <p>
-              <span className="font-medium text-graphite dark:text-cream">{t("calendar.google.vehiclesLabel")}: </span>
+              <span className="font-medium text-ink">{t("calendar.google.vehiclesLabel")}: </span>
               {status.synced_vehicle_ids.length}
             </p>
           </div>
@@ -403,13 +403,13 @@ function GoogleCalendarSection() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => void changeSelection()}
-              className="rounded-md border border-graphite/15 px-3 py-2 text-sm font-medium text-graphite dark:border-white/15 dark:text-cream"
+              className="rounded-md border border-line px-3 py-2 text-sm font-medium text-ink"
             >
               {t("calendar.google.changeSelection")}
             </button>
             <button
               onClick={() => void disconnect()}
-              className="rounded-md border border-copper/30 px-3 py-2 text-sm font-medium text-copper dark:text-copper-bright"
+              className="rounded-md border border-copper/30 px-3 py-2 text-sm font-medium text-brand"
             >
               {t("calendar.google.disconnect")}
             </button>
@@ -420,13 +420,13 @@ function GoogleCalendarSection() {
       {showPicker && calendarOptions && vehicleOptions && (
         <div className="space-y-3">
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">
+            <span className="mb-1 block font-medium text-ink-muted">
               {t("calendar.google.calendarLabel")}
             </span>
             <select
               value={selectedCalendarId}
               onChange={(event) => setSelectedCalendarId(event.target.value)}
-              className="w-full rounded-md border border-graphite/15 bg-white px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+              className="w-full rounded-md border border-line bg-raised px-3 py-2"
             >
               {calendarOptions.map((calendar) => (
                 <option key={calendar.id} value={calendar.id}>
@@ -436,13 +436,13 @@ function GoogleCalendarSection() {
             </select>
           </label>
           <div>
-            <span className="mb-1 block text-sm font-medium text-graphite/70 dark:text-cream/70">
+            <span className="mb-1 block text-sm font-medium text-ink-muted">
               {t("calendar.google.vehiclesLabel")}
             </span>
             <ul className="space-y-1">
               {vehicleOptions.map((vehicle) => (
                 <li key={vehicle.id}>
-                  <label className="flex items-center gap-2 text-sm text-graphite dark:text-cream">
+                  <label className="flex items-center gap-2 text-sm text-ink">
                     <input
                       type="checkbox"
                       checked={selectedVehicleIds.has(vehicle.id)}
@@ -464,7 +464,7 @@ function GoogleCalendarSection() {
             </button>
             <button
               onClick={() => setShowPicker(false)}
-              className="rounded-md border border-graphite/15 px-3 py-2 text-sm font-medium text-graphite dark:border-white/15 dark:text-cream"
+              className="rounded-md border border-line px-3 py-2 text-sm font-medium text-ink"
             >
               {t("common.cancel")}
             </button>

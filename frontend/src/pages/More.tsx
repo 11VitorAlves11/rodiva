@@ -20,18 +20,18 @@ export function More() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("nav.more")}</h1>
+      <h1 className="text-2xl font-bold text-ink">{t("nav.more")}</h1>
       <div className="grid gap-3">
         {links.map((item) => {
           const ItemIcon = NAV_ICONS[item.icon];
           return (
-          <Link key={item.to} to={item.to} className="flex min-h-20 items-center gap-4 rounded-xl border border-graphite/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-copper/10 text-copper dark:bg-copper/20 dark:text-copper-bright">
+          <Link key={item.to} to={item.to} className="flex min-h-20 items-center gap-4 rounded-xl border border-line bg-raised p-4 shadow-sm">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-copper/10 text-brand dark:bg-copper/20">
               <ItemIcon aria-hidden="true" className="h-5 w-5" />
             </span>
             <span className="min-w-0">
-              <span className="block font-semibold text-graphite dark:text-cream">{item.title}</span>
-              <span className="block text-sm text-graphite/50 dark:text-cream/50">{item.description}</span>
+              <span className="block font-semibold text-ink">{item.title}</span>
+              <span className="block text-sm text-ink-subtle">{item.description}</span>
             </span>
             <ChevronRightIcon aria-hidden="true" className="ml-auto h-5 w-5 shrink-0 text-graphite/30 dark:text-cream/30" />
           </Link>

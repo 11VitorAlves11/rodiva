@@ -32,7 +32,7 @@ export function Garage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold text-graphite dark:text-cream">{t("garage.title")}</h1>
+        <h1 className="text-xl font-semibold text-ink">{t("garage.title")}</h1>
         {canManage && <button
           onClick={() => {
             setShowForm((value) => !value);
@@ -54,17 +54,17 @@ export function Garage() {
       )}
 
       {vehicles.length === 0 ? (
-        <p className="text-sm text-graphite/50 dark:text-cream/50">{t("garage.empty")}</p>
+        <p className="text-sm text-ink-subtle">{t("garage.empty")}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {vehicles.map((vehicle) => (
-            <li key={vehicle.id} className="overflow-hidden rounded-xl border border-graphite/10 bg-white shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+            <li key={vehicle.id} className="overflow-hidden rounded-xl border border-line bg-raised shadow-sm">
               {vehicle.photo_url && <img src={vehicle.photo_url} alt="" className="h-36 w-full object-cover" />}
               <div className="p-4">
-              <Link to={`/vehicles/${vehicle.id}`} className="font-medium text-graphite hover:text-copper dark:text-cream">
+              <Link to={`/vehicles/${vehicle.id}`} className="font-medium text-ink hover:text-copper">
                 {vehicle.name}
               </Link>
-              <p className="text-sm text-graphite/50 dark:text-cream/50">
+              <p className="text-sm text-ink-subtle">
                 {[vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(" · ") || "—"}
               </p>
               </div>
@@ -107,41 +107,41 @@ function VehicleForm({ onCreated }: { onCreated: (vehicle: Vehicle) => void }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid gap-3 rounded-xl border border-graphite/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised sm:grid-cols-2"
+      className="grid gap-3 rounded-xl border border-line bg-raised p-4 shadow-sm sm:grid-cols-2"
     >
       <label className="text-sm sm:col-span-2">
-        <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">{t("garage.name")}</span>
+        <span className="mb-1 block font-medium text-ink-muted">{t("garage.name")}</span>
         <input
           required
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="w-full rounded-md border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+          className="w-full rounded-md border border-line px-3 py-2 bg-raised"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">{t("garage.make")}</span>
+        <span className="mb-1 block font-medium text-ink-muted">{t("garage.make")}</span>
         <input
           value={make}
           onChange={(event) => setMake(event.target.value)}
-          className="w-full rounded-md border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+          className="w-full rounded-md border border-line px-3 py-2 bg-raised"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">{t("garage.model")}</span>
+        <span className="mb-1 block font-medium text-ink-muted">{t("garage.model")}</span>
         <input
           value={model}
           onChange={(event) => setModel(event.target.value)}
-          className="w-full rounded-md border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+          className="w-full rounded-md border border-line px-3 py-2 bg-raised"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">{t("garage.year")}</span>
+        <span className="mb-1 block font-medium text-ink-muted">{t("garage.year")}</span>
         <input
           type="number"
           inputMode="numeric"
           value={year}
           onChange={(event) => setYear(event.target.value)}
-          className="w-full rounded-md border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+          className="w-full rounded-md border border-line px-3 py-2 bg-raised"
         />
       </label>
       {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}

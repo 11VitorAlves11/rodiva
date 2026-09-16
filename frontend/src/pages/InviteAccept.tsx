@@ -40,7 +40,7 @@ export function InviteAccept() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
-      <div className="w-full max-w-sm space-y-4 rounded-xl border border-graphite/10 bg-white p-6 shadow-sm">
+      <div className="w-full max-w-sm space-y-4 rounded-xl border border-graphite/10 bg-raised p-6 shadow-sm">
         <div className="mb-2 flex items-center gap-2">
           <Logo size={32} />
           <span className="text-lg font-bold text-graphite">Rodiva</span>

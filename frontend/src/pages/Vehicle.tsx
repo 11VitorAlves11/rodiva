@@ -162,7 +162,7 @@ export function Vehicle() {
                 .filter(Boolean)
                 .join(" · ")}
             </p>
-            <h1 className="text-2xl font-semibold text-slate-900">
+            <h1 className="text-2xl font-semibold text-ink">
               {vehicle.name}
             </h1>
             {canManage && (
@@ -189,7 +189,7 @@ export function Vehicle() {
             <p className="text-xs font-medium uppercase tracking-wide text-copper-dark">
               {t("vehicle.currentOdometer")}
             </p>
-            <p className="text-xl font-semibold text-slate-900">
+            <p className="text-xl font-semibold text-ink">
               {currentReading === null
                 ? "—"
                 : `${currentReading.toLocaleString(i18n.language)} ${vehicle.distance_unit}`}
@@ -198,7 +198,7 @@ export function Vehicle() {
           {canManage && (
             <button
               onClick={() => setEditingVehicle((value) => !value)}
-              className="rounded-lg border border-graphite/15 px-3 py-2 text-sm font-semibold dark:border-white/15"
+              className="rounded-lg border border-line px-3 py-2 text-sm font-semibold"
             >
               {t("common.edit")}
             </button>
@@ -223,7 +223,7 @@ export function Vehicle() {
 
       <nav
         aria-label={t("vehicle.sections")}
-        className="flex gap-1 overflow-x-auto rounded-xl bg-white p-1 shadow-sm"
+        className="flex gap-1 overflow-x-auto rounded-xl bg-raised p-1 shadow-sm"
       >
         {(
           [
@@ -249,10 +249,10 @@ export function Vehicle() {
       {activeSection === "charging" && <ChargingSection vehicleId={vehicleId} unit={vehicle.distance_unit} />}
 
       {activeSection === "odometer" && (
-        <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <section className="space-y-4 rounded-xl border border-line bg-raised p-4 shadow-sm sm:p-6">
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-ink">
                 {t("odometer.title")}
               </h2>
               <p className="text-sm text-slate-500">
@@ -287,7 +287,7 @@ export function Vehicle() {
                   className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 >
                   <div>
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-ink">
                       {item.reading.toLocaleString(i18n.language)}{" "}
                       {vehicle.distance_unit}
                     </p>
@@ -414,7 +414,7 @@ function VehicleEditForm({
   return (
     <form
       onSubmit={submit}
-      className="grid min-w-0 gap-3 rounded-xl border border-copper/20 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised sm:grid-cols-2"
+      className="grid min-w-0 gap-3 rounded-xl border border-copper/20 bg-raised p-4 dark:border-white/10 sm:grid-cols-2"
     >
       <label className="text-sm sm:col-span-2">
         {t("garage.name")}
@@ -422,7 +422,7 @@ function VehicleEditForm({
           required
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         />
       </label>
       <label className="text-sm">
@@ -430,7 +430,7 @@ function VehicleEditForm({
         <input
           value={make}
           onChange={(event) => setMake(event.target.value)}
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         />
       </label>
       <label className="text-sm">
@@ -438,7 +438,7 @@ function VehicleEditForm({
         <input
           value={model}
           onChange={(event) => setModel(event.target.value)}
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         />
       </label>
       <label className="text-sm">
@@ -448,7 +448,7 @@ function VehicleEditForm({
           inputMode="numeric"
           value={year}
           onChange={(event) => setYear(event.target.value)}
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         />
       </label>
       <label className="text-sm">
@@ -456,7 +456,7 @@ function VehicleEditForm({
         <input
           value={plate}
           onChange={(event) => setPlate(event.target.value)}
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         />
       </label>
       <label className="text-sm">
@@ -464,7 +464,7 @@ function VehicleEditForm({
         <input
           value={vin}
           onChange={(event) => setVin(event.target.value)}
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         />
       </label>
       <label className="text-sm">
@@ -472,7 +472,7 @@ function VehicleEditForm({
         <select
           value={unit}
           onChange={(event) => setUnit(event.target.value as "km" | "mi")}
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         >
           <option value="km">km</option>
           <option value="mi">mi</option>
@@ -485,7 +485,7 @@ function VehicleEditForm({
           onChange={(event) =>
             setStatus(event.target.value as VehicleType["status"])
           }
-          className="mt-1 w-full rounded-lg border px-3 py-2.5 dark:bg-surface-dark"
+          className="mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised"
         >
           {(["active", "parked", "sold", "archived"] as const).map((value) => (
             <option key={value} value={value}>
@@ -565,10 +565,10 @@ function WorkSection({
     }
   }
   return (
-    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="space-y-4 rounded-xl border border-line bg-raised p-4 shadow-sm sm:p-6">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-ink">
             {t("work.title")}
           </h2>
           <p className="text-sm text-slate-500">{t("work.description")}</p>
@@ -583,12 +583,12 @@ function WorkSection({
       {show && (
         <form
           onSubmit={submit}
-          className="grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2"
+          className="grid gap-3 rounded-lg bg-sunken p-4 sm:grid-cols-2"
         >
           <select
             value={kind}
             onChange={(event) => setKind(event.target.value as WorkKind)}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2"
+            className="rounded-md border border-line bg-raised px-3 py-2"
           >
             <option value="maintenance">{t("work.maintenance")}</option>
             <option value="repair">{t("work.repair")}</option>
@@ -599,14 +599,14 @@ function WorkSection({
             placeholder={t("work.placeholder")}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2"
+            className="rounded-md border border-line bg-raised px-3 py-2"
           />
           <input
             inputMode="decimal"
             placeholder={t("work.cost")}
             value={cost}
             onChange={(event) => setCost(event.target.value)}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2"
+            className="rounded-md border border-line bg-raised px-3 py-2"
           />
           {error && <p className="text-sm text-red-700">{error}</p>}
           <button
@@ -624,7 +624,7 @@ function WorkSection({
             className="flex min-w-0 flex-col gap-2 py-3 sm:flex-row sm:justify-between sm:gap-4"
           >
             <div className="min-w-0">
-              <p className="break-words font-medium text-slate-900">
+              <p className="break-words font-medium text-ink">
                 {record.description}
               </p>
               <p className="text-sm text-slate-500">
@@ -675,10 +675,10 @@ function FuelSection({
     );
 
   return (
-    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="space-y-4 rounded-xl border border-line bg-raised p-4 shadow-sm sm:p-6">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-ink">
             {t("fuel.title")}
           </h2>
           <p className="text-sm text-slate-500">{t("fuel.description")}</p>
@@ -710,7 +710,7 @@ function FuelSection({
               className="flex min-w-0 flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
               <div className="min-w-0">
-                <p className="font-medium text-slate-900">
+                <p className="font-medium text-ink">
                   {Number(record.volume_litres).toLocaleString(i18n.language)} L
                   ·{" "}
                   {Number(record.total_price).toLocaleString(i18n.language, {
@@ -796,10 +796,10 @@ function FuelForm({
   return (
     <form
       onSubmit={submit}
-      className="grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2"
+      className="grid gap-3 rounded-lg bg-sunken p-4 sm:grid-cols-2"
     >
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("fuel.date")}
         </span>
         <input
@@ -807,11 +807,11 @@ function FuelForm({
           type="date"
           value={recordedOn}
           onChange={(event) => setRecordedOn(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("fuel.odometer")}
         </span>
         <input
@@ -820,11 +820,11 @@ function FuelForm({
           type="number"
           value={odometerReading}
           onChange={(event) => setOdometerReading(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("fuel.volume")}
         </span>
         <input
@@ -835,11 +835,11 @@ function FuelForm({
           type="text"
           value={volume}
           onChange={(event) => setVolume(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("fuel.total")}
         </span>
         <input
@@ -850,20 +850,20 @@ function FuelForm({
           type="text"
           value={totalPrice}
           onChange={(event) => setTotalPrice(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
       <label className="text-sm sm:col-span-2">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("fuel.station")}
         </span>
         <input
           value={station}
           onChange={(event) => setStation(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
-      <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2">
+      <label className="flex items-center gap-2 text-sm text-ink-muted sm:col-span-2">
         <input
           type="checkbox"
           checked={fullTank}
@@ -925,10 +925,10 @@ function OdometerForm({
   return (
     <form
       onSubmit={submit}
-      className="grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2"
+      className="grid gap-3 rounded-lg bg-sunken p-4 sm:grid-cols-2"
     >
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("odometer.date")}
         </span>
         <input
@@ -936,11 +936,11 @@ function OdometerForm({
           type="date"
           value={recordedOn}
           onChange={(event) => setRecordedOn(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("odometer.reading", { unit })}
         </span>
         <input
@@ -951,20 +951,20 @@ function OdometerForm({
           type="number"
           value={reading}
           onChange={(event) => setReading(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
       <label className="text-sm sm:col-span-2">
-        <span className="mb-1 block font-medium text-slate-700">
+        <span className="mb-1 block font-medium text-ink-muted">
           {t("odometer.notes")}
         </span>
         <input
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+          className="w-full rounded-md border border-line bg-raised px-3 py-2"
         />
       </label>
-      <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2">
+      <label className="flex items-center gap-2 text-sm text-ink-muted sm:col-span-2">
         <input
           type="checkbox"
           checked={adjustment}

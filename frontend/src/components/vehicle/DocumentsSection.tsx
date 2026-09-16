@@ -42,10 +42,10 @@ export function DocumentsSection({
     if (changed) onCreated();
   }
   return (
-    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="space-y-4 rounded-xl border border-line bg-raised p-4 shadow-sm sm:p-6">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-ink">
             {t("documents.title")}
           </h2>
           <p className="text-sm text-slate-500">{t("documents.description")}</p>
@@ -87,7 +87,7 @@ export function DocumentsSection({
                   <PaperClipIcon aria-hidden="true" className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-slate-900">
+                  <p className="truncate font-medium text-ink">
                     {document.filename}
                   </p>
                   <p className="text-xs text-slate-500">

@@ -258,8 +258,8 @@ export function Search() {
   return (
     <div className="min-w-0 space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("search.title")}</h1>
-        <p className="mt-1 text-sm text-graphite/50 dark:text-cream/50">
+        <h1 className="text-2xl font-bold text-ink">{t("search.title")}</h1>
+        <p className="mt-1 text-sm text-ink-subtle">
           {t("search.description")}
         </p>
       </div>
@@ -271,21 +271,21 @@ export function Search() {
           value={term}
           onChange={(event) => setTerm(event.target.value)}
           placeholder={t("search.placeholder")}
-          className="min-w-0 flex-1 rounded-lg border border-graphite/15 px-3 py-3 dark:border-white/15 dark:bg-surface-dark"
+          className="min-w-0 flex-1 rounded-lg border border-line px-3 py-3 bg-raised"
         />
         <button className="rounded-lg bg-copper px-5 py-3 font-semibold text-white">
           {t("search.submit")}
         </button>
       </form>
 
-      <section className="space-y-3 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised">
+      <section className="space-y-3 rounded-xl border border-line bg-raised p-4">
         <fieldset>
           <legend className="mb-2 text-sm font-medium">{t("search.kindFilter")}</legend>
           <div className="flex flex-wrap gap-2">
             {KINDS.map((value) => (
               <label
                 key={value}
-                className="flex items-center gap-1.5 rounded-full border border-graphite/15 px-3 py-1.5 text-sm dark:border-white/15"
+                className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-sm"
               >
                 <input
                   type="checkbox"
@@ -305,7 +305,7 @@ export function Search() {
               {vehicleList.map((vehicle) => (
                 <label
                   key={vehicle.id}
-                  className="flex items-center gap-1.5 rounded-full border border-graphite/15 px-3 py-1.5 text-sm dark:border-white/15"
+                  className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-sm"
                 >
                   <input
                     type="checkbox"
@@ -326,7 +326,7 @@ export function Search() {
               type="date"
               value={dateFrom}
               onChange={(event) => setDateFrom(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark"
+              className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised"
             />
           </label>
           <label className="text-sm">
@@ -335,7 +335,7 @@ export function Search() {
               type="date"
               value={dateTo}
               onChange={(event) => setDateTo(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark"
+              className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised"
             />
           </label>
           <label className="text-sm">
@@ -343,7 +343,7 @@ export function Search() {
             <select
               value={sort}
               onChange={(event) => setSort(event.target.value as SearchSort)}
-              className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark"
+              className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised"
             >
               {SORTS.map((value) => (
                 <option key={value} value={value}>
@@ -357,13 +357,13 @@ export function Search() {
         <button
           type="button"
           onClick={saveCurrentView}
-          className="rounded-lg border border-graphite/15 px-4 py-2.5 text-sm font-semibold dark:border-white/15"
+          className="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold"
         >
           {t("search.saveView")}
         </button>
 
         {savedViews && savedViews.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 border-t border-graphite/10 pt-3 dark:border-white/10">
+          <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
             <span className="text-sm font-medium">{t("search.savedViewsLabel")}</span>
             {savedViews.map((view) => (
               <span
@@ -394,7 +394,7 @@ export function Search() {
               key={filter.key}
               type="button"
               onClick={filter.onRemove}
-              className="flex items-center gap-1.5 rounded-full border border-graphite/20 px-3 py-1 text-xs font-medium dark:border-white/20"
+              className="flex items-center gap-1.5 rounded-full border border-line-strong px-3 py-1 text-xs font-medium"
             >
               {filter.label}
               <XMarkIcon aria-hidden="true" className="h-3.5 w-3.5" />
@@ -437,14 +437,14 @@ export function Search() {
             type="button"
             disabled={busy}
             onClick={() => void runBulk("duplicate")}
-            className="rounded-lg border border-graphite/15 px-3 py-1.5 font-semibold disabled:opacity-50 dark:border-white/15"
+            className="rounded-lg border border-line px-3 py-1.5 font-semibold disabled:opacity-50"
           >
             {t("search.bulkDuplicate")}
           </button>
           <select
             value={moveTarget}
             onChange={(event) => setMoveTarget(event.target.value)}
-            className="rounded-lg border border-graphite/15 px-2 py-1.5 dark:border-white/15 dark:bg-surface-dark"
+            className="rounded-lg border border-line px-2 py-1.5 bg-raised"
           >
             <option value="">{t("search.bulkMoveTarget")}</option>
             {vehicleList?.map((vehicle) => (
@@ -457,7 +457,7 @@ export function Search() {
             type="button"
             disabled={busy || !moveTarget}
             onClick={confirmMove}
-            className="rounded-lg border border-graphite/15 px-3 py-1.5 font-semibold disabled:opacity-50 dark:border-white/15"
+            className="rounded-lg border border-line px-3 py-1.5 font-semibold disabled:opacity-50"
           >
             {t("search.bulkMove")}
           </button>
@@ -486,7 +486,7 @@ export function Search() {
             return (
               <div
                 key={key}
-                className="flex min-w-0 items-start gap-3 rounded-xl border border-graphite/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised"
+                className="flex min-w-0 items-start gap-3 rounded-xl border border-line bg-raised p-4 shadow-sm"
               >
                 <input
                   type="checkbox"
@@ -496,23 +496,23 @@ export function Search() {
                   aria-label={item.title}
                 />
                 <Link to={item.url} className="flex min-w-0 flex-1 items-start gap-3">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-copper/10 text-copper dark:bg-copper/20 dark:text-copper-bright">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-copper/10 text-brand dark:bg-copper/20">
                     <KindIcon aria-hidden="true" className="h-4 w-4" />
                   </span>
                   <span className="shrink-0 rounded-full bg-copper/10 px-2 py-1 text-[10px] font-bold uppercase text-copper">
                     {t(`search.kinds.${item.kind}`)}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block break-words font-semibold text-graphite dark:text-cream">
+                    <span className="block break-words font-semibold text-ink">
                       {item.title}
                     </span>
                     {item.subtitle && (
-                      <span className="mt-0.5 block line-clamp-2 break-words text-sm text-graphite/50 dark:text-cream/50">
+                      <span className="mt-0.5 block line-clamp-2 break-words text-sm text-ink-subtle">
                         {item.subtitle}
                       </span>
                     )}
                     {item.occurred_on && (
-                      <span className="mt-1 block text-xs text-graphite/40 dark:text-cream/40">
+                      <span className="mt-1 block text-xs text-ink-subtle">
                         {new Intl.DateTimeFormat(i18n.language).format(new Date(item.occurred_on))}
                       </span>
                     )}

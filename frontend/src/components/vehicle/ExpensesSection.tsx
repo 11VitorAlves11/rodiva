@@ -20,7 +20,7 @@ export function ExpensesSection({ records, vehicleId, onCreated }: { records: Ex
   const [saving, setSaving] = useState(false);
   const currency = (value: number) => value.toLocaleString(i18n.language, { style: "currency", currency: "EUR" });
   const total = records.filter((record) => record.status === "paid").reduce((sum, record) => sum + Number(record.amount), 0);
-  const input = "mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark";
+  const input = "mt-1 w-full rounded-lg border border-line px-3 py-2 bg-raised";
   async function submit(event: FormEvent) {
     event.preventDefault(); if (!form) return;
     setSaving(true); setError(null);
@@ -32,8 +32,8 @@ export function ExpensesSection({ records, vehicleId, onCreated }: { records: Ex
     } catch (cause) { setError(cause instanceof ApiError ? cause.message : t("common.error")); }
     finally { setSaving(false); }
   }
-  return <section className="space-y-4 rounded-xl border border-graphite/10 bg-white p-4 dark:border-white/10 dark:bg-surface-dark-raised">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">{t("expenses.title")}</h2><p className="text-sm text-graphite/60 dark:text-cream/60">{t("expenses.total", { value: currency(total) })}</p></div>{canWrite && <button onClick={() => { setForm(blank()); setEditing(null); }} className="rounded-lg bg-copper px-3 py-2 font-semibold text-white">{t("expenses.add")}</button>}</div>
+  return <section className="space-y-4 rounded-xl border border-line bg-raised p-4">
+    <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">{t("expenses.title")}</h2><p className="text-sm text-ink-muted">{t("expenses.total", { value: currency(total) })}</p></div>{canWrite && <button onClick={() => { setForm(blank()); setEditing(null); }} className="rounded-lg bg-copper px-3 py-2 font-semibold text-white">{t("expenses.add")}</button>}</div>
     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     {form && <form onSubmit={submit}><fieldset disabled={saving} className="grid gap-3 sm:grid-cols-2">
       <label className="text-sm">{t("import.fields.issued_on")}<input type="date" required value={form.issued_on} onChange={(event) => setForm({ ...form, issued_on: event.target.value })} className={input} /></label>

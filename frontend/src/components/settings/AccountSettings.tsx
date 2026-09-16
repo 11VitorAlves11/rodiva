@@ -7,8 +7,8 @@ import { useTheme } from "../../lib/theme";
 import type { Theme } from "../../lib/theme";
 import { useSession } from "../../lib/session";
 
-const panel = "space-y-4 rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised";
-const input = "mt-1 w-full rounded-md border border-graphite/15 px-3 py-2 dark:border-white/15 dark:bg-surface-dark";
+const panel = "space-y-4 rounded-xl border border-line bg-raised p-5 shadow-sm";
+const input = "mt-1 w-full rounded-md border border-line px-3 py-2 bg-raised";
 const button = "rounded-lg bg-copper px-4 py-2 text-sm font-semibold text-white disabled:opacity-60";
 
 export function AccountSettings() {
@@ -89,13 +89,13 @@ export function AccountSettings() {
         <label className="block text-sm">{t("account.currentPassword")}<input required type="password" autoComplete="current-password" className={input} value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></label>
         <label className="block text-sm">{t("account.newPassword")}<input required minLength={10} maxLength={72} type="password" autoComplete="new-password" className={input} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
         <label className="block text-sm">{t("account.confirmPassword")}<input required minLength={10} maxLength={72} type="password" autoComplete="new-password" className={input} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></label>
-        <p className="text-sm text-graphite/60 dark:text-cream/60">{t("account.passwordHint")}</p>
+        <p className="text-sm text-ink-muted">{t("account.passwordHint")}</p>
         <button disabled={busy} className={button}>{t("account.changePassword")}</button>
       </form>
       <section className={panel}>
         <h2 className="font-semibold">{t("account.sessions")}</h2>
         {!sessions ? <p>{t("common.loading")}</p> : <ul className="divide-y divide-graphite/10 dark:divide-white/10">{sessions.map((session) => <li key={session.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-          <div className="min-w-0 flex-1"><p className="break-words text-sm">{session.user_agent || t("account.unknownDevice")}</p><p className="text-xs text-graphite/60 dark:text-cream/60">{new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium", timeStyle: "short", timeZone: me?.user.timezone }).format(new Date(session.created_at))}{session.current ? ` · ${t("account.currentSession")}` : ""}</p></div>
+          <div className="min-w-0 flex-1"><p className="break-words text-sm">{session.user_agent || t("account.unknownDevice")}</p><p className="text-xs text-ink-muted">{new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium", timeStyle: "short", timeZone: me?.user.timezone }).format(new Date(session.created_at))}{session.current ? ` · ${t("account.currentSession")}` : ""}</p></div>
           <button disabled={busy} className="text-sm font-semibold text-red-700 disabled:opacity-60" onClick={() => void run(async () => { await auth.revokeSession(session.id); if (session.current) setMe(null); else setSessions((rows) => rows?.filter((row) => row.id !== session.id) ?? null); })}>{t("account.endSession")}</button>
         </li>)}</ul>}
         <button disabled={busy} className="rounded-lg border border-copper/30 px-4 py-2 text-sm font-semibold text-copper disabled:opacity-60" onClick={() => {

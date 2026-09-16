@@ -21,7 +21,7 @@ const priorities: PlanPriority[] = ["low", "normal", "high", "urgent"];
 const kinds: WorkKind[] = ["maintenance", "repair", "modification"];
 
 const priorityStyles: Record<PlanPriority, string> = {
-  low: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
+  low: "bg-slate-100 text-ink-muted dark:bg-slate-800 dark:text-slate-200",
   normal: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-200",
   high: "bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200",
   urgent: "bg-red-100 text-red-900 dark:bg-red-950/60 dark:text-red-200",
@@ -101,8 +101,8 @@ export function Planner() {
     <div className="space-y-5">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("planner.title")}</h1>
-          <p className="mt-1 text-sm text-graphite/50 dark:text-cream/50">{t("planner.description")}</p>
+          <h1 className="text-2xl font-bold text-ink">{t("planner.title")}</h1>
+          <p className="mt-1 text-sm text-ink-subtle">{t("planner.description")}</p>
         </div>
         {canWrite && (
           <button
@@ -145,7 +145,7 @@ export function Planner() {
       {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
 
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-graphite/20 bg-white p-8 text-center text-sm text-graphite/50 dark:border-white/20 dark:bg-surface-dark-raised dark:text-cream/50">
+        <div className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-sm text-ink-subtle">
           {t("planner.empty")}
         </div>
       ) : (
@@ -160,23 +160,23 @@ export function Planner() {
                 className="min-w-0 rounded-xl bg-graphite/[0.035] p-3 dark:bg-white/[0.04]"
               >
                 <div className="mb-3 flex items-center justify-between gap-2 px-1">
-                  <h2 className="font-semibold text-graphite dark:text-cream">{t(`planner.stages.${stage}`)}</h2>
-                  <span className="rounded-full bg-graphite/10 px-2 py-0.5 text-xs text-graphite/60 dark:bg-white/10 dark:text-cream/60">{stageItems.length}</span>
+                  <h2 className="font-semibold text-ink">{t(`planner.stages.${stage}`)}</h2>
+                  <span className="rounded-full bg-graphite/10 px-2 py-0.5 text-xs text-ink-muted dark:bg-white/10">{stageItems.length}</span>
                 </div>
                 <div className="space-y-3">
-                  {stageItems.length === 0 && <p className="rounded-lg border border-dashed border-graphite/10 p-4 text-center text-xs text-graphite/40 dark:border-white/10 dark:text-cream/40">{t("planner.emptyStage")}</p>}
+                  {stageItems.length === 0 && <p className="rounded-lg border border-dashed border-line p-4 text-center text-xs text-ink-subtle">{t("planner.emptyStage")}</p>}
                   {stageItems.map((plan) => (
                     <article
                       key={plan.id}
                       draggable={canWrite && plan.stage !== "completed"}
                       onDragStart={(event) => event.dataTransfer.setData("text/plain", plan.id)}
-                      className="min-w-0 rounded-lg border border-graphite/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised"
+                      className="min-w-0 rounded-lg border border-line bg-raised p-4 shadow-sm"
                     >
                       <div className="flex min-w-0 items-start justify-between gap-2">
                         <span className={`rounded-full px-2 py-1 text-[11px] font-semibold uppercase ${priorityStyles[plan.priority]}`}>{t(`planner.priorities.${plan.priority}`)}</span>
-                        <span className="shrink-0 text-xs text-graphite/40 dark:text-cream/40">{t(`work.${plan.kind}`)}</span>
+                        <span className="shrink-0 text-xs text-ink-subtle">{t(`work.${plan.kind}`)}</span>
                       </div>
-                      <h3 className="mt-3 break-words font-semibold text-graphite dark:text-cream">{plan.description}</h3>
+                      <h3 className="mt-3 break-words font-semibold text-ink">{plan.description}</h3>
                       <Link to={`/vehicles/${plan.vehicle_id}`} className="mt-1 block truncate text-sm text-copper hover:underline">{plan.vehicleName}</Link>
                       <div className="mt-3 space-y-1 text-xs text-graphite/55 dark:text-cream/55">
                         {plan.due_date && <p>{date(plan.due_date)}</p>}
@@ -190,14 +190,14 @@ export function Planner() {
                             aria-label={t("planner.stage")}
                             value={plan.stage}
                             onChange={(event) => move(plan, event.target.value as EditableStage)}
-                            className="w-full rounded-md border border-graphite/15 bg-white px-2 py-2 text-sm dark:border-white/15 dark:bg-surface-dark"
+                            className="w-full rounded-md border border-line bg-raised px-2 py-2 text-sm"
                           >
                             {editableStages.map((option) => <option key={option} value={option}>{t(`planner.stages.${option}`)}</option>)}
                           </select>
                           <button onClick={() => { setEditing(null); setCompleting(plan); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="w-full rounded-md bg-emerald-700 px-3 py-2 text-sm font-semibold text-white">{t("planner.complete")}</button>
                           <div className="flex items-center justify-between gap-3 text-sm">
                             <button onClick={() => { setCompleting(null); setEditing(plan); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-1 font-medium text-copper"><PencilIcon aria-hidden="true" className="h-4 w-4" />{t("common.edit")}</button>
-                            <button onClick={() => { if (window.confirm(t("common.confirmDelete"))) void act(() => plans.remove(plan.vehicle_id, plan.id)); }} className="flex items-center gap-1 font-medium text-red-700 dark:text-red-300"><TrashIcon aria-hidden="true" className="h-4 w-4" />{t("common.delete")}</button>
+                            <button onClick={() => { if (window.confirm(t("common.confirmDelete"))) void act(() => plans.remove(plan.vehicle_id, plan.id)); }} className="flex items-center gap-1 font-medium text-danger"><TrashIcon aria-hidden="true" className="h-4 w-4" />{t("common.delete")}</button>
                           </div>
                         </div>
                       )}
@@ -254,18 +254,18 @@ function PlanForm({ vehicles, initial, onSaved, onCancel }: { vehicles: Vehicle[
   }
 
   return (
-    <form onSubmit={submit} className="grid min-w-0 gap-3 rounded-xl border border-graphite/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised sm:grid-cols-2">
-      <select aria-label={t("nav.vehicle")} disabled={Boolean(initial)} value={vehicleId} onChange={(event) => setVehicleId(event.target.value)} className="rounded-lg border border-graphite/15 px-3 py-2.5 disabled:opacity-60 dark:border-white/15 dark:bg-surface-dark sm:col-span-2">{vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name}</option>)}</select>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("planner.kind")}<select value={kind} onChange={(event) => setKind(event.target.value as WorkKind)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark">{kinds.map((value) => <option key={value} value={value}>{t(`work.${value}`)}</option>)}</select></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("planner.priority")}<select value={priority} onChange={(event) => setPriority(event.target.value as PlanPriority)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark">{priorities.map((value) => <option key={value} value={value}>{t(`planner.priorities.${value}`)}</option>)}</select></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70 sm:col-span-2">{t("planner.descriptionLabel")}<input required value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("planner.estimatedCost")}<input inputMode="decimal" value={estimatedCost} onChange={(event) => setEstimatedCost(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("planner.dueDate")}<input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70 sm:col-span-2">{t("planner.dueOdometer")}<input type="number" min="0" inputMode="numeric" value={dueOdometer} onChange={(event) => setDueOdometer(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70 sm:col-span-2">{t("planner.notes")}<textarea rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      {error && <p role="alert" className="text-sm text-red-700 dark:text-red-300 sm:col-span-2">{error}</p>}
+    <form onSubmit={submit} className="grid min-w-0 gap-3 rounded-xl border border-line bg-raised p-4 shadow-sm sm:grid-cols-2">
+      <select aria-label={t("nav.vehicle")} disabled={Boolean(initial)} value={vehicleId} onChange={(event) => setVehicleId(event.target.value)} className="rounded-lg border border-line px-3 py-2.5 disabled:opacity-60 bg-raised sm:col-span-2">{vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name}</option>)}</select>
+      <label className="text-sm text-ink-muted">{t("planner.kind")}<select value={kind} onChange={(event) => setKind(event.target.value as WorkKind)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised">{kinds.map((value) => <option key={value} value={value}>{t(`work.${value}`)}</option>)}</select></label>
+      <label className="text-sm text-ink-muted">{t("planner.priority")}<select value={priority} onChange={(event) => setPriority(event.target.value as PlanPriority)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised">{priorities.map((value) => <option key={value} value={value}>{t(`planner.priorities.${value}`)}</option>)}</select></label>
+      <label className="text-sm text-ink-muted sm:col-span-2">{t("planner.descriptionLabel")}<input required value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("planner.estimatedCost")}<input inputMode="decimal" value={estimatedCost} onChange={(event) => setEstimatedCost(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("planner.dueDate")}<input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted sm:col-span-2">{t("planner.dueOdometer")}<input type="number" min="0" inputMode="numeric" value={dueOdometer} onChange={(event) => setDueOdometer(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted sm:col-span-2">{t("planner.notes")}<textarea rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      {error && <p role="alert" className="text-sm text-danger sm:col-span-2">{error}</p>}
       <div className="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
-        <button type="button" onClick={onCancel} className="rounded-lg border border-graphite/15 px-4 py-2.5 text-sm font-semibold dark:border-white/15">{t("common.cancel")}</button>
+        <button type="button" onClick={onCancel} className="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold">{t("common.cancel")}</button>
         <button disabled={saving} className="rounded-lg bg-copper px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{initial ? t("common.saveChanges") : t("garage.save")}</button>
       </div>
     </form>
@@ -309,16 +309,16 @@ function CompletePlanForm({ plan, inventoryItems, onSaved, onCancel }: { plan: P
 
   return (
     <form onSubmit={submit} className="grid min-w-0 gap-3 rounded-xl border border-emerald-500/30 bg-emerald-50 p-4 dark:bg-emerald-950/30 sm:grid-cols-2">
-      <div className="sm:col-span-2"><h2 className="font-semibold text-graphite dark:text-cream">{t("planner.completeTitle")}</h2><p className="break-words text-sm text-graphite/60 dark:text-cream/60">{plan.description} · {plan.vehicleName}</p></div>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("odometer.date")}<input required type="date" value={recordedOn} onChange={(event) => setRecordedOn(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("odometer.reading", { unit: plan.distanceUnit })}<input required type="number" min="0" inputMode="numeric" value={odometerReading} onChange={(event) => setOdometerReading(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("work.cost")}<input inputMode="decimal" value={totalCost} onChange={(event) => setTotalCost(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70">{t("expenses.supplier")}<input value={supplier} onChange={(event) => setSupplier(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      <label className="text-sm text-graphite/70 dark:text-cream/70 sm:col-span-2">{t("planner.notes")}<textarea rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark" /></label>
-      {inventoryItems.length > 0 && <><label className="text-sm text-graphite/70 dark:text-cream/70">{t("planner.inventoryItem")}<select value={inventoryItemId} onChange={(event) => setInventoryItemId(event.target.value)} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 dark:border-white/15 dark:bg-surface-dark"><option value="">{t("planner.noInventory")}</option>{inventoryItems.map((item) => <option key={item.id} value={item.id}>{item.name} ({Number(item.quantity).toLocaleString()} {item.unit})</option>)}</select></label><label className="text-sm text-graphite/70 dark:text-cream/70">{t("inventory.quantity")}<input inputMode="decimal" value={inventoryQuantity} onChange={(event) => setInventoryQuantity(event.target.value)} disabled={!inventoryItemId} className="mt-1 w-full rounded-lg border border-graphite/15 px-3 py-2.5 disabled:opacity-50 dark:border-white/15 dark:bg-surface-dark" /></label></>}
-      {error && <p role="alert" className="text-sm text-red-700 dark:text-red-300 sm:col-span-2">{error}</p>}
+      <div className="sm:col-span-2"><h2 className="font-semibold text-ink">{t("planner.completeTitle")}</h2><p className="break-words text-sm text-ink-muted">{plan.description} · {plan.vehicleName}</p></div>
+      <label className="text-sm text-ink-muted">{t("odometer.date")}<input required type="date" value={recordedOn} onChange={(event) => setRecordedOn(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("odometer.reading", { unit: plan.distanceUnit })}<input required type="number" min="0" inputMode="numeric" value={odometerReading} onChange={(event) => setOdometerReading(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("work.cost")}<input inputMode="decimal" value={totalCost} onChange={(event) => setTotalCost(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted">{t("expenses.supplier")}<input value={supplier} onChange={(event) => setSupplier(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      <label className="text-sm text-ink-muted sm:col-span-2">{t("planner.notes")}<textarea rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
+      {inventoryItems.length > 0 && <><label className="text-sm text-ink-muted">{t("planner.inventoryItem")}<select value={inventoryItemId} onChange={(event) => setInventoryItemId(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised"><option value="">{t("planner.noInventory")}</option>{inventoryItems.map((item) => <option key={item.id} value={item.id}>{item.name} ({Number(item.quantity).toLocaleString()} {item.unit})</option>)}</select></label><label className="text-sm text-ink-muted">{t("inventory.quantity")}<input inputMode="decimal" value={inventoryQuantity} onChange={(event) => setInventoryQuantity(event.target.value)} disabled={!inventoryItemId} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 disabled:opacity-50 bg-raised" /></label></>}
+      {error && <p role="alert" className="text-sm text-danger sm:col-span-2">{error}</p>}
       <div className="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
-        <button type="button" onClick={onCancel} className="rounded-lg border border-graphite/15 px-4 py-2.5 text-sm font-semibold dark:border-white/15">{t("common.cancel")}</button>
+        <button type="button" onClick={onCancel} className="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold">{t("common.cancel")}</button>
         <button disabled={saving || !odometerReading} className="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{t("planner.createWork")}</button>
       </div>
     </form>

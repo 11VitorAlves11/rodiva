@@ -168,8 +168,8 @@ export function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-graphite dark:text-cream">{t("dashboard.title")}</h1>
-          <p className="mt-1 hidden text-sm text-graphite/50 dark:text-cream/50 md:block">{t("dashboard.subtitle")}</p>
+          <h1 className="text-2xl font-bold text-ink">{t("dashboard.title")}</h1>
+          <p className="mt-1 hidden text-sm text-ink-subtle md:block">{t("dashboard.subtitle")}</p>
           <p className="text-sm font-medium text-copper md:hidden">
             {t("dashboard.greeting", { name: me?.user.name?.split(" ")[0] ?? me?.user.email })}
           </p>
@@ -181,8 +181,8 @@ export function Dashboard() {
       </div>
 
       {summaries.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-graphite/20 bg-white p-8 text-center dark:border-white/20 dark:bg-surface-dark-raised">
-          <p className="font-medium text-graphite dark:text-cream">{t("dashboard.noVehicles")}</p>
+        <div className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center">
+          <p className="font-medium text-ink">{t("dashboard.noVehicles")}</p>
           <Link to="/garage?new=1" className="mt-3 inline-block text-sm font-medium text-copper">
             {t("garage.add")}
           </Link>
@@ -198,7 +198,7 @@ export function Dashboard() {
                   className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
                     index === selected
                       ? "bg-copper text-white"
-                      : "bg-white text-graphite/60 dark:bg-surface-dark-raised dark:text-cream/60"
+                      : "bg-raised text-graphite/60 dark:bg-surface-dark-raised dark:text-cream/60"
                   }`}
                 >
                   {summary.vehicle.name}
@@ -207,7 +207,7 @@ export function Dashboard() {
             </div>
           )}
 
-          <section className="grid overflow-hidden rounded-xl border border-graphite/10 bg-white shadow-sm dark:border-white/10 dark:bg-surface-dark-raised md:grid-cols-[300px_1fr]">
+          <section className="grid overflow-hidden rounded-xl border border-line bg-raised shadow-sm md:grid-cols-[300px_1fr]">
             <div className="grid min-h-44 place-items-center bg-gradient-to-br from-slate-400 via-slate-600 to-slate-900">
               {primary.vehicle.photo_url ? (
                 <img src={primary.vehicle.photo_url} alt="" className="h-full w-full object-cover" />
@@ -225,12 +225,12 @@ export function Dashboard() {
             <div className="p-4 md:p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-graphite dark:text-cream md:text-2xl">{primary.vehicle.name}</h2>
-                  <p className="text-sm text-graphite/50 dark:text-cream/50">
+                  <h2 className="text-xl font-bold text-ink md:text-2xl">{primary.vehicle.name}</h2>
+                  <p className="text-sm text-ink-subtle">
                     {[primary.vehicle.make, primary.vehicle.model, primary.vehicle.year, data.latestFuelType].filter(Boolean).join(" · ")}
                   </p>
                 </div>
-                <Link to={`/vehicles/${primary.vehicle.id}`} className="rounded-md border border-graphite/15 px-3 py-1.5 text-sm font-medium text-graphite dark:border-white/15 dark:text-cream">
+                <Link to={`/vehicles/${primary.vehicle.id}`} className="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-ink">
                   {t("dashboard.edit")}
                 </Link>
               </div>
@@ -243,33 +243,33 @@ export function Dashboard() {
           </section>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+            <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.recentHistory")}</h2>
+                <h2 className="font-semibold text-ink">{t("dashboard.recentHistory")}</h2>
                 <Link to="/history" className="inline-flex items-center gap-1 text-sm font-medium text-copper">
                   {t("dashboard.viewAll")}
                   <ArrowRightIcon aria-hidden="true" className="h-3.5 w-3.5" />
                 </Link>
               </div>
               {data.activities.length === 0 ? (
-                <p className="py-4 text-sm text-graphite/50 dark:text-cream/50">{t("history.empty")}</p>
+                <p className="py-4 text-sm text-ink-subtle">{t("history.empty")}</p>
               ) : (
                 <ul className="divide-y divide-graphite/5 dark:divide-white/5">
                   {data.activities.slice(0, 5).map((item) => {
                     const ActivityIcon = NAV_ICONS[item.kind];
                     return (
                     <li key={item.id} className="flex items-center gap-3 py-3">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-copper/10 text-copper dark:bg-copper/20 dark:text-copper-bright">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-copper/10 text-brand dark:bg-copper/20">
                         <ActivityIcon aria-hidden="true" className="h-4 w-4" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-graphite dark:text-cream">{item.title}</p>
-                        <p className="truncate text-xs text-graphite/50 dark:text-cream/50">
+                        <p className="truncate text-sm font-medium text-ink">{item.title}</p>
+                        <p className="truncate text-xs text-ink-subtle">
                           {new Intl.DateTimeFormat(i18n.language).format(new Date(`${item.date}T12:00:00`))}
                           {item.detail ? ` · ${item.detail}` : ""}
                         </p>
                       </div>
-                      <span className="shrink-0 text-sm font-medium text-graphite/70 dark:text-cream/70">{item.value}</span>
+                      <span className="shrink-0 text-sm font-medium text-ink-muted">{item.value}</span>
                     </li>
                     );
                   })}
@@ -277,13 +277,13 @@ export function Dashboard() {
               )}
             </section>
 
-            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+            <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.monthlyExpenses")}</h2>
+                <h2 className="font-semibold text-ink">{t("dashboard.monthlyExpenses")}</h2>
                 <select
                   value={year}
                   onChange={(event) => setYear(Number(event.target.value))}
-                  className="rounded-md border border-graphite/15 bg-white px-2 py-1 text-sm dark:border-white/15 dark:bg-surface-dark"
+                  className="rounded-md border border-line bg-raised px-2 py-1 text-sm"
                 >
                   {yearOptions.map((option) => (
                     <option key={option} value={option}>{option}</option>
@@ -291,7 +291,7 @@ export function Dashboard() {
                 </select>
               </div>
               <div className="flex gap-2">
-                <div className="flex h-36 flex-col justify-between text-right text-[10px] text-graphite/40 dark:text-cream/40">
+                <div className="flex h-36 flex-col justify-between text-right text-[10px] text-ink-subtle">
                   {axisSteps.map((step) => (
                     <span key={step}>{compactCurrency(step)}</span>
                   ))}
@@ -299,7 +299,7 @@ export function Dashboard() {
                 <div className="relative flex-1">
                   <div className="pointer-events-none absolute inset-0 flex h-36 flex-col justify-between">
                     {axisSteps.map((step) => (
-                      <div key={step} className="border-t border-graphite/10 dark:border-white/10" />
+                      <div key={step} className="border-t border-line" />
                     ))}
                   </div>
                   <div className="relative flex h-36 items-end gap-1.5">
@@ -319,7 +319,7 @@ export function Dashboard() {
                   </div>
                   <div className="mt-1 flex gap-1.5">
                     {months.map((month) => (
-                      <span key={month} className="flex-1 text-center text-[10px] uppercase text-graphite/40 dark:text-cream/40">
+                      <span key={month} className="flex-1 text-center text-[10px] uppercase text-ink-subtle">
                         {monthLabels.format(new Date(year, month, 1))}
                       </span>
                     ))}
@@ -330,22 +330,22 @@ export function Dashboard() {
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+            <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.upcomingMaintenance")}</h2>
+                <h2 className="font-semibold text-ink">{t("dashboard.upcomingMaintenance")}</h2>
                 <Link to="/reminders" className="inline-flex items-center gap-1 text-sm font-medium text-copper">
                   {t("dashboard.viewAll")}
                   <ArrowRightIcon aria-hidden="true" className="h-3.5 w-3.5" />
                 </Link>
               </div>
               {data.upcoming.length === 0 ? (
-                <p className="py-4 text-sm text-graphite/50 dark:text-cream/50">{t("reminders.empty")}</p>
+                <p className="py-4 text-sm text-ink-subtle">{t("reminders.empty")}</p>
               ) : (
                 <ul className="divide-y divide-graphite/5 dark:divide-white/5">
                   {data.upcoming.map((item) => (
                     <li key={item.id} className="flex items-center justify-between gap-3 py-3">
-                      <span className="text-sm font-medium text-graphite dark:text-cream">{item.title}</span>
-                      <span className="text-sm text-graphite/50 dark:text-cream/50">
+                      <span className="text-sm font-medium text-ink">{item.title}</span>
+                      <span className="text-sm text-ink-subtle">
                         {[item.due_date, item.due_odometer ? `${item.due_odometer.toLocaleString(i18n.language)} km` : null].filter(Boolean).join(" · ")}
                       </span>
                     </li>
@@ -354,9 +354,9 @@ export function Dashboard() {
               )}
             </section>
 
-            <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+            <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.vehicleInfo")}</h2>
+                <h2 className="font-semibold text-ink">{t("dashboard.vehicleInfo")}</h2>
                 <Link to={`/vehicles/${primary.vehicle.id}`} className="text-sm font-medium text-copper">
                   {t("dashboard.edit")}
                 </Link>
@@ -380,8 +380,8 @@ export function Dashboard() {
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-graphite/5 p-3 dark:bg-white/5">
-      <p className="truncate text-[10px] font-medium uppercase tracking-wide text-graphite/50 dark:text-cream/50">{label}</p>
-      <p className="mt-1 text-sm font-bold text-graphite dark:text-cream md:text-base">{value}</p>
+      <p className="truncate text-[10px] font-medium uppercase tracking-wide text-ink-subtle">{label}</p>
+      <p className="mt-1 text-sm font-bold text-ink md:text-base">{value}</p>
     </div>
   );
 }
@@ -389,8 +389,8 @@ function StatTile({ label, value }: { label: string; value: string }) {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-graphite/5 py-2 last:border-0 dark:border-white/5">
-      <dt className="text-graphite/50 dark:text-cream/50">{label}</dt>
-      <dd className="font-medium text-graphite dark:text-cream">{value}</dd>
+      <dt className="text-ink-subtle">{label}</dt>
+      <dd className="font-medium text-ink">{value}</dd>
     </div>
   );
 }
