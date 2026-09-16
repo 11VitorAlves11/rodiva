@@ -106,7 +106,13 @@
     "licensePlate": "Matrícula",
     "brandModel": "Marca / Modelo",
     "fuelType": "Combustível",
-    "fuelActivity": "Abastecimento"
+    "fuelActivity": "Abastecimento",
+    "spending": {
+      "low": "Abaixo do habitual",
+      "mid": "Habitual",
+      "high": "Acima do habitual",
+      "typical": "Mês habitual ({{amount}})"
+    }
   },
   "invite": {
     "invalid": "Este convite é inválido ou já expirou.",

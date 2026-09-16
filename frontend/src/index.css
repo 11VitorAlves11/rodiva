@@ -50,6 +50,19 @@
   --color-danger-solid: #b02a1f;
   --color-success-solid: #1b7a4b;
 
+  /* Chart fills for spending against the household's own typical month.
+     Brand copper is deliberately absent: RF-IDV-003 keeps it out of a chart
+     where colour stands for intensity. Tuned as fills against the card rather
+     than as text, so each clears 3:1 on the surface it sits on.
+
+     Green and red are ~5 ΔE apart under deuteranopia, which no green/red scheme
+     escapes, so the chart never leans on colour alone: it also draws the
+     typical-month line, labels the bands in a legend, and gives every bar its
+     amount on hover. */
+  --color-chart-low: #12864a;
+  --color-chart-mid: #c08b10;
+  --color-chart-high: #c2372a;
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -75,6 +88,11 @@ html[data-theme="dark"] {
   --color-danger-soft: color-mix(in srgb, #f28b7d 14%, transparent);
   --color-info: #7cc0ec;
   --color-info-soft: color-mix(in srgb, #7cc0ec 14%, transparent);
+
+  /* Chart fills are chosen for the dark card, not flipped from the light ones. */
+  --color-chart-low: #4ade80;
+  --color-chart-mid: #fbbf24;
+  --color-chart-high: #f87171;
 }
 
 body {

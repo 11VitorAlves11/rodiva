@@ -164,6 +164,27 @@ export function Dashboard() {
   const yearOptions = [year, year - 1, year - 2];
   const monthLabels = new Intl.DateTimeFormat(i18n.language, { month: "short" });
 
+  // A month is read against what this household usually spends, not against a
+  // fixed amount: the median of the months that had any spending. The median
+  // rather than the mean, so one insurance renewal does not redefine "usual".
+  const spent = data.monthlyTotals.filter((value) => value > 0).sort((a, b) => a - b);
+  const typical = spent.length
+    ? spent.length % 2
+      ? spent[(spent.length - 1) / 2]
+      : (spent[spent.length / 2 - 1] + spent[spent.length / 2]) / 2
+    : 0;
+  // Under three months there is no "usual" worth drawing, so the bars stay
+  // neutral rather than implying a comparison the data cannot support.
+  const hasBaseline = spent.length >= 3;
+  const band = (value: number) => {
+    if (!hasBaseline || value <= 0) return null;
+    const ratio = value / typical;
+    if (ratio <= 0.85) return "low" as const;
+    if (ratio <= 1.15) return "mid" as const;
+    return "high" as const;
+  };
+  const bandFill = { low: "bg-chart-low", mid: "bg-chart-mid", high: "bg-chart-high" };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -303,19 +324,32 @@ export function Dashboard() {
                     ))}
                   </div>
                   <div className="relative flex h-36 items-end gap-1.5">
-                    {data.monthlyTotals.map((value, month) => (
-                      <div key={month} className="group relative flex h-full flex-1 items-end justify-center">
-                        <div
-                          className="w-full max-w-6 rounded-t bg-copper"
-                          style={{ height: `${Math.max((value / scaleMax) * 100, value > 0 ? 2 : 0)}%` }}
-                        />
-                        {value > 0 && (
-                          <span className="pointer-events-none absolute bottom-full mb-1 hidden whitespace-nowrap rounded bg-graphite px-1.5 py-0.5 text-[10px] font-medium text-cream group-hover:block dark:bg-cream dark:text-graphite">
-                            {currency(value)}
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                    {/* The typical month, drawn: above or below it is readable
+                        from the geometry, so the banding is never colour alone. */}
+                    {hasBaseline && (
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-x-0 border-t border-dashed border-ink-subtle"
+                        style={{ bottom: `${(typical / scaleMax) * 100}%` }}
+                      />
+                    )}
+                    {data.monthlyTotals.map((value, month) => {
+                      const tone = band(value);
+                      return (
+                        <div key={month} className="group relative flex h-full flex-1 items-end justify-center">
+                          <div
+                            className={`w-full max-w-6 rounded-t ${tone ? bandFill[tone] : "bg-ink-subtle"}`}
+                            style={{ height: `${Math.max((value / scaleMax) * 100, value > 0 ? 2 : 0)}%` }}
+                          />
+                          {value > 0 && (
+                            <span className="pointer-events-none absolute bottom-full mb-1 hidden whitespace-nowrap rounded bg-graphite px-1.5 py-0.5 text-[10px] font-medium text-cream group-hover:block dark:bg-cream dark:text-graphite">
+                              {currency(value)}
+                              {tone && ` · ${t(`dashboard.spending.${tone}`)}`}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   <div className="mt-1 flex gap-1.5">
                     {months.map((month) => (
@@ -326,6 +360,20 @@ export function Dashboard() {
                   </div>
                 </div>
               </div>
+              {hasBaseline && (
+                <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-ink-muted">
+                  {(["low", "mid", "high"] as const).map((tone) => (
+                    <li key={tone} className="flex items-center gap-1.5">
+                      <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-sm ${bandFill[tone]}`} />
+                      {t(`dashboard.spending.${tone}`)}
+                    </li>
+                  ))}
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="h-0 w-4 border-t border-dashed border-ink-subtle" />
+                    {t("dashboard.spending.typical", { amount: compactCurrency(typical) })}
+                  </li>
+                </ul>
+              )}
             </section>
           </div>
 

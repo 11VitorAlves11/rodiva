@@ -106,7 +106,13 @@
     "licensePlate": "Licence plate",
     "brandModel": "Make / Model",
     "fuelType": "Fuel",
-    "fuelActivity": "Fuel fill-up"
+    "fuelActivity": "Fuel fill-up",
+    "spending": {
+      "low": "Below usual",
+      "mid": "Usual",
+      "high": "Above usual",
+      "typical": "Usual month ({{amount}})"
+    }
   },
   "invite": {
     "invalid": "This invite is invalid or has expired.",
