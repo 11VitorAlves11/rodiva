@@ -668,5 +668,27 @@
     "quietFrom": "From",
     "quietTo": "To",
     "quietHint": "Email is held during these hours and sent afterwards."
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "description": "Send the household's events to an external service, such as n8n or Telegram.",
+    "name": "Name",
+    "url": "URL",
+    "add": "Add webhook",
+    "test": "Test",
+    "deliveries": "Deliveries",
+    "noDeliveries": "No deliveries yet.",
+    "retry": "Retry",
+    "active": "Active",
+    "paused": "Paused",
+    "pause": "Pause",
+    "resume": "Resume",
+    "attempts": "{{count}} attempts",
+    "secretOnce": "Keep this secret: it signs every request and is only shown now.",
+    "status": {
+      "sent": "Delivered",
+      "pending": "Pending",
+      "failed": "Failed"
+    }
   }
 }

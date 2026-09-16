@@ -44,6 +44,9 @@ import type {
   OdometerReading,
   TrashEntity,
   TrashItem,
+  Webhook,
+  WebhookDelivery,
+  WebhookInput,
   OdometerReadingInput,
   Plan,
   PlanCompleteInput,
@@ -311,6 +314,16 @@ export const notifications = {
   preferences: () => request<NotificationPreference>("/api/v1/notifications/preferences"),
   savePreferences: (body: NotificationPreference) => request<NotificationPreference>("/api/v1/notifications/preferences", { method: "PUT", body }),
   run: () => request<NotificationRun>("/api/v1/notifications/run", { method: "POST" }),
+};
+
+export const webhooks = {
+  list: () => request<Webhook[]>("/api/v1/webhooks"),
+  create: (body: WebhookInput) => request<Webhook & { secret: string }>("/api/v1/webhooks", { method: "POST", body }),
+  update: (id: string, body: Partial<WebhookInput> & { active?: boolean }) => request<Webhook>(`/api/v1/webhooks/${id}`, { method: "PATCH", body }),
+  remove: (id: string) => request<void>(`/api/v1/webhooks/${id}`, { method: "DELETE" }),
+  test: (id: string) => request<WebhookDelivery>(`/api/v1/webhooks/${id}/test`, { method: "POST" }),
+  deliveries: (id: string) => request<WebhookDelivery[]>(`/api/v1/webhooks/${id}/deliveries`),
+  retry: (id: string, deliveryId: string) => request<WebhookDelivery>(`/api/v1/webhooks/${id}/deliveries/${deliveryId}/retry`, { method: "POST" }),
 };
 
 export const trash = {

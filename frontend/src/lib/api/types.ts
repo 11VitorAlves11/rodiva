@@ -511,3 +511,7 @@ export type NotificationPage = { items: NotificationItem[]; unread: number };
 export type NotificationUrgency = "overdue" | "very_urgent" | "urgent" | "upcoming" | "future";
 export type NotificationPreference = { channel_inapp: boolean; channel_email: boolean; min_urgency: NotificationUrgency; vehicle_ids: string[]; quiet_hours_start: number | null; quiet_hours_end: number | null };
 export type NotificationRun = { created: number; delivered: number; failed: number };
+
+export type Webhook = { id: string; description: string; url: string; events: string[]; active: boolean; created_at: string; last_success_at: string | null; last_error: string };
+export type WebhookInput = { description: string; url: string; events: string[] };
+export type WebhookDelivery = { id: string; event: string; payload: Record<string, unknown>; status: string; attempts: number; next_attempt_at: string; response_status: number | null; last_error: string; created_at: string; delivered_at: string | null };

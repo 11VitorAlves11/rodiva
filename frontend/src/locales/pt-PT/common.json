@@ -668,5 +668,27 @@
     "quietFrom": "Das",
     "quietTo": "Até",
     "quietHint": "Durante este horário o correio eletrónico fica retido e sai depois."
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "description": "Envie os eventos do agregado para um serviço externo, como o n8n ou o Telegram.",
+    "name": "Nome",
+    "url": "Endereço",
+    "add": "Adicionar webhook",
+    "test": "Testar",
+    "deliveries": "Entregas",
+    "noDeliveries": "Ainda sem entregas.",
+    "retry": "Repetir",
+    "active": "Ativo",
+    "paused": "Em pausa",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "attempts": "{{count}} tentativas",
+    "secretOnce": "Guarde este segredo: assina cada pedido e só é mostrado agora.",
+    "status": {
+      "sent": "Entregue",
+      "pending": "Pendente",
+      "failed": "Falhou"
+    }
   }
 }

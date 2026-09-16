@@ -8,6 +8,7 @@ import { ApiError } from "../lib/api/client";
 import type { GoogleCalendarOption, GoogleCalendarStatus, Invite, Member, Role, Vehicle } from "../lib/api/types";
 import { useSession } from "../lib/session";
 import { NotificationSettings } from "../components/settings/NotificationSettings";
+import { WebhookSettings } from "../components/settings/WebhookSettings";
 import { ApiKeySettings } from "../components/settings/ApiKeySettings";
 import { AccountSettings } from "../components/settings/AccountSettings";
 
@@ -45,6 +46,7 @@ export function Settings() {
       <AccountSettings />
       <NotificationSettings />
       <ApiKeySettings />
+      <WebhookSettings />
 
       <button
         onClick={() => void signOut()}
