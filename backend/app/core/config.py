@@ -45,10 +45,30 @@ class Settings(BaseSettings):
     storage_path: str = "/storage"
     upload_max_bytes: int = 20 * 1024 * 1024
 
+    # RF-GCAL-001/007: OAuth credentials for the Google Calendar integration.
+    # Unset by default — the feature stays inactive until a server operator
+    # registers a Google Cloud OAuth client and sets these.
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    # Absolute, pre-registered URL Google redirects back to after consent —
+    # must match the API's own origin (it serves /calendar/google/callback).
+    public_base_url: str = "http://localhost:8000"
+    # The frontend's origin, used only to build the link the OAuth callback
+    # redirects to and the "open in Rodiva" link inside synced events. Kept
+    # separate from public_base_url because the API and the SPA run on
+    # different ports/origins in dev (:8000 vs :5173) and may well differ in
+    # prod too (reverse-proxied API path vs. static site host).
+    public_frontend_url: str = "http://localhost:5173"
+
     @property
     def cookies_secure(self) -> bool:
         """Session cookies are HTTPS-only everywhere except local development."""
         return self.environment == "prod"
+
+    @property
+    def google_calendar_enabled(self) -> bool:
+        """Whether an operator has configured real Google OAuth credentials."""
+        return bool(self.google_client_id and self.google_client_secret)
 
     @model_validator(mode="after")
     def _check_secrets(self) -> Self:

@@ -5,6 +5,7 @@ from app.models.base import Base
 from app.models.enums import Role, VehicleStatus
 from app.models.expense_record import ExpenseRecord
 from app.models.fuel_record import FuelRecord
+from app.models.google_calendar import CalendarSyncEvent, GoogleCalendarConnection
 from app.models.household import Household
 from app.models.inventory import InventoryItem, StockMovement
 from app.models.invite import Invite
@@ -23,8 +24,10 @@ __all__ = [
     "AuthThrottle",
     "PasswordReset",
     "Base",
+    "CalendarSyncEvent",
     "ExpenseRecord",
     "FuelRecord",
+    "GoogleCalendarConnection",
     "Household",
     "Invite",
     "InventoryItem",
