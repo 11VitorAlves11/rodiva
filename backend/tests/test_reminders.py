@@ -115,3 +115,45 @@ async def test_completing_a_non_repeating_reminder_does_not_renew_it(
 
     listed = await user_client.get(f"/api/vehicles/{vehicle_id}/reminders")
     assert len([item for item in listed.json() if item["title"] == "Inspeção"]) == 1
+
+
+async def test_reminder_can_be_updated_reopened_and_deleted(user_client: AsyncClient) -> None:
+    vehicle_id = await _vehicle(user_client)
+    created = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/reminders",
+        json={"title": "Seguro", "due_date": date.today().isoformat()},
+    )
+    reminder_id = created.json()["id"]
+
+    updated = await user_client.patch(
+        f"/api/vehicles/{vehicle_id}/reminders/{reminder_id}",
+        json={"title": "Renovar seguro", "due_odometer": 80_000, "notes": "Comparar preços"},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["title"] == "Renovar seguro"
+    assert updated.json()["due_odometer"] == 80_000
+    assert updated.json()["notes"] == "Comparar preços"
+
+    await user_client.post(f"/api/vehicles/{vehicle_id}/reminders/{reminder_id}/complete")
+    reopened = await user_client.post(f"/api/vehicles/{vehicle_id}/reminders/{reminder_id}/reopen")
+    assert reopened.status_code == 200
+    assert reopened.json()["status"] == "active"
+    assert reopened.json()["completed_at"] is None
+
+    deleted = await user_client.delete(f"/api/vehicles/{vehicle_id}/reminders/{reminder_id}")
+    assert deleted.status_code == 204
+    listed = await user_client.get(f"/api/vehicles/{vehicle_id}/reminders")
+    assert all(item["id"] != reminder_id for item in listed.json())
+
+
+async def test_reminder_update_cannot_clear_all_due_conditions(user_client: AsyncClient) -> None:
+    vehicle_id = await _vehicle(user_client)
+    created = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/reminders",
+        json={"title": "IPO", "due_date": date.today().isoformat()},
+    )
+    response = await user_client.patch(
+        f"/api/vehicles/{vehicle_id}/reminders/{created.json()['id']}",
+        json={"due_date": None},
+    )
+    assert response.status_code == 422

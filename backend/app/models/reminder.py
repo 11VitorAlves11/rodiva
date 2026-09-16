@@ -16,6 +16,9 @@ class Reminder(Base):
     vehicle_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    equipment_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("equipment.id", ondelete="CASCADE"), index=True
+    )
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     due_date: Mapped[date | None] = mapped_column(Date)
     due_odometer: Mapped[int | None] = mapped_column(Integer)

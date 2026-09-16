@@ -9,6 +9,7 @@ from app.api.routes import (
     attachments,
     auth,
     calendar,
+    equipment,
     expenses,
     fuel,
     health,
@@ -49,6 +50,7 @@ app.add_middleware(
 for resource in [
     health,
     calendar,
+    equipment,
     households,
     inventory,
     vehicles,

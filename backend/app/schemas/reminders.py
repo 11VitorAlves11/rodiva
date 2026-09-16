@@ -22,9 +22,19 @@ class ReminderIn(BaseModel):
         return self
 
 
+class ReminderUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=300)
+    due_date: date | None = None
+    due_odometer: int | None = Field(default=None, ge=0, le=9_999_999)
+    repeat_days: int | None = Field(default=None, ge=1, le=36_500)
+    repeat_distance: int | None = Field(default=None, ge=1, le=9_999_999)
+    notes: str | None = Field(default=None, max_length=2_000)
+
+
 class ReminderOut(ReminderIn):
     id: uuid.UUID
     vehicle_id: uuid.UUID
+    equipment_id: uuid.UUID | None = None
     status: str
     urgency: Urgency
     completed_at: datetime | None

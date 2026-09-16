@@ -4,6 +4,7 @@ from app.models.auth_session import AuthSession
 from app.models.base import Base
 from app.models.calendar_feed import CalendarFeed
 from app.models.enums import Role, VehicleStatus
+from app.models.equipment import Equipment, MountPeriod, TireRotation
 from app.models.expense_record import ExpenseRecord
 from app.models.fuel_record import FuelRecord
 from app.models.google_calendar import CalendarSyncEvent, GoogleCalendarConnection
@@ -27,6 +28,7 @@ __all__ = [
     "Base",
     "CalendarFeed",
     "CalendarSyncEvent",
+    "Equipment",
     "ExpenseRecord",
     "FuelRecord",
     "GoogleCalendarConnection",
@@ -34,12 +36,14 @@ __all__ = [
     "Invite",
     "InventoryItem",
     "Membership",
+    "MountPeriod",
     "Note",
     "OdometerReading",
     "Plan",
     "Reminder",
     "Role",
     "StockMovement",
+    "TireRotation",
     "User",
     "Vehicle",
     "VehicleStatus",
