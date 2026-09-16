@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 
-import { household } from "../lib/api";
+import { googleCalendar, household, vehicles as vehiclesApi } from "../lib/api";
 import { ApiError } from "../lib/api/client";
-import type { Invite, Member, Role } from "../lib/api/types";
+import type { GoogleCalendarOption, GoogleCalendarStatus, Invite, Member, Role, Vehicle } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { ApiKeySettings } from "../components/settings/ApiKeySettings";
+import { AccountSettings } from "../components/settings/AccountSettings";
 
 function initials(name: string | null | undefined, email: string) {
   const source = (name ?? email).trim();
@@ -15,7 +18,7 @@ function initials(name: string | null | undefined, email: string) {
 }
 
 export function Settings() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { me, signOut } = useSession();
   const canManageMembers = me?.membership.role === "owner" || me?.membership.role === "manager";
 
@@ -36,20 +39,10 @@ export function Settings() {
 
       <MembersSection canManage={canManageMembers} currentUserId={me?.user.id} />
 
-      <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
-        <h2 className="mb-4 font-semibold text-graphite dark:text-cream">{t("settings.preferences")}</h2>
-        <div className="flex items-center justify-between gap-4 py-2">
-          <span className="text-sm text-graphite/70 dark:text-cream/70">{t("settings.language")}</span>
-          <select
-            value={i18n.language}
-            onChange={(event) => void i18n.changeLanguage(event.target.value)}
-            className="rounded-md border border-graphite/15 bg-white px-3 py-2 text-sm dark:border-white/15 dark:bg-surface-dark"
-          >
-            <option value="pt-PT">Português</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-      </section>
+      <GoogleCalendarSection />
+
+      <AccountSettings />
+      <ApiKeySettings />
 
       <button
         onClick={() => void signOut()}
@@ -113,12 +106,12 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
 
   return (
     <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
-      <div className="mb-4 flex items-center justify-between gap-4">
+      <div className="mb-4 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-semibold text-graphite dark:text-cream">{t("settings.members")}</h2>
         {canManage && (
           <button
             onClick={() => setShowInviteForm((value) => !value)}
-            className="rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark"
+            className="self-start rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark"
           >
             {t("settings.invite")}
           </button>
@@ -194,7 +187,7 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
           <h3 className="mb-2 text-sm font-semibold text-graphite/70 dark:text-cream/70">{t("settings.pendingInvites")}</h3>
           <ul className="space-y-2">
             {pendingInvites.map((invite) => (
-              <li key={invite.id} className="flex items-center justify-between gap-3 text-sm">
+              <li key={invite.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
                 <span className="text-graphite dark:text-cream">
                   {invite.email ?? t(`settings.roles.${invite.role}`)}
                 </span>
@@ -262,5 +255,222 @@ function InviteForm({ onCreated }: { onCreated: (invite: Invite) => void }) {
         {t("settings.createInvite")}
       </button>
     </form>
+  );
+}
+
+function GoogleCalendarSection() {
+  const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [status, setStatus] = useState<GoogleCalendarStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
+  const [vehicleOptions, setVehicleOptions] = useState<Vehicle[] | null>(null);
+  const [calendarOptions, setCalendarOptions] = useState<GoogleCalendarOption[] | null>(null);
+  const [selectedCalendarId, setSelectedCalendarId] = useState("");
+  const [selectedVehicleIds, setSelectedVehicleIds] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState(false);
+
+  const loadStatus = () => {
+    googleCalendar
+      .status()
+      .then(setStatus)
+      .catch((cause) => setError(cause instanceof ApiError ? cause.message : t("common.error")));
+  };
+
+  useEffect(loadStatus, [t]);
+
+  useEffect(() => {
+    if (searchParams.get("google_calendar") !== "connected") return;
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete("google_calendar");
+      return next;
+    });
+    openPicker();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  async function openPicker() {
+    setError(null);
+    try {
+      const [calendars, vehicleList] = await Promise.all([googleCalendar.calendars(), vehiclesApi.list()]);
+      setCalendarOptions(calendars);
+      setVehicleOptions(vehicleList);
+      setSelectedCalendarId((current) => current || calendars[0]?.id || "");
+      setShowPicker(true);
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : t("common.error"));
+    }
+  }
+
+  function toggleVehicle(vehicleId: string) {
+    setSelectedVehicleIds((current) => {
+      const next = new Set(current);
+      if (next.has(vehicleId)) next.delete(vehicleId);
+      else next.add(vehicleId);
+      return next;
+    });
+  }
+
+  async function connect() {
+    setError(null);
+    try {
+      const { authorize_url } = await googleCalendar.connect();
+      window.location.href = authorize_url;
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : t("common.error"));
+    }
+  }
+
+  async function saveSelection() {
+    if (!selectedCalendarId) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await googleCalendar.saveConnection({
+        calendar_id: selectedCalendarId,
+        vehicle_ids: [...selectedVehicleIds],
+      });
+      setStatus(updated);
+      setShowPicker(false);
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : t("common.error"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function changeSelection() {
+    setSelectedVehicleIds(new Set(status?.synced_vehicle_ids ?? []));
+    setSelectedCalendarId(status?.calendar_id ?? "");
+    await openPicker();
+  }
+
+  async function disconnect() {
+    setError(null);
+    try {
+      await googleCalendar.disconnect();
+      setShowPicker(false);
+      loadStatus();
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : t("common.error"));
+    }
+  }
+
+  if (!status) return null;
+
+  return (
+    <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
+      <h2 className="mb-1 font-semibold text-graphite dark:text-cream">{t("calendar.google.title")}</h2>
+      <p className="mb-4 text-sm text-graphite/60 dark:text-cream/60">{t("calendar.google.description")}</p>
+
+      {error && <p className="mb-3 text-sm text-red-700">{error}</p>}
+
+      {!status.configured && (
+        <p className="rounded-lg bg-graphite/5 p-3 text-sm text-graphite/70 dark:bg-white/5 dark:text-cream/70">
+          {t("calendar.google.notConfigured")}
+        </p>
+      )}
+
+      {status.configured && !status.connected && !showPicker && (
+        <button
+          onClick={() => void connect()}
+          className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white hover:bg-copper-dark"
+        >
+          {t("calendar.google.connect")}
+        </button>
+      )}
+
+      {status.configured && status.connected && !showPicker && (
+        <div className="space-y-3">
+          <div className="text-sm text-graphite/70 dark:text-cream/70">
+            <p>
+              <span className="font-medium text-graphite dark:text-cream">{t("calendar.google.account")}: </span>
+              {status.google_account_email}
+            </p>
+            {status.calendar_id && (
+              <p>
+                <span className="font-medium text-graphite dark:text-cream">{t("calendar.google.calendarLabel")}: </span>
+                {status.calendar_id}
+              </p>
+            )}
+            <p>
+              <span className="font-medium text-graphite dark:text-cream">{t("calendar.google.vehiclesLabel")}: </span>
+              {status.synced_vehicle_ids.length}
+            </p>
+          </div>
+          {status.last_error && <p className="text-sm text-red-700">{status.last_error}</p>}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => void changeSelection()}
+              className="rounded-md border border-graphite/15 px-3 py-2 text-sm font-medium text-graphite dark:border-white/15 dark:text-cream"
+            >
+              {t("calendar.google.changeSelection")}
+            </button>
+            <button
+              onClick={() => void disconnect()}
+              className="rounded-md border border-copper/30 px-3 py-2 text-sm font-medium text-copper dark:text-copper-bright"
+            >
+              {t("calendar.google.disconnect")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showPicker && calendarOptions && vehicleOptions && (
+        <div className="space-y-3">
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-graphite/70 dark:text-cream/70">
+              {t("calendar.google.calendarLabel")}
+            </span>
+            <select
+              value={selectedCalendarId}
+              onChange={(event) => setSelectedCalendarId(event.target.value)}
+              className="w-full rounded-md border border-graphite/15 bg-white px-3 py-2 dark:border-white/15 dark:bg-surface-dark"
+            >
+              {calendarOptions.map((calendar) => (
+                <option key={calendar.id} value={calendar.id}>
+                  {calendar.summary}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div>
+            <span className="mb-1 block text-sm font-medium text-graphite/70 dark:text-cream/70">
+              {t("calendar.google.vehiclesLabel")}
+            </span>
+            <ul className="space-y-1">
+              {vehicleOptions.map((vehicle) => (
+                <li key={vehicle.id}>
+                  <label className="flex items-center gap-2 text-sm text-graphite dark:text-cream">
+                    <input
+                      type="checkbox"
+                      checked={selectedVehicleIds.has(vehicle.id)}
+                      onChange={() => toggleVehicle(vehicle.id)}
+                    />
+                    {vehicle.name}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => void saveSelection()}
+              disabled={saving || !selectedCalendarId}
+              className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white hover:bg-copper-dark disabled:opacity-60"
+            >
+              {t("calendar.google.save")}
+            </button>
+            <button
+              onClick={() => setShowPicker(false)}
+              className="rounded-md border border-graphite/15 px-3 py-2 text-sm font-medium text-graphite dark:border-white/15 dark:text-cream"
+            >
+              {t("common.cancel")}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

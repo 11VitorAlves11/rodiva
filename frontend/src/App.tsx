@@ -9,6 +9,7 @@ import { Garage } from "./pages/Garage";
 import { History } from "./pages/History";
 import { Dashboard } from "./pages/Dashboard";
 import { InviteAccept } from "./pages/InviteAccept";
+import { PasswordRecovery } from "./pages/PasswordRecovery";
 import { Login } from "./pages/Login";
 import { Reminders } from "./pages/Reminders";
 import { Settings } from "./pages/Settings";
@@ -35,6 +36,8 @@ function RequireSession({ children }: { children: ReactNode }) {
 export function App() {
   return (
     <Routes>
+      <Route path="/forgot-password" element={<PasswordRecovery />} />
+      <Route path="/reset-password" element={<PasswordRecovery reset />} />
       <Route path="/login" element={<Login />} />
       <Route path="/invite/:token" element={<InviteAccept />} />
       <Route
