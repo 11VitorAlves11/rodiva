@@ -25,7 +25,9 @@
   --color-line-strong: color-mix(in srgb, var(--color-graphite) 22%, transparent);
   --color-ink: var(--color-graphite);
   --color-ink-muted: color-mix(in srgb, var(--color-graphite) 62%, transparent);
-  --color-ink-subtle: color-mix(in srgb, var(--color-graphite) 42%, transparent);
+  /* 50%, not the 40-ish the pages used to hardcode: below that, hint text
+     drops under 3:1 on white and stops being readable. */
+  --color-ink-subtle: color-mix(in srgb, var(--color-graphite) 50%, transparent);
 
   /* Brand accent for text and active states; the filled action keeps the brand
      copper in both themes so the primary button reads the same everywhere. */
