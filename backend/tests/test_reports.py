@@ -1,6 +1,6 @@
 import base64
 import zipfile
-from datetime import date
+from datetime import UTC, date, datetime
 from io import BytesIO
 
 from httpx import AsyncClient
@@ -103,7 +103,9 @@ async def test_attachments_zip_contains_chronologically_named_entries(
     assert response.headers["content-type"] == "application/zip"
     assert 'filename="rodiva-attachments.zip"' in response.headers["content-disposition"]
 
-    today = date.today().isoformat()
+    # Entries are named from created_at, which is UTC (spec §23.2). Comparing
+    # against the local date fails for the hour either side of midnight.
+    today = datetime.now(UTC).date().isoformat()
     with zipfile.ZipFile(BytesIO(response.content)) as archive:
         names = archive.namelist()
         assert len(names) == 2
