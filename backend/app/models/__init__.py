@@ -6,10 +6,12 @@ from app.models.enums import Role, VehicleStatus
 from app.models.expense_record import ExpenseRecord
 from app.models.fuel_record import FuelRecord
 from app.models.household import Household
+from app.models.inventory import InventoryItem, StockMovement
 from app.models.invite import Invite
 from app.models.membership import Membership
 from app.models.note import Note
 from app.models.odometer_reading import OdometerReading
+from app.models.plan import Plan
 from app.models.reminder import Reminder
 from app.models.user import User
 from app.models.vehicle import Vehicle
@@ -25,11 +27,14 @@ __all__ = [
     "FuelRecord",
     "Household",
     "Invite",
+    "InventoryItem",
     "Membership",
     "Note",
     "OdometerReading",
+    "Plan",
     "Reminder",
     "Role",
+    "StockMovement",
     "User",
     "Vehicle",
     "VehicleStatus",
