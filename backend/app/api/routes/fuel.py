@@ -145,7 +145,7 @@ async def delete_fuel_record(
         )
     record = await _fuel_record_in_vehicle(vehicle_id, record_id, db)
     mark_deleted(record, user.id)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

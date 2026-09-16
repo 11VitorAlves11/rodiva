@@ -182,7 +182,7 @@ async def delete_plan(
             status_code=status.HTTP_409_CONFLICT, detail="Completed plans cannot be deleted"
         )
     mark_deleted(plan, user.id)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

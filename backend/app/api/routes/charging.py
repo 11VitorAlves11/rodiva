@@ -137,7 +137,7 @@ async def delete_charging(
     if row is None or row.vehicle_id != vehicle_id or row.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Charging record not found")
     mark_deleted(row, user.id)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

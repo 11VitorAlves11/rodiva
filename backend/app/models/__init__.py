@@ -29,6 +29,7 @@ from app.models.reminder import Reminder
 from app.models.saved_view import SavedView
 from app.models.user import User
 from app.models.vehicle import Vehicle
+from app.models.webhook import Webhook, WebhookDelivery
 from app.models.work_record import WorkRecord
 
 __all__ = [
@@ -67,6 +68,8 @@ __all__ = [
     "TireRotation",
     "User",
     "Vehicle",
+    "Webhook",
+    "WebhookDelivery",
     "VehicleStatus",
     "WorkRecord",
 ]

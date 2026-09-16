@@ -182,7 +182,7 @@ async def restore(
     mark_restored(row)
     await db.flush()
     await _rebuild_derived(row, db)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,
@@ -213,7 +213,7 @@ async def purge(
     summary = _kind(entity_type).describe(row)
     # The stored file outlived the delete so a restore could find it; now it goes.
     stored = Path(settings.storage_path) / row.storage_key if entity_type == "attachment" else None
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

@@ -36,6 +36,51 @@ def actor_label(user: User | None) -> str:
     return user.name or user.email
 
 
+async def record_and_emit(
+    db: AsyncSession,
+    *,
+    household_id: uuid.UUID,
+    actor: User | None,
+    action: str,
+    entity_type: str,
+    entity_id: uuid.UUID | None = None,
+    vehicle_id: uuid.UUID | None = None,
+    summary: str = "",
+    context: dict[str, Any] | None = None,
+) -> AuditEvent:
+    """Record the action and queue the webhook event it maps to.
+
+    Both land in the caller's transaction, so an action that rolls back leaves
+    neither a trail entry nor an event.
+    """
+    # Imported here: events reads webhooks, which has no business importing audit.
+    from app.services.events import AUDIT_EVENTS, emit
+
+    event = record(
+        db,
+        household_id=household_id,
+        actor=actor,
+        action=action,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        summary=summary,
+        context=context,
+    )
+    name = AUDIT_EVENTS.get(action)
+    if name:
+        resource, _, verb = name.partition(".")
+        await emit(
+            db,
+            household_id=household_id,
+            resource=resource,
+            action=verb,
+            entity_id=entity_id,
+            vehicle_id=vehicle_id,
+            data={"entity_type": entity_type, "summary": summary} | (context or {}),
+        )
+    return event
+
+
 def record(
     db: AsyncSession,
     *,
@@ -62,7 +107,7 @@ def record(
     return event
 
 
-def record_record_action(
+async def record_record_action(
     db: AsyncSession,
     *,
     membership: Membership,
@@ -74,13 +119,14 @@ def record_record_action(
     summary: str = "",
 ) -> AuditEvent:
     """Shorthand for the delete/restore/purge of one vehicle record."""
-    return record(
+    return await record_and_emit(
         db,
         household_id=membership.household_id,
         actor=actor,
         action=action,
         entity_type=entity_type,
         entity_id=entity_id,
+        vehicle_id=vehicle_id,
         summary=summary,
         context={"vehicle_id": str(vehicle_id)} if vehicle_id else None,
     )

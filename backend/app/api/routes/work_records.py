@@ -105,7 +105,7 @@ async def delete_work_record(
     record = await _work_record_in_vehicle(vehicle_id, record_id, db)
     await _restore_requisitioned_stock(record_id, user.id, db)
     mark_deleted(record, user.id)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

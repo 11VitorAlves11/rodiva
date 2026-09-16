@@ -92,7 +92,7 @@ async def delete_expense(
         )
     record = await _expense_in_vehicle(vehicle_id, record_id, db)
     mark_deleted(record, user.id)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

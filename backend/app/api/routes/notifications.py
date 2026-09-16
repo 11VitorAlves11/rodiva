@@ -12,6 +12,7 @@ from app.schemas.notifications import (
     PreferenceIn,
     PreferenceOut,
 )
+from app.services import events
 from app.services import notifications as service
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
@@ -112,4 +113,11 @@ async def run_evaluation(membership: CurrentMembership, db: DbSession) -> Evalua
     await db.commit()
     delivered, failed = await service.deliver_pending(db)
     await db.commit()
-    return EvaluationOut(created=created, delivered=delivered, failed=failed)
+    # The same run flushes the outbox, so an event queued just now goes out too.
+    hook_delivered, hook_failed = await events.flush(db)
+    await db.commit()
+    return EvaluationOut(
+        created=created,
+        delivered=delivered + hook_delivered,
+        failed=failed + hook_failed,
+    )

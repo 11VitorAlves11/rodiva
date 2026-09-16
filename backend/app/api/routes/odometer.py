@@ -151,7 +151,7 @@ async def delete_reading(
         )
     reading = await _reading_in_vehicle(vehicle_id, reading_id, db)
     mark_deleted(reading, user.id)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

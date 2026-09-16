@@ -99,7 +99,7 @@ async def update_member_role(
     member_user = await db.get(User, user_id)
     assert member_user is not None
     member_label = member_user.name or member_user.email
-    audit.record(
+    await audit.record_and_emit(
         db,
         household_id=membership.household_id,
         actor=user,
@@ -134,7 +134,7 @@ async def remove_member(
             status_code=status.HTTP_409_CONFLICT, detail="A household needs at least one owner"
         )
     removed = await db.get(User, user_id)
-    audit.record(
+    await audit.record_and_emit(
         db,
         household_id=membership.household_id,
         actor=user,
@@ -177,7 +177,7 @@ async def create_invite(
         expires_at=datetime.now(UTC) + timedelta(hours=payload.expires_in_hours),
     )
     db.add(invite)
-    audit.record(
+    await audit.record_and_emit(
         db,
         household_id=membership.household_id,
         actor=user,
@@ -201,7 +201,7 @@ async def revoke_invite(
     if invite is None or invite.household_id != membership.household_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invite not found")
     invite.revoked_at = datetime.now(UTC)
-    audit.record(
+    await audit.record_and_emit(
         db,
         household_id=membership.household_id,
         actor=user,

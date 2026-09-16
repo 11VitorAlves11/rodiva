@@ -30,6 +30,8 @@ from app.models import (
     User,
     Vehicle,
 )
+from app.services.events import emit
+from app.services.events import flush as flush_webhooks
 from app.services.urgency import at_least_as_urgent_as, urgency_of
 
 logger = logging.getLogger(__name__)
@@ -167,6 +169,15 @@ async def _queue(
     notification_id = await db.scalar(statement)
     if notification_id is None:
         return 0
+    await emit(
+        db,
+        household_id=household_id,
+        resource="reminder",
+        action="due",
+        entity_id=reminder.id,
+        vehicle_id=vehicle.id,
+        data={"title": reminder.title, "urgency": urgency, "vehicle_name": vehicle.name},
+    )
     channels = [INAPP] if preference.channel_inapp else []
     if preference.channel_email:
         channels.append(EMAIL)
@@ -276,4 +287,10 @@ async def run_once(db: AsyncSession) -> EvaluationResult:
     await db.commit()
     delivered, failed = await deliver_pending(db)
     await db.commit()
-    return EvaluationResult(created=created, delivered=delivered, failed=failed)
+    hook_delivered, hook_failed = await flush_webhooks(db)
+    await db.commit()
+    return EvaluationResult(
+        created=created,
+        delivered=delivered + hook_delivered,
+        failed=failed + hook_failed,
+    )

@@ -209,7 +209,7 @@ async def delete_reminder(
     # response, by which point it could no longer read them itself.
     pending = await take_pending_deletions(reminder_id, db)
     mark_deleted(reminder, user.id)
-    audit.record_record_action(
+    await audit.record_record_action(
         db,
         membership=membership,
         actor=user,

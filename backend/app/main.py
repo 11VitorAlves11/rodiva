@@ -30,6 +30,7 @@ from app.api.routes import (
     storage,
     trash,
     vehicles,
+    webhooks,
     work_records,
 )
 from app.core.config import get_settings
@@ -83,6 +84,7 @@ for resource in [
     notifications,
     attachments,
     trash,
+    webhooks,
 ]:
     app.include_router(resource.router, prefix="/api", include_in_schema=False)
     app.include_router(resource.router, prefix="/api/v1")

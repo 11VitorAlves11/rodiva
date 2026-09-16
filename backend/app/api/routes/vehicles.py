@@ -7,15 +7,16 @@ comes from the caller's own membership, never from a client-supplied id.
 import base64
 import binascii
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from app.api.deps import AppSettings, CurrentMembership, CurrentUser, DbSession
+from app.db.filters import mark_deleted
 from app.models import Role, Vehicle, VehicleStatus
 from app.schemas.vehicles import VehicleIn, VehicleOut, VehiclePhotoIn, VehicleUpdate
+from app.services import audit, events
 
 router = APIRouter(prefix="/vehicles", tags=["vehicles"])
 
@@ -55,6 +56,16 @@ async def create_vehicle(
         **payload.model_dump(),
     )
     db.add(vehicle)
+    await db.flush()
+    await events.emit(
+        db,
+        household_id=membership.household_id,
+        resource="vehicle",
+        action="created",
+        entity_id=vehicle.id,
+        vehicle_id=vehicle.id,
+        data={"name": vehicle.name},
+    )
     await db.commit()
     await db.refresh(vehicle)
     return vehicle
@@ -88,6 +99,16 @@ async def update_vehicle(
         raise HTTPException(status_code=422, detail="Required vehicle fields cannot be null")
     for field, value in changes.items():
         setattr(vehicle, field, value)
+    await events.emit(
+        db,
+        household_id=membership.household_id,
+        resource="vehicle",
+        # An archived vehicle is its own event in the minimum set (§24.2).
+        action="archived" if changes.get("status") == VehicleStatus.ARCHIVED else "updated",
+        entity_id=vehicle.id,
+        vehicle_id=vehicle.id,
+        data={"fields": sorted(changes)},
+    )
     await db.commit()
     await db.refresh(vehicle)
     return vehicle
@@ -95,11 +116,21 @@ async def update_vehicle(
 
 @router.delete("/{vehicle_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_vehicle(
-    vehicle_id: uuid.UUID, membership: CurrentMembership, db: DbSession
+    vehicle_id: uuid.UUID, user: CurrentUser, membership: CurrentMembership, db: DbSession
 ) -> None:
     _require_manage(membership)
     vehicle = await get_vehicle(vehicle_id, membership, db)
-    vehicle.deleted_at = datetime.now(UTC)
+    mark_deleted(vehicle, user.id)
+    await audit.record_and_emit(
+        db,
+        household_id=membership.household_id,
+        actor=user,
+        action=audit.VEHICLE_DELETED,
+        entity_type="vehicle",
+        entity_id=vehicle.id,
+        vehicle_id=vehicle.id,
+        summary=vehicle.name,
+    )
     await db.commit()
 
 
