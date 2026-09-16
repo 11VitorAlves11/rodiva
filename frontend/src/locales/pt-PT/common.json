@@ -645,5 +645,28 @@
       "read": "Só leitura",
       "write": "Leitura e escrita"
     }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "description": "Avisos sobre lembretes que se aproximam do prazo.",
+    "empty": "Sem notificações",
+    "emptyHint": "Quando um lembrete se aproximar do prazo, aparece aqui.",
+    "markAllRead": "Marcar tudo como lido",
+    "unread": "Por ler",
+    "saved": "Preferências guardadas.",
+    "settingsTitle": "Notificações",
+    "settingsDescription": "Escolha o que quer saber e por que meio.",
+    "channels": "Meios",
+    "channelInapp": "Na aplicação",
+    "channelEmail": "Correio eletrónico",
+    "emailHint": "O correio eletrónico só sai se o servidor tiver SMTP configurado.",
+    "minUrgency": "Avisar a partir de",
+    "minUrgencyHint": "Recebe avisos desta urgência ou mais pressionante.",
+    "vehicles": "Veículos",
+    "vehiclesHint": "Sem seleção, recebe avisos de todos os veículos.",
+    "quietHours": "Horário silencioso",
+    "quietFrom": "Das",
+    "quietTo": "Até",
+    "quietHint": "Durante este horário o correio eletrónico fica retido e sai depois."
   }
 }

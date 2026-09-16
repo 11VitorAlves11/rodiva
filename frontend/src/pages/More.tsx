@@ -15,6 +15,7 @@ export function More() {
     { to: "/inventory", title: t("nav.inventory"), description: t("inventory.description"), icon: "inventory" as const },
     { to: "/equipment", title: t("nav.equipment"), description: t("equipment.description"), icon: "equipment" as const },
     { to: "/inspections", title: t("nav.inspections"), description: t("inspections.description"), icon: "inspections" as const },
+    { to: "/notifications", title: t("notifications.title"), description: t("notifications.description"), icon: "reminders" as const },
     { to: "/activity", title: t("activity.title"), description: t("activity.description"), icon: "activity" as const },
     { to: "/trash", title: t("trash.title"), description: t("trash.description"), icon: "trash" as const },
     { to: "/settings", title: t("nav.settings"), description: t("settings.preferences"), icon: "settings" as const },

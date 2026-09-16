@@ -18,6 +18,7 @@ import { PasswordRecovery } from "./pages/PasswordRecovery";
 import { ImportRecords } from "./pages/ImportRecords";
 import { Login } from "./pages/Login";
 import { More } from "./pages/More";
+import { Notifications } from "./pages/Notifications";
 import { Planner } from "./pages/Planner";
 import { Reminders } from "./pages/Reminders";
 import { Reports } from "./pages/Reports";
@@ -70,6 +71,7 @@ export function App() {
       <Route path="/inspections" element={<RequireSession><Inspections /></RequireSession>} />
       <Route path="/planner" element={<RequireSession><Planner /></RequireSession>} />
       <Route path="/import" element={<RequireSession><ImportRecords /></RequireSession>} />
+      <Route path="/notifications" element={<RequireSession><Notifications /></RequireSession>} />
       <Route path="/activity" element={<RequireSession><Activity /></RequireSession>} />
       <Route path="/trash" element={<RequireSession><Trash /></RequireSession>} />
       <Route path="/more" element={<RequireSession><More /></RequireSession>} />

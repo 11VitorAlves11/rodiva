@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 
+import { notifications } from "../../lib/api";
 import { NAV_ICONS } from "../../lib/icons";
 import { useTheme } from "../../lib/theme";
 import { useSession } from "../../lib/session";
@@ -40,6 +41,20 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    // The count drives a badge, so a stale one is a cosmetic problem, not a
+    // correctness one: poll gently and ignore failures.
+    const read = () =>
+      notifications
+        .list(true)
+        .then((page) => setUnread(page.unread))
+        .catch(() => {});
+    void read();
+    const timer = window.setInterval(read, 120_000);
+    return () => window.clearInterval(timer);
+  }, [location.pathname]);
+
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
   const vehicleId = location.pathname.match(/^\/vehicles\/([^/]+)/)?.[1];
   const vehicleItems = vehicleId
@@ -65,6 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/equipment", label: t("nav.equipment"), icon: "equipment" as const },
     { to: "/inspections", label: t("nav.inspections"), icon: "inspections" as const },
     { to: "/reminders", label: t("nav.reminders"), icon: "reminders" as const },
+    { to: "/notifications", label: t("notifications.title"), icon: "reminders" as const, badge: true },
     { to: "/activity", label: t("activity.title"), icon: "activity" as const },
     { to: "/trash", label: t("trash.title"), icon: "trash" as const },
     { to: "/settings", label: t("nav.settings"), icon: "settings" as const },
@@ -102,6 +118,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/" className="flex items-center gap-2">
           <Logo size={30} />
           <span className="text-lg font-bold text-ink">Rodiva</span>
+        </Link>
+        <Link
+          to="/notifications"
+          aria-label={t("notifications.title")}
+          className="relative ml-auto mr-2 grid h-9 w-9 place-items-center rounded-full border border-line text-ink"
+        >
+          <Icon name="reminders" />
+          {unread > 0 && (
+            <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-copper px-1 text-center text-[11px] font-semibold text-white">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
         </Link>
         <button
           aria-label={t("theme.toggle")}
@@ -157,6 +185,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <Icon name={item.icon} />
                 {item.label}
+                {item.badge && unread > 0 && (
+                  <span className="ml-auto rounded-full bg-copper px-2 py-0.5 text-xs font-semibold text-white">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
               </NavLink>
             ),
           )}

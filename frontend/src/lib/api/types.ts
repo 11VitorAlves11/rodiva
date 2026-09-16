@@ -505,3 +505,9 @@ export type TrashEntity =
 export type TrashItem = { entity_type: TrashEntity; entity_id: string; vehicle_id: string | null; summary: string; deleted_at: string; deleted_by: string | null; deleted_by_label: string };
 export type AuditEvent = { id: string; actor_user_id: string | null; actor_label: string; action: string; entity_type: string; entity_id: string | null; summary: string; context: Record<string, unknown> | null; created_at: string };
 export type AuditPage = { items: AuditEvent[]; next_before: string | null };
+
+export type NotificationItem = { id: string; kind: string; title: string; body: string; context: Record<string, string> | null; entity_type: string; entity_id: string | null; vehicle_id: string | null; created_at: string; read_at: string | null };
+export type NotificationPage = { items: NotificationItem[]; unread: number };
+export type NotificationUrgency = "overdue" | "very_urgent" | "urgent" | "upcoming" | "future";
+export type NotificationPreference = { channel_inapp: boolean; channel_email: boolean; min_urgency: NotificationUrgency; vehicle_ids: string[]; quiet_hours_start: number | null; quiet_hours_end: number | null };
+export type NotificationRun = { created: number; delivered: number; failed: number };

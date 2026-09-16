@@ -7,6 +7,7 @@ import { googleCalendar, household, vehicles as vehiclesApi } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type { GoogleCalendarOption, GoogleCalendarStatus, Invite, Member, Role, Vehicle } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { NotificationSettings } from "../components/settings/NotificationSettings";
 import { ApiKeySettings } from "../components/settings/ApiKeySettings";
 import { AccountSettings } from "../components/settings/AccountSettings";
 
@@ -42,6 +43,7 @@ export function Settings() {
       <GoogleCalendarSection />
 
       <AccountSettings />
+      <NotificationSettings />
       <ApiKeySettings />
 
       <button

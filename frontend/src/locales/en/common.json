@@ -645,5 +645,28 @@
       "read": "Read only",
       "write": "Read and write"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Alerts about reminders coming due.",
+    "empty": "No notifications",
+    "emptyHint": "When a reminder comes due, it shows up here.",
+    "markAllRead": "Mark all as read",
+    "unread": "Unread",
+    "saved": "Preferences saved.",
+    "settingsTitle": "Notifications",
+    "settingsDescription": "Choose what you want to hear about, and how.",
+    "channels": "Channels",
+    "channelInapp": "In the app",
+    "channelEmail": "Email",
+    "emailHint": "Email only goes out if the server has SMTP configured.",
+    "minUrgency": "Tell me from",
+    "minUrgencyHint": "You hear about this urgency and anything more pressing.",
+    "vehicles": "Vehicles",
+    "vehiclesHint": "With none selected, you hear about every vehicle.",
+    "quietHours": "Quiet hours",
+    "quietFrom": "From",
+    "quietTo": "To",
+    "quietHint": "Email is held during these hours and sent afterwards."
   }
 }

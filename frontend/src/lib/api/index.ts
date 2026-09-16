@@ -38,6 +38,9 @@ import type {
   Member,
   Note,
   NoteInput,
+  NotificationPage,
+  NotificationPreference,
+  NotificationRun,
   OdometerReading,
   TrashEntity,
   TrashItem,
@@ -299,6 +302,15 @@ export const charging = {
   create: (vehicle: string, body: ChargingInput) => request<ChargingRecord>(`/api/vehicles/${vehicle}/charging-records`, { method: "POST", body }),
   update: (vehicle: string, id: string, body: ChargingInput) => request<ChargingRecord>(`/api/vehicles/${vehicle}/charging-records/${id}`, { method: "PATCH", body }),
   remove: (vehicle: string, id: string) => request<void>(`/api/vehicles/${vehicle}/charging-records/${id}`, { method: "DELETE" }),
+};
+
+export const notifications = {
+  list: (unreadOnly = false) => request<NotificationPage>(`/api/v1/notifications${unreadOnly ? "?unread_only=true" : ""}`),
+  markRead: (id: string) => request<void>(`/api/v1/notifications/${id}/read`, { method: "POST" }),
+  markAllRead: () => request<void>("/api/v1/notifications/read-all", { method: "POST" }),
+  preferences: () => request<NotificationPreference>("/api/v1/notifications/preferences"),
+  savePreferences: (body: NotificationPreference) => request<NotificationPreference>("/api/v1/notifications/preferences", { method: "PUT", body }),
+  run: () => request<NotificationRun>("/api/v1/notifications/run", { method: "POST" }),
 };
 
 export const trash = {
