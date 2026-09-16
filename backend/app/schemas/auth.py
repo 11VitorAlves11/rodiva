@@ -1,6 +1,9 @@
 import uuid
+from datetime import datetime
+from typing import Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 from app.models.enums import Role
 
@@ -31,6 +34,7 @@ class UserOut(BaseModel):
     email: str
     name: str | None
     locale: str
+    timezone: str
 
     model_config = {"from_attributes": True}
 
@@ -44,3 +48,40 @@ class MembershipOut(BaseModel):
 class MeOut(BaseModel):
     user: UserOut
     membership: MembershipOut
+
+
+class ProfileIn(BaseModel):
+    name: str | None = Field(default=None, max_length=200)
+    locale: Literal["pt-PT", "en"] = "pt-PT"
+    timezone: str = Field(default="Europe/Lisbon", max_length=50)
+
+    @field_validator("timezone")
+    @classmethod
+    def valid_timezone(cls, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError) as exc:
+            raise ValueError("Unknown timezone") from exc
+        return value
+
+
+class PasswordIn(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=10, max_length=72)
+
+
+class SessionOut(BaseModel):
+    id: uuid.UUID
+    user_agent: str
+    created_at: datetime
+    expires_at: datetime
+    current: bool
+
+
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordIn(BaseModel):
+    token: str = Field(min_length=32, max_length=200)
+    password: str = Field(min_length=10, max_length=72)

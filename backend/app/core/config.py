@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     session_cookie_name: str = "rodiva_session"
     session_max_age: int = 60 * 60 * 24 * 14
 
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_starttls: bool = True
+
     cors_origins: list[str] = ["http://localhost:5173"]
 
     # Household defaults applied to a newly created household (RF-ADM-001).

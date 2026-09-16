@@ -1,10 +1,4 @@
-"""Password hashing and the signed session cookie.
-
-The session is stateless: a signed token carrying the user id and an issue time,
-verified on every request. No session table, no session store — one fewer service
-to run at home, at the cost of not being able to revoke a single session early
-(RF-AUT-003/RF-AUT-007 will need a revocation list when that matters).
-"""
+"""Password hashing and signed identifiers for server-side sessions."""
 
 import uuid
 from datetime import UTC, datetime
@@ -24,6 +18,10 @@ MIN_PASSWORD_LENGTH = 10
 MAX_CLOCK_SKEW_SECONDS = 60
 
 SESSION_SALT = "rodiva.session"
+GOOGLE_OAUTH_STATE_SALT = "rodiva.google_oauth_state"
+#: The OAuth round trip to Google and back should take seconds, not minutes —
+#: keep the state token's window tight since it's the CSRF binding for the flow.
+GOOGLE_OAUTH_STATE_MAX_AGE = 60 * 10
 
 
 class PasswordTooLongError(ValueError):
@@ -51,12 +49,12 @@ def _serializer() -> URLSafeTimedSerializer:
     return URLSafeTimedSerializer(get_settings().secret_key, salt=SESSION_SALT)
 
 
-def issue_session(user_id: uuid.UUID) -> str:
-    return _serializer().dumps(str(user_id))
+def issue_session(session_id: uuid.UUID) -> str:
+    return _serializer().dumps(str(session_id))
 
 
 def read_session(token: str) -> uuid.UUID | None:
-    """Return the user id carried by a valid, unexpired token, else None."""
+    """Return the session id carried by a valid, unexpired token, else None."""
     serializer = _serializer()
     max_age = get_settings().session_max_age
     try:
@@ -69,6 +67,25 @@ def read_session(token: str) -> uuid.UUID | None:
         except BadSignature:
             return None
     except BadSignature:
+        return None
+    try:
+        return uuid.UUID(str(raw))
+    except ValueError:
+        return None
+
+
+def issue_google_oauth_state(user_id: uuid.UUID) -> str:
+    """Sign a short-lived token binding a Google OAuth round trip to a user (RF-GCAL-001)."""
+    serializer = URLSafeTimedSerializer(get_settings().secret_key, salt=GOOGLE_OAUTH_STATE_SALT)
+    return serializer.dumps(str(user_id))
+
+
+def read_google_oauth_state(token: str) -> uuid.UUID | None:
+    """Return the user id bound to a valid, unexpired OAuth state token, else None."""
+    serializer = URLSafeTimedSerializer(get_settings().secret_key, salt=GOOGLE_OAUTH_STATE_SALT)
+    try:
+        raw = serializer.loads(token, max_age=GOOGLE_OAUTH_STATE_MAX_AGE)
+    except (BadSignature, SignatureExpired):
         return None
     try:
         return uuid.UUID(str(raw))
