@@ -8,9 +8,12 @@ import { ApiError } from "../lib/api/client";
 import type { Vehicle } from "../lib/api/types";
 import { ErrorState } from "../components/ui/ErrorState";
 import { Skeleton } from "../components/ui/Skeleton";
+import { useSession } from "../lib/session";
 
 export function Garage() {
   const { t } = useTranslation();
+  const { me } = useSession();
+  const canManage = me?.membership.role === "owner" || me?.membership.role === "manager";
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,17 +31,17 @@ export function Garage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-semibold text-graphite dark:text-cream">{t("garage.title")}</h1>
-        <button
+        {canManage && <button
           onClick={() => {
             setShowForm((value) => !value);
             setSearchParams({}, { replace: true });
           }}
-          className="rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark"
+          className="self-start rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark"
         >
           {t("garage.add")}
-        </button>
+        </button>}
       </div>
 
       {showForm && (

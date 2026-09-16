@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 
 import { Logo } from "../components/ui/Logo";
 import { auth } from "../lib/api";
@@ -19,6 +19,9 @@ export function Login() {
   const [householdName, setHouseholdName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const [options, setOptions] = useState({ registration: true, password_recovery: false });
+  useEffect(() => { void auth.options().then(setOptions).catch(() => {}); }, []);
 
   if (me) {
     const from = (location.state as { from?: string } | null)?.from ?? "/";
@@ -72,8 +75,9 @@ export function Login() {
           {mode === "login" ? t("login.submit") : t("register.submit")}
         </button>
 
+        {options.password_recovery && <Link to="/forgot-password" className="block text-center text-sm font-medium text-copper">{t("recovery.forgot")}</Link>}
         <p className="text-center text-sm text-graphite/50">
-          {mode === "login" ? (
+          {mode === "login" && options.registration ? (
             <>
               {t("login.noAccount")}{" "}
               <button type="button" className="font-medium text-copper" onClick={() => setMode("register")}>

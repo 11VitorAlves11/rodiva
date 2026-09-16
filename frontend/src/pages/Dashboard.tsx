@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { ArrowRightIcon, PlusIcon } from "@heroicons/react/20/solid";
 
 import { ErrorState } from "../components/ui/ErrorState";
 import { Skeleton } from "../components/ui/Skeleton";
-import { expenses, fuel, odometer, reminders, vehicles, workRecords } from "../lib/api";
+import { charging, expenses, fuel, odometer, reminders, vehicles, workRecords } from "../lib/api";
+import { NAV_ICONS } from "../lib/icons";
 import { useSession } from "../lib/session";
 import type {
+  ChargingRecord,
   ExpenseRecord,
   FuelRecord,
   OdometerReading,
@@ -19,19 +22,13 @@ type VehicleSummary = {
   vehicle: Vehicle;
   readings: OdometerReading[];
   fuel: FuelRecord[];
+  charging: ChargingRecord[];
   work: WorkRecord[];
   expenses: ExpenseRecord[];
   reminders: Reminder[];
 };
 
-type Activity = { id: string; kind: "fuel" | "work" | "expenses" | "odometer"; date: string; title: string; detail: string; value: string };
-
-const activityIcons: Record<Activity["kind"], string> = {
-  fuel: "M6 3h9v18H6V3Zm2 2v5h5V5H8Zm11 2 2 2v8a2 2 0 0 1-4 0v-4h-2v-2h4V9l-1.5-1.5L19 7Z",
-  work: "M14.7 6.3a4 4 0 0 0-5-5L12 3.6 9.6 6 7.3 3.7a4 4 0 0 0 5 5L4 17l3 3 8.3-8.3a4 4 0 0 0-.6-5.4Z",
-  expenses: "M3 6h18v13H3V6Zm2 3v7h14V9H5Zm7 1a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z",
-  odometer: "M12 4a8 8 0 1 0 8 8 8 8 0 0 0-8-8Zm0 2a6 6 0 0 1 5.2 9H6.8A6 6 0 0 1 12 6Zm0 2-3 5h6l-3-5Z",
-};
+type Activity = { id: string; kind: "charging" | "fuel" | "work" | "expenses" | "odometer"; date: string; title: string; detail: string; value: string };
 
 const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
@@ -60,14 +57,15 @@ export function Dashboard() {
       .then(async (items) =>
         Promise.all(
           items.map(async (vehicle) => {
-            const [readings, fuelRecords, work, expenseRecords, reminderRecords] = await Promise.all([
+            const [readings, fuelRecords, work, expenseRecords, reminderRecords, charges] = await Promise.all([
               odometer.list(vehicle.id),
               fuel.list(vehicle.id),
               workRecords.list(vehicle.id),
               expenses.list(vehicle.id),
               reminders.list(vehicle.id),
+              charging.list(vehicle.id),
             ]);
-            return { vehicle, readings, fuel: fuelRecords, work, expenses: expenseRecords, reminders: reminderRecords };
+            return { vehicle, readings, charging: charges, fuel: fuelRecords, work, expenses: expenseRecords, reminders: reminderRecords };
           }),
         ),
       )
@@ -98,6 +96,7 @@ export function Dashboard() {
       return parsed.getFullYear() === now.getFullYear() && parsed.getMonth() === now.getMonth();
     };
     const monthCost =
+      primary.charging.filter((item) => inCurrentMonth(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_cost), 0) +
       primary.fuel.filter((item) => inCurrentMonth(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_price), 0) +
       primary.work.filter((item) => inCurrentMonth(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_cost ?? 0), 0) +
       primary.expenses
@@ -105,6 +104,7 @@ export function Dashboard() {
         .reduce((sum, item) => sum + Number(item.amount), 0);
 
     const activities: Activity[] = [
+      ...primary.charging.map((item) => ({ id: `charging-${item.id}`, kind: "charging" as const, date: item.recorded_on, title: t("charging.title"), detail: item.location ?? "", value: currency(Number(item.total_cost)) })),
       ...primary.fuel.map((item) => ({
         id: `fuel-${item.id}`,
         kind: "fuel" as const,
@@ -137,6 +137,7 @@ export function Dashboard() {
         return parsed.getFullYear() === year && parsed.getMonth() === month;
       };
       return (
+        primary.charging.filter((item) => of(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_cost), 0) +
         primary.fuel.filter((item) => of(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_price), 0) +
         primary.work.filter((item) => of(item.recorded_on)).reduce((sum, item) => sum + Number(item.total_cost ?? 0), 0) +
         primary.expenses
@@ -152,7 +153,9 @@ export function Dashboard() {
   }, [summaries, selected, year, currency, t]);
 
   if (error) return <ErrorState onRetry={load} />;
-  if (!summaries || !data) return <Skeleton lines={8} />;
+  if (!summaries) return <Skeleton lines={8} />;
+  if (!summaries.length) return <div className="space-y-4 rounded-xl border border-dashed border-graphite/20 p-8 text-center"><h1 className="text-xl font-semibold">{t("dashboard.noVehicles")}</h1><Link to="/garage?new=1" className="text-copper">{t("garage.add")}</Link></div>;
+  if (!data) return <Skeleton lines={8} />;
 
   const primary = summaries[selected];
   const scaleMax = niceScaleMax(Math.max(...data.monthlyTotals));
@@ -171,8 +174,9 @@ export function Dashboard() {
             {t("dashboard.greeting", { name: me?.user.name?.split(" ")[0] ?? me?.user.email })}
           </p>
         </div>
-        <Link to="/garage?new=1" className="hidden rounded-lg bg-copper px-5 py-3 text-sm font-semibold text-white hover:bg-copper-dark md:block">
-          ＋ {t("dashboard.addRecord")}
+        <Link to="/garage?new=1" className="hidden items-center gap-1.5 rounded-lg bg-copper px-5 py-3 text-sm font-semibold text-white hover:bg-copper-dark md:inline-flex">
+          <PlusIcon aria-hidden="true" className="h-4 w-4" />
+          {t("dashboard.addRecord")}
         </Link>
       </div>
 
@@ -242,18 +246,21 @@ export function Dashboard() {
             <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.recentHistory")}</h2>
-                <Link to="/history" className="text-sm font-medium text-copper">
-                  {t("dashboard.viewAll")} →
+                <Link to="/history" className="inline-flex items-center gap-1 text-sm font-medium text-copper">
+                  {t("dashboard.viewAll")}
+                  <ArrowRightIcon aria-hidden="true" className="h-3.5 w-3.5" />
                 </Link>
               </div>
               {data.activities.length === 0 ? (
                 <p className="py-4 text-sm text-graphite/50 dark:text-cream/50">{t("history.empty")}</p>
               ) : (
                 <ul className="divide-y divide-graphite/5 dark:divide-white/5">
-                  {data.activities.slice(0, 5).map((item) => (
+                  {data.activities.slice(0, 5).map((item) => {
+                    const ActivityIcon = NAV_ICONS[item.kind];
+                    return (
                     <li key={item.id} className="flex items-center gap-3 py-3">
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-copper/10 text-copper dark:bg-copper/20 dark:text-copper-bright">
-                        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current"><path d={activityIcons[item.kind]} /></svg>
+                        <ActivityIcon aria-hidden="true" className="h-4 w-4" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-graphite dark:text-cream">{item.title}</p>
@@ -264,7 +271,8 @@ export function Dashboard() {
                       </div>
                       <span className="shrink-0 text-sm font-medium text-graphite/70 dark:text-cream/70">{item.value}</span>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               )}
             </section>
@@ -325,8 +333,9 @@ export function Dashboard() {
             <section className="rounded-xl border border-graphite/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-surface-dark-raised">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold text-graphite dark:text-cream">{t("dashboard.upcomingMaintenance")}</h2>
-                <Link to="/reminders" className="text-sm font-medium text-copper">
-                  {t("dashboard.viewAll")} →
+                <Link to="/reminders" className="inline-flex items-center gap-1 text-sm font-medium text-copper">
+                  {t("dashboard.viewAll")}
+                  <ArrowRightIcon aria-hidden="true" className="h-3.5 w-3.5" />
                 </Link>
               </div>
               {data.upcoming.length === 0 ? (
