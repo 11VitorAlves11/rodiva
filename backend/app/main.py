@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from app.api.errors import install_error_handlers
 from app.api.routes import (
     attachments,
     auth,
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title=f"{settings.app_name} API", version="0.1.0", lifespan=lifespan)
+install_error_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,18 +42,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health.router, prefix="/api")
+# Preserve existing clients while making v1 the documented integration API.
+for resource in [
+    health,
+    households,
+    vehicles,
+    odometer,
+    fuel,
+    work_records,
+    expenses,
+    reminders,
+    notes,
+    attachments,
+]:
+    app.include_router(resource.router, prefix="/api", include_in_schema=False)
+    app.include_router(resource.router, prefix="/api/v1")
 app.include_router(auth.router)
-app.include_router(households.router, prefix="/api")
-app.include_router(vehicles.router, prefix="/api")
-app.include_router(odometer.router, prefix="/api")
-app.include_router(fuel.router, prefix="/api")
-app.include_router(work_records.router, prefix="/api")
-app.include_router(expenses.router, prefix="/api")
-app.include_router(reminders.router, prefix="/api")
-app.include_router(notes.router, prefix="/api")
-app.include_router(attachments.router, prefix="/api")
 app.mount("/storage", StaticFiles(directory=settings.storage_path, check_dir=False), name="storage")
+app.include_router(storage.router)
 
 
 @app.get("/api")
