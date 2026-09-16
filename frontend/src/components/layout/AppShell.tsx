@@ -1,32 +1,17 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 
+import { NAV_ICONS } from "../../lib/icons";
+import { useTheme } from "../../lib/theme";
 import { useSession } from "../../lib/session";
 import { Logo } from "../ui/Logo";
 
-const paths = {
-  garage: "m3 11 2-5h14l2 5v8h-3v-2H6v2H3v-8Zm3.5-3-1.2 3h13.4l-1.2-3h-11ZM7 14a1 1 0 1 0 0 .01V14Zm10 0a1 1 0 1 0 0 .01V14Z",
-  history: "M12 4a8 8 0 1 1-7.4 5H2l3.5-4L9 9H6.7A6 6 0 1 0 12 6V4Zm-1 4h2v5H9v-2h2V8Z",
-  reminders: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm7-6v-5a7 7 0 0 0-6-6.9V2h-2v2.1A7 7 0 0 0 5 11v5l-2 2h18l-2-2Z",
-  settings: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm8.4 4a7.9 7.9 0 0 0-.15-1.5l2.1-1.6-2-3.5-2.5 1a8 8 0 0 0-2.6-1.5L14.8 2H9.2l-.45 2.9a8 8 0 0 0-2.6 1.5l-2.5-1-2 3.5 2.1 1.6a7.9 7.9 0 0 0 0 3l-2.1 1.6 2 3.5 2.5-1a8 8 0 0 0 2.6 1.5l.45 2.9h5.6l.45-2.9a8 8 0 0 0 2.6-1.5l2.5 1 2-3.5-2.1-1.6c.1-.5.15-1 .15-1.5Z",
-  more: "M12 6.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 7.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 7.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z",
-  plus: "M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z",
-  fuel: "M6 3h9v18H6V3Zm2 2v5h5V5H8Zm11 2 2 2v8a2 2 0 0 1-4 0v-4h-2v-2h4V9l-1.5-1.5L19 7Z",
-  odometer: "M12 4a8 8 0 1 0 8 8 8 8 0 0 0-8-8Zm0 2a6 6 0 0 1 5.2 9H6.8A6 6 0 0 1 12 6Zm0 2-3 5h6l-3-5Z",
-  work: "M14.7 6.3a4 4 0 0 0-5-5L12 3.6 9.6 6 7.3 3.7a4 4 0 0 0 5 5L4 17l3 3 8.3-8.3a4 4 0 0 0-.6-5.4Z",
-  expenses: "M3 6h18v13H3V6Zm2 3v7h14V9H5Zm7 1a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z",
-  notes: "M5 3h14v18H5V3Zm3 4v2h8V7H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z",
-  documents: "M6 2h9l4 4v16H6V2Zm8 2v4h4M9 12h6M9 16h6",
-};
-
-function Icon({ name, className = "h-5 w-5" }: { name: keyof typeof paths; className?: string }) {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className={`${className} fill-current`}>
-      <path d={paths[name]} />
-    </svg>
-  );
+function Icon({ name, className = "h-5 w-5" }: { name: keyof typeof NAV_ICONS; className?: string }) {
+  const Component = NAV_ICONS[name];
+  return <Component aria-hidden="true" className={className} />;
 }
 
 function initials(name: string | null | undefined, email: string) {
@@ -40,16 +25,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { me, signOut } = useSession();
   const location = useLocation();
-  const [theme, setTheme] = useState<"light" | "dark">(
-    () => (localStorage.getItem("rodiva-theme") === "dark" ? "dark" : "light"),
-  );
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const { resolved: theme, setTheme } = useTheme();
   const [online, setOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    localStorage.setItem("rodiva-theme", theme);
-  }, [theme]);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -61,10 +40,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const toggleTheme = () => setTheme((value) => (value === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
   const vehicleId = location.pathname.match(/^\/vehicles\/([^/]+)/)?.[1];
   const vehicleItems = vehicleId
-    ? (["fuel", "odometer", "work", "expenses", "notes", "documents"] as const).map((name) => ({
+    ? (["fuel", "charging", "odometer", "work", "expenses", "notes", "documents"] as const).map((name) => ({
         name,
         to: `/vehicles/${vehicleId}?section=${name}`,
         label: t(`${name}.title`),
@@ -88,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   ];
   const mobileTabsAfterFab = [
     { to: "/reminders", label: t("nav.reminders"), icon: "reminders" as const, end: false },
-    { to: "/settings", label: t("nav.more"), icon: "more" as const, end: false },
+    { to: "/more", label: t("nav.more"), icon: "more" as const, end: false },
   ];
 
   const sidebarLinkClass = (active: boolean) =>
@@ -103,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     }`;
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="flex min-h-screen min-w-0 flex-col md:flex-row">
       {!online && (
         <div
           role="status"
@@ -113,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <header className="flex items-center justify-between border-b border-graphite/10 bg-cream px-4 py-4 dark:border-white/10 dark:bg-surface-dark md:hidden">
+      <header className="safe-header flex items-center justify-between border-b border-graphite/10 bg-cream pb-4 dark:border-white/10 dark:bg-surface-dark md:hidden">
         <Link to="/" className="flex items-center gap-2">
           <Logo size={30} />
           <span className="text-lg font-bold text-graphite dark:text-cream">Rodiva</span>
@@ -121,9 +100,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <button
           aria-label={t("theme.toggle")}
           onClick={toggleTheme}
-          className="grid h-9 w-9 place-items-center rounded-full border border-graphite/15 text-lg text-graphite dark:border-white/15 dark:text-cream"
+          className="grid h-9 w-9 place-items-center rounded-full border border-graphite/15 text-graphite dark:border-white/15 dark:text-cream"
         >
-          {theme === "dark" ? "☀" : "☾"}
+          {theme === "dark" ? <SunIcon aria-hidden="true" className="h-5 w-5" /> : <MoonIcon aria-hidden="true" className="h-5 w-5" />}
         </button>
       </header>
 
@@ -137,6 +116,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
           </div>
         </Link>
+
+        <form onSubmit={(event) => { event.preventDefault(); if (searchTerm.trim().length >= 2) navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`); }} className="mb-4">
+          <label className="relative block">
+            <span className="sr-only">{t("search.placeholder")}</span>
+            <Icon name="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-graphite/40 dark:text-cream/40" />
+            <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder={t("search.placeholder")} className="w-full rounded-lg border border-graphite/10 bg-graphite/[.03] py-2.5 pl-9 pr-3 text-sm dark:border-white/10 dark:bg-white/[.04]" />
+          </label>
+        </form>
 
         <nav className="space-y-1">
           {primary.slice(0, 2).map((item) => (
@@ -155,6 +142,30 @@ export function AppShell({ children }: { children: ReactNode }) {
               {item.label}
             </Link>
           ))}
+          <NavLink to="/planner" className={({ isActive }) => sidebarLinkClass(isActive)}>
+            <Icon name="planner" />
+            {t("nav.planner")}
+          </NavLink>
+          <NavLink to="/calendar" className={({ isActive }) => sidebarLinkClass(isActive)}>
+            <Icon name="calendar" />
+            {t("nav.calendar")}
+          </NavLink>
+          <NavLink to="/reports" className={({ isActive }) => sidebarLinkClass(isActive)}>
+            <Icon name="reports" />
+            {t("nav.reports")}
+          </NavLink>
+          <NavLink to="/inventory" className={({ isActive }) => sidebarLinkClass(isActive)}>
+            <Icon name="inventory" />
+            {t("nav.inventory")}
+          </NavLink>
+          <NavLink to="/equipment" className={({ isActive }) => sidebarLinkClass(isActive)}>
+            <Icon name="equipment" />
+            {t("nav.equipment")}
+          </NavLink>
+          <NavLink to="/inspections" className={({ isActive }) => sidebarLinkClass(isActive)}>
+            <Icon name="inspections" />
+            {t("nav.inspections")}
+          </NavLink>
           {primary.slice(2).map((item) => (
             <NavLink key={item.to} end={item.end} to={item.to} className={({ isActive }) => sidebarLinkClass(isActive)}>
               <Icon name={item.icon} />
@@ -200,7 +211,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 md:pb-6">
+      <main className="safe-content mx-auto min-w-0 w-full max-w-6xl flex-1 pt-5 md:py-6">
         {!online && (
           <div role="status" className="mb-4 rounded-lg bg-copper-bright/20 px-4 py-3 text-sm font-medium text-copper-dark dark:text-copper-bright">
             {t("network.offline")}
@@ -209,7 +220,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 items-center border-t border-graphite/10 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-white/10 dark:bg-surface-dark/95 md:hidden">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 items-center border-t border-graphite/10 bg-white/95 backdrop-blur dark:border-white/10 dark:bg-surface-dark/95 md:hidden">
         {mobileTabs.map((item) => (
           <NavLink key={item.to} end={item.end} to={item.to} className={({ isActive }) => mobileTabClass(isActive)}>
             <Icon name={item.icon} />

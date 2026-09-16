@@ -23,6 +23,65 @@ body {
   color: var(--color-graphite);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+html {
+  min-width: 320px;
+  -webkit-text-size-adjust: 100%;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.safe-header {
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-left: max(1rem, env(safe-area-inset-left));
+}
+
+.safe-content {
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  padding-left: max(1rem, env(safe-area-inset-left));
+}
+
+.safe-bottom {
+  min-height: calc(4.25rem + env(safe-area-inset-bottom));
+  padding-right: max(0.5rem, env(safe-area-inset-right));
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: max(0.5rem, env(safe-area-inset-left));
+}
+
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  button,
+  label[role="button"] {
+    min-height: 44px;
+  }
+}
+
+@media (min-width: 768px) {
+  .safe-content {
+    padding-right: 1rem;
+    padding-bottom: 1.5rem;
+    padding-left: 1rem;
+  }
 }
 
 html[data-theme="dark"] body {
@@ -40,7 +99,8 @@ html[data-theme="dark"] .text-slate-700 { color: var(--color-cream) !important; 
 html[data-theme="dark"] .border-slate-200,
 html[data-theme="dark"] .border-slate-300 { border-color: var(--color-surface-dark-line) !important; }
 html[data-theme="dark"] input,
-html[data-theme="dark"] select { background-color: var(--color-surface-dark-raised) !important; color: var(--color-cream); }
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea { background-color: var(--color-surface-dark-raised) !important; color: var(--color-cream); }
 
 :focus-visible {
   outline: 2px solid var(--color-copper-bright);
