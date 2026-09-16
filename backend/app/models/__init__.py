@@ -2,6 +2,7 @@ from app.models.account_recovery import AuthThrottle, PasswordReset
 from app.models.attachment import Attachment
 from app.models.auth_session import AuthSession
 from app.models.base import Base
+from app.models.calendar_feed import CalendarFeed
 from app.models.enums import Role, VehicleStatus
 from app.models.expense_record import ExpenseRecord
 from app.models.fuel_record import FuelRecord
@@ -24,6 +25,7 @@ __all__ = [
     "AuthThrottle",
     "PasswordReset",
     "Base",
+    "CalendarFeed",
     "CalendarSyncEvent",
     "ExpenseRecord",
     "FuelRecord",

@@ -8,6 +8,7 @@ from app.api.errors import install_error_handlers
 from app.api.routes import (
     attachments,
     auth,
+    calendar,
     expenses,
     fuel,
     health,
@@ -47,6 +48,7 @@ app.add_middleware(
 # Preserve existing clients while making v1 the documented integration API.
 for resource in [
     health,
+    calendar,
     households,
     inventory,
     vehicles,
