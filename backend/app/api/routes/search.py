@@ -20,6 +20,7 @@ from app.api.routes import inventory as inventory_routes
 from app.api.routes import notes as notes_routes
 from app.api.routes import plans as plans_routes
 from app.api.routes import work_records as work_records_routes
+from app.db.filters import active
 from app.models import (
     Equipment,
     ExpenseRecord,
@@ -269,18 +270,21 @@ async def global_search(
     if _wants("fuel"):
         fuel_query = select(FuelRecord).where(
             FuelRecord.vehicle_id.in_(household_vehicle_ids),
+            active(FuelRecord),
             _matches(FuelRecord.station, FuelRecord.fuel_type, FuelRecord.notes, term=term),
         )
         queries.append(("fuel", _dated(fuel_query, FuelRecord.recorded_on).limit(per_kind_limit)))
     if _wants("work"):
         work_query = select(WorkRecord).where(
             WorkRecord.vehicle_id.in_(household_vehicle_ids),
+            active(WorkRecord),
             _matches(WorkRecord.description, WorkRecord.supplier, WorkRecord.notes, term=term),
         )
         queries.append(("work", _dated(work_query, WorkRecord.recorded_on).limit(per_kind_limit)))
     if _wants("expense"):
         expense_query = select(ExpenseRecord).where(
             ExpenseRecord.vehicle_id.in_(household_vehicle_ids),
+            active(ExpenseRecord),
             _matches(ExpenseRecord.category, ExpenseRecord.supplier, term=term),
         )
         queries.append(
@@ -289,12 +293,14 @@ async def global_search(
     if _wants("note"):
         note_query = select(Note).where(
             Note.vehicle_id.in_(household_vehicle_ids),
+            active(Note),
             _matches(Note.title, Note.content, term=term),
         )
         queries.append(("note", _dated(note_query, Note.created_at).limit(per_kind_limit)))
     if _wants("plan"):
         plan_query = select(Plan).where(
             Plan.vehicle_id.in_(household_vehicle_ids),
+            active(Plan),
             _matches(Plan.description, Plan.notes, term=term),
         )
         plan_date = func.coalesce(Plan.due_date, sql_cast(Plan.created_at, Date))
@@ -348,7 +354,9 @@ async def global_search(
     found = {entity_kind: list(await db.scalars(query)) for entity_kind, query in queries}
     vehicle_names = {
         item.id: item.name
-        for item in await db.scalars(select(Vehicle).where(Vehicle.id.in_(household_vehicle_ids)))
+        for item in await db.scalars(
+            select(Vehicle).where(Vehicle.id.in_(household_vehicle_ids), active(Vehicle))
+        )
     }
 
     results: list[SearchResult] = [_vehicle_result(item) for item in vehicles]
@@ -642,7 +650,9 @@ async def _bulk_export(
     )
     vehicle_names = {
         item.id: item.name
-        for item in await db.scalars(select(Vehicle).where(Vehicle.id.in_(household_vehicle_ids)))
+        for item in await db.scalars(
+            select(Vehicle).where(Vehicle.id.in_(household_vehicle_ids), active(Vehicle))
+        )
     }
     output = io.StringIO(newline="")
     writer = csv.writer(output)

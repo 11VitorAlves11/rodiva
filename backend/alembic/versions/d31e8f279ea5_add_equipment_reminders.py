@@ -18,9 +18,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     op.add_column("reminders", sa.Column("equipment_id", sa.Uuid(), nullable=True))
-    op.create_index(
-        op.f("ix_reminders_equipment_id"), "reminders", ["equipment_id"], unique=False
-    )
+    op.create_index(op.f("ix_reminders_equipment_id"), "reminders", ["equipment_id"], unique=False)
     op.create_foreign_key(
         "reminders_equipment_id_fkey",
         "reminders",

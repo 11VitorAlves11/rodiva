@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Query, Response
 from sqlalchemy import select
 
 from app.api.deps import AppSettings, CurrentMembership, DbSession
+from app.db.filters import active
 from app.models import (
     Attachment,
     ChargingRecord,
@@ -97,19 +98,29 @@ async def report_summary(
     charging_items = list(
         await db.scalars(
             _date_filter(
-                select(ChargingRecord).where(ChargingRecord.vehicle_id.in_(selected_ids)),
+                select(ChargingRecord).where(
+                    ChargingRecord.vehicle_id.in_(selected_ids), active(ChargingRecord)
+                ),
                 ChargingRecord.recorded_on,
                 date_from,
                 date_to,
             )
         )
     )
-    fuel_query = select(FuelRecord).where(FuelRecord.vehicle_id.in_(selected_ids))
-    work_query = select(WorkRecord).where(WorkRecord.vehicle_id.in_(selected_ids))
-    expense_query = select(ExpenseRecord).where(
-        ExpenseRecord.vehicle_id.in_(selected_ids), ExpenseRecord.status == "paid"
+    fuel_query = select(FuelRecord).where(
+        FuelRecord.vehicle_id.in_(selected_ids), active(FuelRecord)
     )
-    odometer_query = select(OdometerReading).where(OdometerReading.vehicle_id.in_(selected_ids))
+    work_query = select(WorkRecord).where(
+        WorkRecord.vehicle_id.in_(selected_ids), active(WorkRecord)
+    )
+    expense_query = select(ExpenseRecord).where(
+        ExpenseRecord.vehicle_id.in_(selected_ids),
+        active(ExpenseRecord),
+        ExpenseRecord.status == "paid",
+    )
+    odometer_query = select(OdometerReading).where(
+        OdometerReading.vehicle_id.in_(selected_ids), active(OdometerReading)
+    )
     fuel_items = list(
         await db.scalars(_date_filter(fuel_query, FuelRecord.recorded_on, date_from, date_to))
     )
@@ -134,6 +145,7 @@ async def report_summary(
         await db.scalars(
             select(Reminder).where(
                 Reminder.vehicle_id.in_(selected_ids),
+                active(Reminder),
                 Reminder.completed_at.is_(None),
                 Reminder.due_date.is_not(None),
                 Reminder.due_date < today,
@@ -324,7 +336,9 @@ async def export_attachments_zip(
     seen_names: set[str] = set()
     with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
         for vehicle in selected:
-            query = select(Attachment).where(Attachment.vehicle_id == vehicle.id)
+            query = select(Attachment).where(
+                Attachment.vehicle_id == vehicle.id, active(Attachment)
+            )
             query = _date_filter(query, Attachment.created_at, date_from, date_to)
             attachments = list(
                 await db.scalars(query.order_by(Attachment.created_at, Attachment.id))

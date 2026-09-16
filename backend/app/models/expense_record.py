@@ -6,9 +6,10 @@ from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.mixins import SoftDelete
 
 
-class ExpenseRecord(Base):
+class ExpenseRecord(Base, SoftDelete):
     __tablename__ = "expense_records"
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     vehicle_id: Mapped[uuid.UUID] = mapped_column(

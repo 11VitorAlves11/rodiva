@@ -1,6 +1,7 @@
 from app.models.account_recovery import AuthThrottle, PasswordReset
 from app.models.api_key import ApiKey
 from app.models.attachment import Attachment
+from app.models.audit_event import AuditEvent
 from app.models.auth_session import AuthSession
 from app.models.base import Base
 from app.models.calendar_feed import CalendarFeed
@@ -28,6 +29,7 @@ from app.models.work_record import WorkRecord
 __all__ = [
     "ApiKey",
     "Attachment",
+    "AuditEvent",
     "AuthSession",
     "AuthThrottle",
     "PasswordReset",

@@ -101,9 +101,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_index(op.f("ix_calendar_sync_events_reminder_id"), table_name="calendar_sync_events")
-    op.drop_index(
-        op.f("ix_calendar_sync_events_connection_id"), table_name="calendar_sync_events"
-    )
+    op.drop_index(op.f("ix_calendar_sync_events_connection_id"), table_name="calendar_sync_events")
     op.drop_table("calendar_sync_events")
     op.drop_index(
         op.f("ix_google_calendar_connections_household_id"),

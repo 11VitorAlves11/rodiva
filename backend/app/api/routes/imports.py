@@ -16,6 +16,7 @@ from sqlalchemy import select
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.fuel import _recalculate_consumption
 from app.api.routes.odometer import _recalculate, _vehicle_in_household
+from app.db.filters import active
 from app.models import ExpenseRecord, FuelRecord, Note, OdometerReading, Role, Vehicle, WorkRecord
 from app.models.import_batch import ImportBatch
 from app.schemas.expenses import ExpenseRecordIn
@@ -174,7 +175,9 @@ async def execute(
         ).encode()
     ).hexdigest()
     # Serialize concurrent imports for the same vehicle before the deduplication check.
-    await db.scalar(select(Vehicle).where(Vehicle.id == payload.vehicle_id).with_for_update())
+    await db.scalar(
+        select(Vehicle).where(Vehicle.id == payload.vehicle_id, active(Vehicle)).with_for_update()
+    )
     previous = await db.scalar(
         select(ImportBatch).where(
             ImportBatch.vehicle_id == payload.vehicle_id, ImportBatch.fingerprint == fingerprint

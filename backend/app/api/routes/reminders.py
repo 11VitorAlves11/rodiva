@@ -6,12 +6,14 @@ from sqlalchemy import func, select
 
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
+from app.db.filters import active, mark_deleted
 from app.models import OdometerReading, Reminder, Role
 from app.schemas.reminders import ReminderIn, ReminderOut, ReminderUpdate, Urgency
+from app.services import audit
 from app.services.google_calendar import (
-    pending_deletions_for,
     sync_reminder,
     sync_reminder_deletion,
+    take_pending_deletions,
 )
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/reminders", tags=["reminders"])
@@ -45,7 +47,7 @@ async def _current_odometer(vehicle_id: uuid.UUID, db: DbSession) -> int:
     return (
         await db.scalar(
             select(func.max(OdometerReading.reading)).where(
-                OdometerReading.vehicle_id == vehicle_id
+                OdometerReading.vehicle_id == vehicle_id, active(OdometerReading)
             )
         )
         or 0
@@ -56,7 +58,7 @@ async def _reminder_for_vehicle(
     vehicle_id: uuid.UUID, reminder_id: uuid.UUID, db: DbSession
 ) -> Reminder:
     reminder = await db.get(Reminder, reminder_id)
-    if reminder is None or reminder.vehicle_id != vehicle_id:
+    if reminder is None or reminder.vehicle_id != vehicle_id or reminder.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reminder not found")
     return reminder
 
@@ -76,7 +78,7 @@ async def list_reminders(
     current = await _current_odometer(vehicle_id, db)
     result = await db.scalars(
         select(Reminder)
-        .where(Reminder.vehicle_id == vehicle_id)
+        .where(Reminder.vehicle_id == vehicle_id, active(Reminder))
         .order_by(Reminder.created_at.desc())
     )
     order = {
@@ -210,6 +212,7 @@ async def reopen_reminder(
 async def delete_reminder(
     vehicle_id: uuid.UUID,
     reminder_id: uuid.UUID,
+    user: CurrentUser,
     membership: CurrentMembership,
     db: DbSession,
     background_tasks: BackgroundTasks,
@@ -217,9 +220,19 @@ async def delete_reminder(
     await _vehicle_in_household(vehicle_id, membership, db)
     _require_write_access(membership)
     reminder = await _reminder_for_vehicle(vehicle_id, reminder_id, db)
-    # Captured before the delete: calendar_sync_events cascades away with the
-    # reminder, so this is the last point anything can still read those rows.
-    pending = await pending_deletions_for(reminder_id, db)
-    await db.delete(reminder)
+    # Reads the sync rows and drops them: a background task runs after the
+    # response, by which point it could no longer read them itself.
+    pending = await take_pending_deletions(reminder_id, db)
+    mark_deleted(reminder, user.id)
+    audit.record_record_action(
+        db,
+        membership=membership,
+        actor=user,
+        action=audit.RECORD_DELETED,
+        entity_type="reminder",
+        entity_id=reminder.id,
+        vehicle_id=vehicle_id,
+        summary=reminder.title,
+    )
     await db.commit()
     background_tasks.add_task(sync_reminder_deletion, pending)

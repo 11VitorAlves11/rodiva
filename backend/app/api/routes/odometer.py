@@ -7,8 +7,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
+from app.db.filters import active, mark_deleted
 from app.models import OdometerReading, Role, Vehicle
 from app.schemas.odometer import OdometerReadingIn, OdometerReadingOut, OdometerReadingUpdate
+from app.services import audit
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/odometer-readings", tags=["odometer"])
 
@@ -33,7 +35,7 @@ async def _recalculate(vehicle_id: uuid.UUID, db: AsyncSession) -> list[Odometer
     """
     result = await db.scalars(
         select(OdometerReading)
-        .where(OdometerReading.vehicle_id == vehicle_id)
+        .where(OdometerReading.vehicle_id == vehicle_id, active(OdometerReading))
         .order_by(OdometerReading.recorded_on, OdometerReading.id)
         .with_for_update()
     )
@@ -68,7 +70,7 @@ async def list_readings(
     await _vehicle_in_household(vehicle_id, membership, db)
     result = await db.scalars(
         select(OdometerReading)
-        .where(OdometerReading.vehicle_id == vehicle_id)
+        .where(OdometerReading.vehicle_id == vehicle_id, active(OdometerReading))
         .order_by(OdometerReading.recorded_on.desc(), OdometerReading.id.desc())
     )
     return list(result)
@@ -100,7 +102,7 @@ async def _reading_in_vehicle(
     vehicle_id: uuid.UUID, reading_id: uuid.UUID, db: AsyncSession
 ) -> OdometerReading:
     reading = await db.get(OdometerReading, reading_id)
-    if reading is None or reading.vehicle_id != vehicle_id:
+    if reading is None or reading.vehicle_id != vehicle_id or reading.deleted_at is not None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Odometer reading not found"
         )
@@ -138,6 +140,7 @@ async def update_reading(
 async def delete_reading(
     vehicle_id: uuid.UUID,
     reading_id: uuid.UUID,
+    user: CurrentUser,
     membership: CurrentMembership,
     db: DbSession,
 ) -> None:
@@ -147,7 +150,17 @@ async def delete_reading(
             status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot delete records"
         )
     reading = await _reading_in_vehicle(vehicle_id, reading_id, db)
-    await db.delete(reading)
+    mark_deleted(reading, user.id)
+    audit.record_record_action(
+        db,
+        membership=membership,
+        actor=user,
+        action=audit.RECORD_DELETED,
+        entity_type="odometer_reading",
+        entity_id=reading.id,
+        vehicle_id=vehicle_id,
+        summary=f"{reading.reading} on {reading.recorded_on}",
+    )
     await db.flush()
     await _recalculate(vehicle_id, db)
     await db.commit()

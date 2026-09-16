@@ -8,6 +8,7 @@ from app.api.errors import install_error_handlers
 from app.api.routes import (
     api_keys,
     attachments,
+    audit,
     auth,
     calendar,
     charging,
@@ -26,6 +27,7 @@ from app.api.routes import (
     reports,
     search,
     storage,
+    trash,
     vehicles,
     work_records,
 )
@@ -55,6 +57,7 @@ app.add_middleware(
 # Preserve existing clients while making v1 the documented integration API.
 for resource in [
     api_keys,
+    audit,
     charging,
     imports,
     health,
@@ -74,6 +77,7 @@ for resource in [
     search,
     notes,
     attachments,
+    trash,
 ]:
     app.include_router(resource.router, prefix="/api", include_in_schema=False)
     app.include_router(resource.router, prefix="/api/v1")

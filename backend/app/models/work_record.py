@@ -6,9 +6,10 @@ from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, fun
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.mixins import SoftDelete
 
 
-class WorkRecord(Base):
+class WorkRecord(Base, SoftDelete):
     """Preventive maintenance, repair, or modification (spec §9)."""
 
     __tablename__ = "work_records"

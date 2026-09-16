@@ -6,9 +6,10 @@ from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, fun
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.mixins import SoftDelete
 
 
-class FuelRecord(Base):
+class FuelRecord(Base, SoftDelete):
     """Fuel fill-up and its calculated consumption (spec §8.1)."""
 
     __tablename__ = "fuel_records"

@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
 from app.api.routes.reminders import _current_odometer, _out
+from app.db.filters import active
 from app.models import Equipment, MountPeriod, OdometerReading, Reminder, Role, TireRotation
 from app.schemas.equipment import (
     EquipmentIn,
@@ -46,7 +47,9 @@ async def _open_reminders_counts(
         return {}
     rows = await db.execute(
         select(Reminder.equipment_id, func.count())
-        .where(Reminder.equipment_id.in_(equipment_ids), Reminder.status == "active")
+        .where(
+            Reminder.equipment_id.in_(equipment_ids), active(Reminder), Reminder.status == "active"
+        )
         .group_by(Reminder.equipment_id)
     )
     return {equipment_id: count for equipment_id, count in rows.all() if equipment_id is not None}
@@ -61,7 +64,9 @@ def _equipment_out(item: Equipment, open_reminders_count: int) -> EquipmentOut:
 
 async def recalculate_equipment_distance(vehicle_id: uuid.UUID, db: DbSession) -> None:
     current = await db.scalar(
-        select(func.max(OdometerReading.reading)).where(OdometerReading.vehicle_id == vehicle_id)
+        select(func.max(OdometerReading.reading)).where(
+            OdometerReading.vehicle_id == vehicle_id, active(OdometerReading)
+        )
     )
     items = list(await db.scalars(select(Equipment).where(Equipment.vehicle_id == vehicle_id)))
     for item in items:
@@ -258,7 +263,7 @@ async def list_equipment_reminders(
     current = await _current_odometer(vehicle_id, db)
     result = await db.scalars(
         select(Reminder)
-        .where(Reminder.equipment_id == equipment_id)
+        .where(Reminder.equipment_id == equipment_id, active(Reminder))
         .order_by(Reminder.created_at.desc())
     )
     return [_out(item, current) for item in result]

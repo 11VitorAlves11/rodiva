@@ -6,9 +6,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 from app.models.enums import VehicleStatus, pg_enum
+from app.models.mixins import SoftDelete
 
 
-class Vehicle(Base):
+class Vehicle(Base, SoftDelete):
     """A vehicle, bike, trailer or other equipment tracked in the garage (spec §5)."""
 
     __tablename__ = "vehicles"
@@ -38,4 +39,3 @@ class Vehicle(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

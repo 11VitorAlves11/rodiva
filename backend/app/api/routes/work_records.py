@@ -5,8 +5,10 @@ from sqlalchemy import select
 
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _recalculate, _vehicle_in_household
+from app.db.filters import active, mark_deleted
 from app.models import InventoryItem, OdometerReading, Role, StockMovement, WorkRecord
 from app.schemas.work_records import WorkRecordIn, WorkRecordOut, WorkRecordUpdate
+from app.services import audit
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/work-records", tags=["work records"])
 _CAN_WRITE_RECORDS = {Role.OWNER, Role.MANAGER, Role.EDITOR}
@@ -19,7 +21,7 @@ async def list_work_records(
     await _vehicle_in_household(vehicle_id, membership, db)
     result = await db.scalars(
         select(WorkRecord)
-        .where(WorkRecord.vehicle_id == vehicle_id)
+        .where(WorkRecord.vehicle_id == vehicle_id, active(WorkRecord))
         .order_by(WorkRecord.recorded_on.desc(), WorkRecord.id.desc())
     )
     return list(result)
@@ -61,7 +63,7 @@ async def _work_record_in_vehicle(
     vehicle_id: uuid.UUID, record_id: uuid.UUID, db: DbSession
 ) -> WorkRecord:
     record = await db.get(WorkRecord, record_id)
-    if record is None or record.vehicle_id != vehicle_id:
+    if record is None or record.vehicle_id != vehicle_id or record.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Work record not found")
     return record
 
@@ -102,7 +104,17 @@ async def delete_work_record(
         )
     record = await _work_record_in_vehicle(vehicle_id, record_id, db)
     await _restore_requisitioned_stock(record_id, user.id, db)
-    await db.delete(record)
+    mark_deleted(record, user.id)
+    audit.record_record_action(
+        db,
+        membership=membership,
+        actor=user,
+        action=audit.RECORD_DELETED,
+        entity_type="work_record",
+        entity_id=record.id,
+        vehicle_id=vehicle_id,
+        summary=record.description,
+    )
     await db.commit()
 
 

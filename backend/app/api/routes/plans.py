@@ -5,8 +5,10 @@ from sqlalchemy import select
 
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _recalculate, _vehicle_in_household
+from app.db.filters import active, mark_deleted
 from app.models import InventoryItem, OdometerReading, Plan, Role, StockMovement, WorkRecord
 from app.schemas.plans import PlanComplete, PlanIn, PlanOut, PlanUpdate
+from app.services import audit
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/plans", tags=["plans"])
 _CAN_WRITE = {Role.OWNER, Role.MANAGER, Role.EDITOR}
@@ -21,7 +23,7 @@ def _require_write(membership: CurrentMembership) -> None:
 
 async def _plan_in_vehicle(vehicle_id: uuid.UUID, plan_id: uuid.UUID, db: DbSession) -> Plan:
     plan = await db.get(Plan, plan_id)
-    if plan is None or plan.vehicle_id != vehicle_id:
+    if plan is None or plan.vehicle_id != vehicle_id or plan.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found")
     return plan
 
@@ -33,7 +35,7 @@ async def list_plans(
     await _vehicle_in_household(vehicle_id, membership, db)
     result = await db.scalars(
         select(Plan)
-        .where(Plan.vehicle_id == vehicle_id)
+        .where(Plan.vehicle_id == vehicle_id, active(Plan))
         .order_by(Plan.due_date.asc().nullslast(), Plan.created_at.desc())
     )
     return list(result)
@@ -168,6 +170,7 @@ async def complete_plan(
 async def delete_plan(
     vehicle_id: uuid.UUID,
     plan_id: uuid.UUID,
+    user: CurrentUser,
     membership: CurrentMembership,
     db: DbSession,
 ) -> None:
@@ -178,5 +181,15 @@ async def delete_plan(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Completed plans cannot be deleted"
         )
-    await db.delete(plan)
+    mark_deleted(plan, user.id)
+    audit.record_record_action(
+        db,
+        membership=membership,
+        actor=user,
+        action=audit.RECORD_DELETED,
+        entity_type="plan",
+        entity_id=plan.id,
+        vehicle_id=vehicle_id,
+        summary=plan.description,
+    )
     await db.commit()

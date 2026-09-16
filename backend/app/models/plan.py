@@ -6,9 +6,10 @@ from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, fun
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.mixins import SoftDelete
 
 
-class Plan(Base):
+class Plan(Base, SoftDelete):
     """Planned maintenance, repair, or modification work (spec §11)."""
 
     __tablename__ = "plans"

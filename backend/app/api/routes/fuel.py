@@ -9,8 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _recalculate, _vehicle_in_household
+from app.db.filters import active, mark_deleted
 from app.models import FuelRecord, OdometerReading, Role
 from app.schemas.fuel import FuelRecordIn, FuelRecordOut, FuelRecordUpdate
+from app.services import audit
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/fuel-records", tags=["fuel"])
 
@@ -20,7 +22,7 @@ _CAN_WRITE_RECORDS = {Role.OWNER, Role.MANAGER, Role.EDITOR}
 async def _recalculate_consumption(vehicle_id: uuid.UUID, db: AsyncSession) -> list[FuelRecord]:
     result = await db.scalars(
         select(FuelRecord)
-        .where(FuelRecord.vehicle_id == vehicle_id)
+        .where(FuelRecord.vehicle_id == vehicle_id, active(FuelRecord))
         .order_by(FuelRecord.recorded_on, FuelRecord.id)
         .with_for_update()
     )
@@ -57,7 +59,7 @@ async def list_fuel_records(
     await _vehicle_in_household(vehicle_id, membership, db)
     result = await db.scalars(
         select(FuelRecord)
-        .where(FuelRecord.vehicle_id == vehicle_id)
+        .where(FuelRecord.vehicle_id == vehicle_id, active(FuelRecord))
         .order_by(FuelRecord.recorded_on.desc(), FuelRecord.id.desc())
     )
     return list(result)
@@ -100,7 +102,7 @@ async def _fuel_record_in_vehicle(
     vehicle_id: uuid.UUID, record_id: uuid.UUID, db: AsyncSession
 ) -> FuelRecord:
     record = await db.get(FuelRecord, record_id)
-    if record is None or record.vehicle_id != vehicle_id:
+    if record is None or record.vehicle_id != vehicle_id or record.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fuel record not found")
     return record
 
@@ -130,7 +132,11 @@ async def update_fuel_record(
 
 @router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_fuel_record(
-    vehicle_id: uuid.UUID, record_id: uuid.UUID, membership: CurrentMembership, db: DbSession
+    vehicle_id: uuid.UUID,
+    record_id: uuid.UUID,
+    user: CurrentUser,
+    membership: CurrentMembership,
+    db: DbSession,
 ) -> None:
     await _vehicle_in_household(vehicle_id, membership, db)
     if membership.role not in _CAN_WRITE_RECORDS:
@@ -138,7 +144,17 @@ async def delete_fuel_record(
             status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot delete records"
         )
     record = await _fuel_record_in_vehicle(vehicle_id, record_id, db)
-    await db.delete(record)
+    mark_deleted(record, user.id)
+    audit.record_record_action(
+        db,
+        membership=membership,
+        actor=user,
+        action=audit.RECORD_DELETED,
+        entity_type="fuel_record",
+        entity_id=record.id,
+        vehicle_id=vehicle_id,
+        summary=str(record.recorded_on),
+    )
     await db.flush()
     await _recalculate_consumption(vehicle_id, db)
     await db.commit()

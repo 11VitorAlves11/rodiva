@@ -21,6 +21,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.db.filters import active
 from app.db.session import get_sessionmaker
 from app.models import (
     CalendarSyncEvent,
@@ -177,7 +178,7 @@ async def _current_odometer(vehicle_id: uuid.UUID, db: AsyncSession) -> int:
     return (
         await db.scalar(
             select(func.max(OdometerReading.reading)).where(
-                OdometerReading.vehicle_id == vehicle_id
+                OdometerReading.vehicle_id == vehicle_id, active(OdometerReading)
             )
         )
         or 0
@@ -324,7 +325,7 @@ async def upsert_event(
 async def sync_reminder(reminder_id: uuid.UUID) -> None:
     """Entry point routes call (via `BackgroundTasks`) after creating, updating,
     completing or reopening a reminder — never after deleting one, see
-    `pending_deletions_for`/`sync_reminder_deletion` below for why deletion needs
+    `take_pending_deletions`/`sync_reminder_deletion` below for why deletion needs
     a different shape.
 
     Opens its own database session rather than reusing the request-scoped one:
@@ -380,20 +381,26 @@ class PendingEventDeletion:
     external_event_id: str | None
 
 
-async def pending_deletions_for(
+async def take_pending_deletions(
     reminder_id: uuid.UUID, db: AsyncSession
 ) -> list[PendingEventDeletion]:
-    """Snapshot a reminder's sync events before it is deleted.
+    """Snapshot a reminder's sync events and drop the local rows.
 
-    `calendar_sync_events.reminder_id` cascades on the reminder's deletion — by
-    the time a `BackgroundTasks` callback could run, the rows this needs would
-    already be gone. So the route calls this (a plain, fast local read) and
+    A `BackgroundTasks` callback runs after the response, so it cannot read
+    these rows itself: the route reads them here (a plain, fast local read) and
     passes the result to `sync_reminder_deletion` instead of a reminder id.
+
+    The local rows go now rather than by cascade, because deleting a reminder
+    only marks it deleted. Leaving them would claim the reminder is still
+    mirrored on a calendar the event is being removed from, and a restore would
+    then skip re-creating it.
     """
-    rows = await db.scalars(
-        select(CalendarSyncEvent).where(CalendarSyncEvent.reminder_id == reminder_id)
+    rows = list(
+        await db.scalars(
+            select(CalendarSyncEvent).where(CalendarSyncEvent.reminder_id == reminder_id)
+        )
     )
-    return [
+    pending = [
         PendingEventDeletion(
             connection_id=row.connection_id,
             external_calendar_id=row.external_calendar_id,
@@ -401,6 +408,9 @@ async def pending_deletions_for(
         )
         for row in rows
     ]
+    for row in rows:
+        await db.delete(row)
+    return pending
 
 
 async def sync_reminder_deletion(pending: list[PendingEventDeletion]) -> None:

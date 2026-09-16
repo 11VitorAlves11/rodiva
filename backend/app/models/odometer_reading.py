@@ -5,9 +5,10 @@ from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, fun
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.mixins import SoftDelete
 
 
-class OdometerReading(Base):
+class OdometerReading(Base, SoftDelete):
     """A dated odometer value for a vehicle (spec §7)."""
 
     __tablename__ = "odometer_readings"

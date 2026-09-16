@@ -10,8 +10,10 @@ from sqlalchemy import select
 
 from app.api.deps import AppSettings, CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
+from app.db.filters import active, mark_deleted
 from app.models import Attachment, Role
 from app.schemas.attachments import AttachmentIn, AttachmentOut
+from app.services import audit
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/attachments", tags=["attachments"])
 _CAN_WRITE = {Role.OWNER, Role.MANAGER, Role.EDITOR}
@@ -25,7 +27,7 @@ async def list_attachments(
     await _vehicle_in_household(vehicle_id, membership, db)
     result = await db.scalars(
         select(Attachment)
-        .where(Attachment.vehicle_id == vehicle_id)
+        .where(Attachment.vehicle_id == vehicle_id, active(Attachment))
         .order_by(Attachment.created_at.desc())
     )
     return list(result)
@@ -90,7 +92,11 @@ async def download_attachment(
 ) -> FileResponse:
     await _vehicle_in_household(vehicle_id, membership, db)
     attachment = await db.get(Attachment, attachment_id)
-    if attachment is None or attachment.vehicle_id != vehicle_id:
+    if (
+        attachment is None
+        or attachment.vehicle_id != vehicle_id
+        or attachment.deleted_at is not None
+    ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attachment not found")
     return FileResponse(
         Path(settings.storage_path) / attachment.storage_key,
@@ -103,9 +109,9 @@ async def download_attachment(
 async def delete_attachment(
     vehicle_id: uuid.UUID,
     attachment_id: uuid.UUID,
+    user: CurrentUser,
     membership: CurrentMembership,
     db: DbSession,
-    settings: AppSettings,
 ) -> None:
     await _vehicle_in_household(vehicle_id, membership, db)
     if membership.role not in _CAN_WRITE:
@@ -113,9 +119,21 @@ async def delete_attachment(
             status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot delete records"
         )
     attachment = await db.get(Attachment, attachment_id)
-    if attachment is None or attachment.vehicle_id != vehicle_id:
+    if (
+        attachment is None
+        or attachment.vehicle_id != vehicle_id
+        or attachment.deleted_at is not None
+    ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attachment not found")
-    path = Path(settings.storage_path) / attachment.storage_key
-    await db.delete(attachment)
+    mark_deleted(attachment, user.id)
+    audit.record_record_action(
+        db,
+        membership=membership,
+        actor=user,
+        action=audit.RECORD_DELETED,
+        entity_type="attachment",
+        entity_id=attachment.id,
+        vehicle_id=vehicle_id,
+        summary=attachment.filename,
+    )
     await db.commit()
-    path.unlink(missing_ok=True)

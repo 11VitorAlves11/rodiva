@@ -11,6 +11,7 @@ from sqlalchemy import select
 from app.api.deps import AppSettings, CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
 from app.core.security import issue_google_oauth_state, read_google_oauth_state
+from app.db.filters import active
 from app.models import (
     CalendarFeed,
     ExpenseRecord,
@@ -151,6 +152,7 @@ async def read_calendar_feed(token: str, db: DbSession) -> Response:
         reminder_result = await db.scalars(
             select(Reminder).where(
                 Reminder.vehicle_id.in_(vehicle_ids),
+                active(Reminder),
                 Reminder.status != "completed",
                 Reminder.due_date.is_not(None),
             )
@@ -170,6 +172,7 @@ async def read_calendar_feed(token: str, db: DbSession) -> Response:
         expense_result = await db.scalars(
             select(ExpenseRecord).where(
                 ExpenseRecord.vehicle_id.in_(vehicle_ids),
+                active(ExpenseRecord),
                 ExpenseRecord.status.in_(["planned", "pending"]),
             )
         )
@@ -187,6 +190,7 @@ async def read_calendar_feed(token: str, db: DbSession) -> Response:
         plan_result = await db.scalars(
             select(Plan).where(
                 Plan.vehicle_id.in_(vehicle_ids),
+                active(Plan),
                 Plan.stage != "completed",
                 Plan.due_date.is_not(None),
             )

@@ -5,9 +5,10 @@ from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.mixins import SoftDelete
 
 
-class Reminder(Base):
+class Reminder(Base, SoftDelete):
     """A vehicle obligation due by date, distance, or whichever comes first."""
 
     __tablename__ = "reminders"
