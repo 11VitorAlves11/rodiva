@@ -8,10 +8,11 @@ dispositivos.
 Cobertura funcional equivalente às funcionalidades públicas do [LubeLogger](https://docs.lubelogger.com/),
 sem reproduzir o respetivo código ou desenho visual.
 
-> **Estado:** fundação inicial. Autenticação local, agregados, garagem (veículos),
-> quilometragem e abastecimentos estão implementados end to end; os restantes módulos descritos em
-> `PRD/Especificacao_Funcional_Rodiva.md` seguem o plano de implementação da secção 30
-> desse documento.
+> **Estado:** em desenvolvimento. Inclui contas e agregados, garagem, histórico,
+> abastecimentos e carregamentos elétricos, intervenções, despesas, documentos,
+> lembretes, planeamento, inventário, equipamento, inspeções, pesquisa, relatórios
+> e importação CSV dos registos principais. A cobertura integral do PRD ainda está
+> por concluir; consulte [o estado e as lacunas conhecidas](PRD/Estado_Implementacao.md).
 
 ## Stack
 
@@ -60,9 +61,16 @@ cd frontend && npm run lint && npm test && npm run build
 
 ## Autenticação
 
-A primeira versão usa apenas contas locais (correio eletrónico + palavra-passe), com sessão
-por cookie assinado, `httponly` e `secure` fora de desenvolvimento. OpenID Connect está
-planeado para a fase de paridade (ver secção 4 do documento de especificação).
+As contas locais usam palavra-passe com hashing e cookies de sessão assinados,
+`httponly` e `secure` em produção. As sessões são guardadas no servidor e podem
+ser revogadas individualmente ou todas de uma vez nas definições.
+
+A recuperação de palavra-passe está disponível quando SMTP estiver configurado
+(ver `.env.example`). A alteração ou recuperação da palavra-passe revoga outras
+sessões. OIDC continua por implementar.
+
+Os recursos estão documentados em `/api/v1`; os endereços `/api` anteriores mantêm
+compatibilidade. A autenticação continua em `/auth`.
 
 ## Licença
 
