@@ -17,10 +17,12 @@ type CalendarEvent = {
   href: string;
 };
 
+// These distinguish kinds of entry rather than severity, so brand copper is
+// free to carry one of them.
 const eventStyles: Record<CalendarEvent["type"], string> = {
-  reminder: "border-blue-300 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-100",
-  expense: "border-violet-300 bg-violet-50 text-violet-900 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-100",
-  plan: "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-100",
+  reminder: "border-info/40 bg-info-soft text-info",
+  expense: "border-copper/40 bg-copper/10 text-brand",
+  plan: "border-warning/40 bg-warning-soft text-warning",
 };
 
 function isoDate(value: Date) {
@@ -208,7 +210,7 @@ export function Calendar() {
         )}
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <button disabled={feedBusy} onClick={() => void createFeed()} className="rounded-lg bg-copper px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{feed?.active ? t("calendar.feedRenew") : t("calendar.feedCreate")}</button>
-          {feed?.active && <button disabled={feedBusy} onClick={() => void revokeFeed()} className="rounded-lg border border-danger/40 px-4 py-2.5 text-sm font-semibold text-danger disabled:opacity-50 dark:border-red-800 dark:text-red-300">{t("calendar.feedRevoke")}</button>}
+          {feed?.active && <button disabled={feedBusy} onClick={() => void revokeFeed()} className="rounded-lg border border-danger/40 px-4 py-2.5 text-sm font-semibold text-danger disabled:opacity-50">{t("calendar.feedRevoke")}</button>}
         </div>
       </section>
     </div>

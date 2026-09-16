@@ -404,13 +404,13 @@ export function Search() {
       )}
 
       {error && (
-        <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-danger dark:bg-red-950 dark:text-red-200">
+        <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
           {error}
         </p>
       )}
 
       {failures.length > 0 && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+        <div className="rounded-lg border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
           <p className="font-semibold">{t("search.bulkFailuresTitle")}</p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             {failures.map((failure) => (
@@ -429,7 +429,7 @@ export function Search() {
             type="button"
             disabled={busy}
             onClick={confirmDelete}
-            className="rounded-lg border border-danger/40 px-3 py-1.5 font-semibold text-danger disabled:opacity-50 dark:border-red-800 dark:text-red-300"
+            className="rounded-lg border border-danger/40 px-3 py-1.5 font-semibold text-danger disabled:opacity-50"
           >
             {t("search.bulkDelete")}
           </button>

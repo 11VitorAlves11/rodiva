@@ -44,6 +44,12 @@
   --color-info: #1c5e8a;
   --color-info-soft: #e6f1f8;
 
+  /* Filled status, for the cases that have to outrank a tinted badge: the
+     overdue step and the confirming action. Held at the same value in both
+     themes so white stays readable on them. */
+  --color-danger-solid: #b02a1f;
+  --color-success-solid: #1b7a4b;
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 

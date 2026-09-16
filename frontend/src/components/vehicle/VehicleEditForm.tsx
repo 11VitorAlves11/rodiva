@@ -140,7 +140,7 @@ export function VehicleEditForm({
         <button
           type="button"
           onClick={() => void onDelete()}
-          className="rounded-lg border border-danger/40 px-4 py-2.5 font-semibold text-danger dark:border-red-800 dark:text-red-300"
+          className="rounded-lg border border-danger/40 px-4 py-2.5 font-semibold text-danger"
         >
           {t("vehicle.delete")}
         </button>

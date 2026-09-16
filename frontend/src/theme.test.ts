@@ -95,6 +95,13 @@ describe("both themes", () => {
     expect(contrast([1, 1, 1], copper)).toBeGreaterThanOrEqual(4.5);
   });
 
+  it("keeps white readable on the filled danger badge", () => {
+    // Overdue reminders are the one filled status, held at one value everywhere.
+    const solid = resolve(base, base["--color-danger-solid"], [1, 1, 1]);
+    expect(contrast([1, 1, 1], solid)).toBeGreaterThanOrEqual(4.5);
+    expect(darkOverrides["--color-danger-solid"]).toBeUndefined();
+  });
+
   it("gives every semantic token a value in both themes", () => {
     const semantic = Object.keys(base).filter((name) =>
       /^--color-(surface|raised|sunken|line|ink|brand|success|warning|danger|info)/.test(name),

@@ -21,10 +21,10 @@ const priorities: PlanPriority[] = ["low", "normal", "high", "urgent"];
 const kinds: WorkKind[] = ["maintenance", "repair", "modification"];
 
 const priorityStyles: Record<PlanPriority, string> = {
-  low: "bg-sunken text-ink-muted dark:bg-slate-800 dark:text-slate-200",
-  normal: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-200",
-  high: "bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200",
-  urgent: "bg-red-100 text-danger dark:bg-red-950/60 dark:text-red-200",
+  low: "bg-sunken text-ink-muted",
+  normal: "bg-info-soft text-info",
+  high: "bg-warning-soft text-warning",
+  urgent: "bg-danger-soft text-danger",
 };
 
 export function Planner() {
@@ -142,7 +142,7 @@ export function Planner() {
           onCancel={() => setCompleting(null)}
         />
       )}
-      {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-danger dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
+      {actionError && <p role="alert" className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">{actionError}</p>}
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-sm text-ink-subtle">
@@ -194,7 +194,7 @@ export function Planner() {
                           >
                             {editableStages.map((option) => <option key={option} value={option}>{t(`planner.stages.${option}`)}</option>)}
                           </select>
-                          <button onClick={() => { setEditing(null); setCompleting(plan); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="w-full rounded-md bg-emerald-700 px-3 py-2 text-sm font-semibold text-white">{t("planner.complete")}</button>
+                          <button onClick={() => { setEditing(null); setCompleting(plan); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="w-full rounded-md bg-success-solid px-3 py-2 text-sm font-semibold text-white">{t("planner.complete")}</button>
                           <div className="flex items-center justify-between gap-3 text-sm">
                             <button onClick={() => { setCompleting(null); setEditing(plan); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-1 font-medium text-copper"><PencilIcon aria-hidden="true" className="h-4 w-4" />{t("common.edit")}</button>
                             <button onClick={() => { if (window.confirm(t("common.confirmDelete"))) void act(() => plans.remove(plan.vehicle_id, plan.id)); }} className="flex items-center gap-1 font-medium text-danger"><TrashIcon aria-hidden="true" className="h-4 w-4" />{t("common.delete")}</button>
@@ -308,7 +308,7 @@ function CompletePlanForm({ plan, inventoryItems, onSaved, onCancel }: { plan: P
   }
 
   return (
-    <form onSubmit={submit} className="grid min-w-0 gap-3 rounded-xl border border-emerald-500/30 bg-emerald-50 p-4 dark:bg-emerald-950/30 sm:grid-cols-2">
+    <form onSubmit={submit} className="grid min-w-0 gap-3 rounded-xl border border-success/30 bg-success-soft p-4 sm:grid-cols-2">
       <div className="sm:col-span-2"><h2 className="font-semibold text-ink">{t("planner.completeTitle")}</h2><p className="break-words text-sm text-ink-muted">{plan.description} · {plan.vehicleName}</p></div>
       <label className="text-sm text-ink-muted">{t("odometer.date")}<input required type="date" value={recordedOn} onChange={(event) => setRecordedOn(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
       <label className="text-sm text-ink-muted">{t("odometer.reading", { unit: plan.distanceUnit })}<input required type="number" min="0" inputMode="numeric" value={odometerReading} onChange={(event) => setOdometerReading(event.target.value)} className="mt-1 w-full rounded-lg border border-line px-3 py-2.5 bg-raised" /></label>
@@ -319,7 +319,7 @@ function CompletePlanForm({ plan, inventoryItems, onSaved, onCancel }: { plan: P
       {error && <p role="alert" className="text-sm text-danger sm:col-span-2">{error}</p>}
       <div className="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
         <button type="button" onClick={onCancel} className="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold">{t("common.cancel")}</button>
-        <button disabled={saving || !odometerReading} className="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{t("planner.createWork")}</button>
+        <button disabled={saving || !odometerReading} className="rounded-lg bg-success-solid px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{t("planner.createWork")}</button>
       </div>
     </form>
   );

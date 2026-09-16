@@ -12,13 +12,16 @@ import { useSession } from "../lib/session";
 
 type ReminderWithVehicle = Reminder & { vehicleName: string };
 
+// Urgency carries its own colour and never borrows brand copper (RF-IDV-003).
+// The top two steps share the danger hue and separate by weight instead, so the
+// ramp needs no orange — which would read as the brand mark in the dark theme.
 const urgencyStyles = {
-  overdue: "border-red-500 bg-red-50 text-danger dark:bg-red-950/40 dark:text-red-100",
-  very_urgent: "border-orange-500 bg-orange-50 text-orange-900 dark:bg-orange-950/40 dark:text-orange-100",
-  urgent: "border-amber-500 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100",
-  upcoming: "border-blue-400 bg-blue-50 text-blue-900 dark:bg-blue-950/40 dark:text-blue-100",
+  overdue: "border-danger-solid bg-danger-solid text-white",
+  very_urgent: "border-danger bg-danger-soft text-danger",
+  urgent: "border-warning bg-warning-soft text-warning",
+  upcoming: "border-info bg-info-soft text-info",
   future: "border-line-strong bg-raised text-ink",
-  completed: "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100",
+  completed: "border-success bg-success-soft text-success",
 };
 
 const urgencyOrder = {
@@ -120,7 +123,7 @@ export function Reminders() {
         />
       )}
 
-      {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-danger dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
+      {actionError && <p role="alert" className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">{actionError}</p>}
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-sm text-ink-subtle">
@@ -172,7 +175,9 @@ export function Reminders() {
                         void act(() => reminders.remove(item.vehicle_id, item.id));
                       }
                     }}
-                    className="ml-auto text-danger underline-offset-4 hover:underline dark:text-red-300"
+                    // Inherits the card's colour like the other actions: forcing
+                    // the danger tint puts salmon on the solid overdue red.
+                    className="ml-auto underline-offset-4 hover:underline"
                   >
                     {t("common.delete")}
                   </button>

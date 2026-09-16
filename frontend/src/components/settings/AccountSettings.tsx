@@ -66,8 +66,8 @@ export function AccountSettings() {
 
   return (
     <div className="space-y-6">
-      {error && <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-danger">{error}<button className="ml-3 underline" onClick={() => { setError(null); setReload((value) => value + 1); }}>{t("common.retry")}</button></div>}
-      {success && <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">{success}</p>}
+      {error && <div role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">{error}<button className="ml-3 underline" onClick={() => { setError(null); setReload((value) => value + 1); }}>{t("common.retry")}</button></div>}
+      {success && <p role="status" className="rounded-lg bg-success-soft p-3 text-sm text-success">{success}</p>}
       {households.length > 1 && <section className={panel}>
         <label className="block text-sm font-semibold">{t("account.activeHousehold")}
           <select disabled={busy} className={input} value={me?.membership.household_id ?? ""} onChange={(event) => {

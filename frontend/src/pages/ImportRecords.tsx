@@ -49,7 +49,7 @@ export function ImportRecords() {
     <h1 className="text-2xl font-bold">{t("import.title")}</h1>
     <p className="text-sm text-ink-muted">{t("import.description")}</p>
     {error && <p role="alert" className="text-sm text-danger">{error}<button className="ml-2 underline" onClick={() => { setError(null); setAttempt((value) => value + 1); }}>{t("common.retry")}</button></p>}
-    {done !== null && <p role="status" className="rounded-lg bg-emerald-50 p-3 text-emerald-800">{t("import.done", { count: done })} <Link className="underline" to={`/vehicles/${vehicleId}?section=${kind}`}>{t("import.openVehicle")}</Link></p>}
+    {done !== null && <p role="status" className="rounded-lg bg-success-soft p-3 text-success">{t("import.done", { count: done })} <Link className="underline" to={`/vehicles/${vehicleId}?section=${kind}`}>{t("import.openVehicle")}</Link></p>}
     <fieldset disabled={busy} className="grid gap-4 rounded-xl border border-line bg-raised p-4 sm:grid-cols-2">
       <label className="text-sm">{t("search.vehicleFilter")}<select value={vehicleId} onChange={(event) => { setVehicleId(event.target.value); invalidate(); }} className={input}><option value="" disabled>{t("import.chooseVehicle")}</option>{list.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name}</option>)}</select></label>
       <label className="text-sm">{t("search.kindFilter")}<select value={kind} onChange={(event) => { setKind(event.target.value as ImportKind); setMapping({}); setMetadata(null); invalidate(); }} className={input}>{(["fuel", "work", "expenses", "odometer", "notes"] as ImportKind[]).map((value) => <option key={value} value={value}>{t(`${value}.title`)}</option>)}</select></label>
