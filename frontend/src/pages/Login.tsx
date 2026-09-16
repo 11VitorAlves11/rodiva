@@ -3,6 +3,8 @@ import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useLocation } from "react-router-dom";
 
+import { Button } from "../components/ui/Button";
+import { Field, Input } from "../components/ui/Field";
 import { Logo } from "../components/ui/Logo";
 import { auth } from "../lib/api";
 import { ApiError } from "../lib/api/client";
@@ -46,78 +48,61 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-cream px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-xl border border-graphite/10 bg-white p-6 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-xl border border-line bg-raised p-6 shadow-sm">
         <div className="mb-2 flex items-center gap-2">
           <Logo size={32} />
-          <span className="text-lg font-bold text-graphite">Rodiva</span>
+          <span className="text-lg font-bold text-ink">Rodiva</span>
         </div>
-        <h1 className="text-xl font-semibold text-graphite">
+        <h1 className="text-xl font-semibold text-ink">
           {mode === "login" ? t("login.title") : t("register.title")}
         </h1>
 
         {mode === "register" && (
           <>
-            <Field label={t("register.householdName")} value={householdName} onChange={setHouseholdName} required />
-            <Field label={t("register.name")} value={name} onChange={setName} />
+            <Field label={t("register.householdName")} required>
+              <Input value={householdName} required onChange={(event) => setHouseholdName(event.target.value)} />
+            </Field>
+            <Field label={t("register.name")}>
+              <Input value={name} onChange={(event) => setName(event.target.value)} />
+            </Field>
           </>
         )}
-        <Field label={t("login.email")} type="email" value={email} onChange={setEmail} required />
-        <Field label={t("login.password")} type="password" value={password} onChange={setPassword} required />
+        <Field label={t("login.email")} required>
+          <Input type="email" value={email} required autoComplete="email" onChange={(event) => setEmail(event.target.value)} />
+        </Field>
+        <Field label={t("login.password")} required>
+          <Input
+            type="password"
+            value={password}
+            required
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </Field>
 
-        {error && <p className="text-sm text-red-700">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-md bg-copper px-4 py-2 text-sm font-medium text-white hover:bg-copper-dark disabled:opacity-60"
-        >
+        <Button type="submit" disabled={submitting} className="w-full">
           {mode === "login" ? t("login.submit") : t("register.submit")}
-        </button>
+        </Button>
 
-        {options.password_recovery && <Link to="/forgot-password" className="block text-center text-sm font-medium text-copper">{t("recovery.forgot")}</Link>}
-        <p className="text-center text-sm text-graphite/50">
+        {options.password_recovery && <Link to="/forgot-password" className="block text-center text-sm font-medium text-brand">{t("recovery.forgot")}</Link>}
+        <p className="text-center text-sm text-ink-subtle">
           {mode === "login" && options.registration ? (
             <>
               {t("login.noAccount")}{" "}
-              <button type="button" className="font-medium text-copper" onClick={() => setMode("register")}>
+              <button type="button" className="font-medium text-brand" onClick={() => setMode("register")}>
                 {t("login.register")}
               </button>
             </>
           ) : (
-            <button type="button" className="font-medium text-copper" onClick={() => setMode("login")}>
+            <button type="button" className="font-medium text-brand" onClick={() => setMode("login")}>
               {t("login.title")}
             </button>
           )}
         </p>
       </form>
     </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
-  required,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="block text-sm">
-      <span className="mb-1 block font-medium text-graphite/70">{label}</span>
-      <input
-        type={type}
-        value={value}
-        required={required}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-md border border-graphite/15 px-3 py-2 focus-visible:border-copper"
-      />
-    </label>
   );
 }
