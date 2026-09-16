@@ -9,6 +9,7 @@ from app.api.routes import (
     attachments,
     auth,
     calendar,
+    charging,
     equipment,
     expenses,
     fuel,
@@ -51,6 +52,7 @@ app.add_middleware(
 
 # Preserve existing clients while making v1 the documented integration API.
 for resource in [
+    charging,
     imports,
     health,
     calendar,

@@ -3,6 +3,7 @@ from app.models.attachment import Attachment
 from app.models.auth_session import AuthSession
 from app.models.base import Base
 from app.models.calendar_feed import CalendarFeed
+from app.models.charging_record import ChargingRecord
 from app.models.enums import Role, VehicleStatus
 from app.models.equipment import Equipment, MountPeriod, TireRotation
 from app.models.expense_record import ExpenseRecord
@@ -31,6 +32,7 @@ __all__ = [
     "Base",
     "CalendarFeed",
     "CalendarSyncEvent",
+    "ChargingRecord",
     "Equipment",
     "ExpenseRecord",
     "FuelRecord",
