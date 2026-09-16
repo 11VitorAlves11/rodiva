@@ -77,7 +77,7 @@ async def create_key(
         action=audit.API_KEY_CREATED,
         entity_type="api_key",
         entity_id=key.id,
-        summary=f"{payload.name} ({payload.scope})",
+        summary=payload.name,
         context={"scope": payload.scope, "vehicle_ids": key.vehicle_ids},
     )
     await db.commit()

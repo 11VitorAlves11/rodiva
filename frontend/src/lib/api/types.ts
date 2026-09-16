@@ -490,3 +490,18 @@ export type ChargingRecord = ChargingInput & { id: string; vehicle_id: string; u
 
 export type ApiKey = { id: string; name: string; scope: "read" | "write"; vehicle_ids: string[]; expires_at: string; revoked_at: string | null; created_at: string };
 export type ApiKeyInput = { name: string; scope: "read" | "write"; vehicle_ids: string[]; expires_in_days: number };
+
+export type TrashEntity =
+  | "vehicle"
+  | "odometer_reading"
+  | "fuel_record"
+  | "charging_record"
+  | "work_record"
+  | "expense_record"
+  | "note"
+  | "attachment"
+  | "plan"
+  | "reminder";
+export type TrashItem = { entity_type: TrashEntity; entity_id: string; vehicle_id: string | null; summary: string; deleted_at: string; deleted_by: string | null; deleted_by_label: string };
+export type AuditEvent = { id: string; actor_user_id: string | null; actor_label: string; action: string; entity_type: string; entity_id: string | null; summary: string; context: Record<string, unknown> | null; created_at: string };
+export type AuditPage = { items: AuditEvent[]; next_before: string | null };

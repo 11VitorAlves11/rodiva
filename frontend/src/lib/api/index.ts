@@ -2,6 +2,7 @@ import { errorFrom, request } from "./client";
 import type {
   Attachment,
   ApiKey,
+  AuditPage,
   ApiKeyInput,
   ChargingInput,
   ChargingRecord,
@@ -38,6 +39,8 @@ import type {
   Note,
   NoteInput,
   OdometerReading,
+  TrashEntity,
+  TrashItem,
   OdometerReadingInput,
   Plan,
   PlanCompleteInput,
@@ -296,6 +299,16 @@ export const charging = {
   create: (vehicle: string, body: ChargingInput) => request<ChargingRecord>(`/api/vehicles/${vehicle}/charging-records`, { method: "POST", body }),
   update: (vehicle: string, id: string, body: ChargingInput) => request<ChargingRecord>(`/api/vehicles/${vehicle}/charging-records/${id}`, { method: "PATCH", body }),
   remove: (vehicle: string, id: string) => request<void>(`/api/vehicles/${vehicle}/charging-records/${id}`, { method: "DELETE" }),
+};
+
+export const trash = {
+  list: () => request<TrashItem[]>("/api/v1/trash"),
+  restore: (entity: TrashEntity, id: string) => request<void>(`/api/v1/trash/${entity}/${id}/restore`, { method: "POST" }),
+  purge: (entity: TrashEntity, id: string) => request<void>(`/api/v1/trash/${entity}/${id}`, { method: "DELETE" }),
+};
+
+export const audit = {
+  list: (before?: string) => request<AuditPage>(`/api/v1/audit${before ? `?before=${encodeURIComponent(before)}` : ""}`),
 };
 
 export const apiKeys = {

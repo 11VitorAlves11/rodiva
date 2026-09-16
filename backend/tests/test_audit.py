@@ -38,6 +38,8 @@ async def test_api_key_lifecycle_is_recorded(register: RegisterFn) -> None:
     events = (await owner.get("/api/v1/audit?action=api_key")).json()["items"]
     assert [event["action"] for event in events] == ["api_key.revoked", "api_key.created"]
     assert events[1]["context"]["scope"] == "read"
+    # Summaries carry data only: the wording is the client's, in its own locale.
+    assert events[1]["summary"] == "n8n"
 
 
 async def test_trail_is_scoped_to_the_household(register: RegisterFn) -> None:

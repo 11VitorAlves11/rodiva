@@ -65,6 +65,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/equipment", label: t("nav.equipment"), icon: "equipment" as const },
     { to: "/inspections", label: t("nav.inspections"), icon: "inspections" as const },
     { to: "/reminders", label: t("nav.reminders"), icon: "reminders" as const },
+    { to: "/activity", label: t("activity.title"), icon: "activity" as const },
+    { to: "/trash", label: t("trash.title"), icon: "trash" as const },
     { to: "/settings", label: t("nav.settings"), icon: "settings" as const },
   ];
   const mobileTabs = [

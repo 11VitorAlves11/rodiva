@@ -9,6 +9,7 @@ import { useSession } from "./lib/session";
 import { Garage } from "./pages/Garage";
 import { History } from "./pages/History";
 import { Dashboard } from "./pages/Dashboard";
+import { Activity } from "./pages/Activity";
 import { Calendar } from "./pages/Calendar";
 import { InviteAccept } from "./pages/InviteAccept";
 import { Inventory } from "./pages/Inventory";
@@ -21,6 +22,7 @@ import { Planner } from "./pages/Planner";
 import { Reminders } from "./pages/Reminders";
 import { Reports } from "./pages/Reports";
 import { Search } from "./pages/Search";
+import { Trash } from "./pages/Trash";
 import { Settings } from "./pages/Settings";
 import { Vehicle } from "./pages/Vehicle";
 
@@ -68,6 +70,8 @@ export function App() {
       <Route path="/inspections" element={<RequireSession><Inspections /></RequireSession>} />
       <Route path="/planner" element={<RequireSession><Planner /></RequireSession>} />
       <Route path="/import" element={<RequireSession><ImportRecords /></RequireSession>} />
+      <Route path="/activity" element={<RequireSession><Activity /></RequireSession>} />
+      <Route path="/trash" element={<RequireSession><Trash /></RequireSession>} />
       <Route path="/more" element={<RequireSession><More /></RequireSession>} />
       <Route path="/settings" element={<RequireSession><Settings /></RequireSession>} />
       <Route

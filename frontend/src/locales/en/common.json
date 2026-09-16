@@ -26,8 +26,13 @@
     "vehicle": "Vehicle"
   },
   "theme": {
- "toggle": "Switch theme", "light": "Light theme", "dark": "Dark theme" },
-  "network": { "offline": "You are offline. Changes cannot be saved." },
+    "toggle": "Switch theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "network": {
+    "offline": "You are offline. Changes cannot be saved."
+  },
   "reminders": {
     "title": "Reminders",
     "description": "Maintenance and obligation deadlines by date or mileage.",
@@ -62,9 +67,28 @@
     "results_one": "{{count}} record",
     "results_other": "{{count}} records",
     "from": "From",
- "title": "History", "search": "Search history", "all": "All records", "empty": "No records found." },
-  "notes": { "title": "Notes", "description": "Free-form information linked to the vehicle.", "add": "Create note", "name": "Title", "content": "Write the note", "pin": "Pin this note", "pinned": "Pinned note", "empty": "There are no notes yet." },
-  "documents": { "title": "Documents", "description": "Invoices, policies, inspections and vehicle photos.", "add": "Add file", "uploading": "Uploading…", "empty": "There are no documents yet." },
+    "title": "History",
+    "search": "Search history",
+    "all": "All records",
+    "empty": "No records found."
+  },
+  "notes": {
+    "title": "Notes",
+    "description": "Free-form information linked to the vehicle.",
+    "add": "Create note",
+    "name": "Title",
+    "content": "Write the note",
+    "pin": "Pin this note",
+    "pinned": "Pinned note",
+    "empty": "There are no notes yet."
+  },
+  "documents": {
+    "title": "Documents",
+    "description": "Invoices, policies, inspections and vehicle photos.",
+    "add": "Add file",
+    "uploading": "Uploading…",
+    "empty": "There are no documents yet."
+  },
   "dashboard": {
     "title": "My garage",
     "subtitle": "Manage vehicles, costs and maintenance in one place.",
@@ -120,7 +144,12 @@
     "status": "Status",
     "delete": "Delete vehicle",
     "confirmDelete": "Delete this vehicle? This cannot be undone.",
-    "statuses": { "active": "Active", "parked": "Parked", "sold": "Sold", "archived": "Archived" }
+    "statuses": {
+      "active": "Active",
+      "parked": "Parked",
+      "sold": "Sold",
+      "archived": "Archived"
+    }
   },
   "odometer": {
     "title": "Odometer",
@@ -146,10 +175,31 @@
     "fullTank": "Full tank"
   },
   "work": {
-    "title": "Maintenance and repairs", "description": "Keep a history of work on the vehicle.", "add": "Record work", "maintenance": "Maintenance", "repair": "Repair", "modification": "Modification", "placeholder": "Work description", "cost": "Cost (€)"
+    "title": "Maintenance and repairs",
+    "description": "Keep a history of work on the vehicle.",
+    "add": "Record work",
+    "maintenance": "Maintenance",
+    "repair": "Repair",
+    "modification": "Modification",
+    "placeholder": "Work description",
+    "cost": "Cost (€)"
   },
   "expenses": {
-    "title": "Expenses and obligations", "total": "Total paid: {{value}}", "add": "Record expense", "empty": "There are no expenses yet.", "amount": "Amount (€)", "supplier": "Supplier", "insurance": "Insurance", "tax": "Road tax", "inspection": "Inspection", "tolls": "Tolls", "other": "Other expense", "paid": "Paid", "pending": "Pending", "planned": "Planned", "cancelled": "Cancelled"
+    "title": "Expenses and obligations",
+    "total": "Total paid: {{value}}",
+    "add": "Record expense",
+    "empty": "There are no expenses yet.",
+    "amount": "Amount (€)",
+    "supplier": "Supplier",
+    "insurance": "Insurance",
+    "tax": "Road tax",
+    "inspection": "Inspection",
+    "tolls": "Tolls",
+    "other": "Other expense",
+    "paid": "Paid",
+    "pending": "Pending",
+    "planned": "Planned",
+    "cancelled": "Cancelled"
   },
   "settings": {
     "title": "Settings",
@@ -165,7 +215,12 @@
     "remove": "Remove",
     "pendingInvites": "Pending invites",
     "revoke": "Revoke",
-    "roles": { "owner": "Owner", "manager": "Manager", "editor": "Editor", "reader": "Reader" }
+    "roles": {
+      "owner": "Owner",
+      "manager": "Manager",
+      "editor": "Editor",
+      "reader": "Reader"
+    }
   },
   "common": {
     "signOut": "Sign out",
@@ -238,8 +293,18 @@
     "completeTitle": "Complete plan",
     "createWork": "Create work record",
     "viewWork": "View work record",
-    "priorities": { "low": "Low", "normal": "Normal", "high": "High", "urgent": "Urgent" },
-    "stages": { "planned": "Planned", "in_progress": "In progress", "testing": "Testing", "completed": "Completed" }
+    "priorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "stages": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "testing": "Testing",
+      "completed": "Completed"
+    }
   },
   "calendar": {
     "title": "Calendar",
@@ -253,7 +318,11 @@
     "feedCopyNow": "Copy link",
     "feedRenew": "Renew link",
     "feedRevoke": "Revoke link",
-    "types": { "reminder": "Reminder", "expense": "Expense", "plan": "Plan" },
+    "types": {
+      "reminder": "Reminder",
+      "expense": "Expense",
+      "plan": "Plan"
+    },
     "google": {
       "title": "Google Calendar",
       "description": "Connect your Google account so your reminders show up automatically on your calendar.",
@@ -284,7 +353,13 @@
     "movements": "Movements",
     "movementHistory": "Movement history",
     "register": "Register movement",
-    "kinds": { "entry": "Entry", "adjustment": "Adjustment", "requisition": "Requisition", "return": "Return", "removal": "Removal" }
+    "kinds": {
+      "entry": "Entry",
+      "adjustment": "Adjustment",
+      "requisition": "Requisition",
+      "return": "Return",
+      "removal": "Removal"
+    }
   },
   "inspections": {
     "title": "Inspections",
@@ -403,125 +478,172 @@
     }
   },
   "account": {
-  "saved": "Preferences saved.",
-  "name": "Name",
-  "timezone": "Time zone",
-  "activeHousehold": "Active household",
-  "changePassword": "Change password",
-  "currentPassword": "Current password",
-  "newPassword": "New password",
-  "confirmPassword": "Confirm new password",
-  "passwordMismatch": "Passwords do not match.",
-  "passwordError": "Could not change the password. Check the current password and use at least 10 characters and at most 72 bytes for the new one.",
-  "passwordChanged": "Password changed. Other sessions have been ended.",
-  "passwordHint": "Use at least 10 characters. Other sessions will be ended.",
-  "sessions": "Active sessions",
-  "unknownDevice": "Unknown device",
-  "currentSession": "This session",
-  "endSession": "End session",
-  "endAll": "End all sessions",
-  "endAllConfirm": "End all sessions, including this one?"
-},
+    "saved": "Preferences saved.",
+    "name": "Name",
+    "timezone": "Time zone",
+    "activeHousehold": "Active household",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordMismatch": "Passwords do not match.",
+    "passwordError": "Could not change the password. Check the current password and use at least 10 characters and at most 72 bytes for the new one.",
+    "passwordChanged": "Password changed. Other sessions have been ended.",
+    "passwordHint": "Use at least 10 characters. Other sessions will be ended.",
+    "sessions": "Active sessions",
+    "unknownDevice": "Unknown device",
+    "currentSession": "This session",
+    "endSession": "End session",
+    "endAll": "End all sessions",
+    "endAllConfirm": "End all sessions, including this one?"
+  },
   "recovery": {
-  "forgot": "Forgot password",
-  "reset": "Set new password",
-  "send": "Send link",
-  "sent": "If an account exists for this email, you will receive a password recovery link.",
-  "resetDone": "Password changed. Sign in with your new password.",
-  "invalid": "This link is invalid or expired. Request a new recovery link.",
-  "unavailable": "Could not send the link. Check email configuration with the administrator.",
-  "tooMany": "Too many attempts. Try again in 15 minutes."
-},
+    "forgot": "Forgot password",
+    "reset": "Set new password",
+    "send": "Send link",
+    "sent": "If an account exists for this email, you will receive a password recovery link.",
+    "resetDone": "Password changed. Sign in with your new password.",
+    "invalid": "This link is invalid or expired. Request a new recovery link.",
+    "unavailable": "Could not send the link. Check email configuration with the administrator.",
+    "tooMany": "Too many attempts. Try again in 15 minutes."
+  },
   "import": {
-  "title": "Import CSV",
-  "description": "Import fuel, work, expenses, odometer readings and notes. Preview and correct data before saving. Up to 500 records per file; no rows are saved if any error occurs.",
-  "confirm": "Import {{count}} records into this vehicle?",
-  "failed": "Could not process the CSV. Check the file and fields and try again.",
-  "readOnly": "Your role only allows viewing records.",
-  "done": "Import complete: {{count}} records.",
-  "openVehicle": "Open vehicle",
-  "chooseVehicle": "Select a vehicle",
-  "template": "Download sample file",
-  "file": "CSV file",
-  "tooLarge": "The file must be at most 1 MB.",
-  "content": "File content (editable)",
-  "mapping": "Map columns",
-  "ignore": "Do not import this column",
-  "preview": "Preview and validate",
-  "previewCount": "Preview: {{count}} records",
-  "alreadyImported": "This set of records has already been imported.",
-  "line": "Line",
-  "values": "Data",
-  "validation": "Validation",
-  "valid": "Valid",
-  "commit": "Import {{count}} records",
-  "fields": {
-    "recorded_on": "Date",
-    "issued_on": "Issue date",
-    "odometer_reading": "Odometer",
-    "volume_litres": "Volume (litres)",
-    "total_price": "Total price",
-    "unit_price": "Unit price",
-    "fuel_type": "Fuel type",
-    "station": "Station",
-    "full_tank": "Full tank",
-    "excluded_from_consumption": "Exclude from consumption",
-    "notes": "Notes",
-    "kind": "Work type",
-    "description": "Description",
-    "total_cost": "Total cost",
-    "supplier": "Supplier",
-    "category": "Category",
-    "amount": "Amount",
-    "status": "Status",
-    "reading": "Final reading",
-    "start_reading": "Initial reading",
-    "is_adjustment": "Odometer adjustment",
-    "title": "Title",
-    "content": "Content",
-    "pinned": "Pinned"
-  }
-},
+    "title": "Import CSV",
+    "description": "Import fuel, work, expenses, odometer readings and notes. Preview and correct data before saving. Up to 500 records per file; no rows are saved if any error occurs.",
+    "confirm": "Import {{count}} records into this vehicle?",
+    "failed": "Could not process the CSV. Check the file and fields and try again.",
+    "readOnly": "Your role only allows viewing records.",
+    "done": "Import complete: {{count}} records.",
+    "openVehicle": "Open vehicle",
+    "chooseVehicle": "Select a vehicle",
+    "template": "Download sample file",
+    "file": "CSV file",
+    "tooLarge": "The file must be at most 1 MB.",
+    "content": "File content (editable)",
+    "mapping": "Map columns",
+    "ignore": "Do not import this column",
+    "preview": "Preview and validate",
+    "previewCount": "Preview: {{count}} records",
+    "alreadyImported": "This set of records has already been imported.",
+    "line": "Line",
+    "values": "Data",
+    "validation": "Validation",
+    "valid": "Valid",
+    "commit": "Import {{count}} records",
+    "fields": {
+      "recorded_on": "Date",
+      "issued_on": "Issue date",
+      "odometer_reading": "Odometer",
+      "volume_litres": "Volume (litres)",
+      "total_price": "Total price",
+      "unit_price": "Unit price",
+      "fuel_type": "Fuel type",
+      "station": "Station",
+      "full_tank": "Full tank",
+      "excluded_from_consumption": "Exclude from consumption",
+      "notes": "Notes",
+      "kind": "Work type",
+      "description": "Description",
+      "total_cost": "Total cost",
+      "supplier": "Supplier",
+      "category": "Category",
+      "amount": "Amount",
+      "status": "Status",
+      "reading": "Final reading",
+      "start_reading": "Initial reading",
+      "is_adjustment": "Odometer adjustment",
+      "title": "Title",
+      "content": "Content",
+      "pinned": "Pinned"
+    }
+  },
   "charging": {
-  "title": "Charging",
-  "add": "Record charging",
-  "energy": "Energy (kWh)",
-  "soc_start": "Starting charge",
-  "soc_end": "Final charge",
-  "location": "Location",
-  "chargerType": "Charger type",
-  "home": "Home",
-  "public": "Public",
-  "empty": "No charging records yet.",
-  "invalid": "Check the values: positive energy, non-negative cost, final charge at least equal to starting charge and no decreasing odometer readings.",
-  "efficiencyHint": "Efficiency is calculated between charges ending at the same battery percentage. Includes energy from intermediate charges and charging losses."
-},
+    "title": "Charging",
+    "add": "Record charging",
+    "energy": "Energy (kWh)",
+    "soc_start": "Starting charge",
+    "soc_end": "Final charge",
+    "location": "Location",
+    "chargerType": "Charger type",
+    "home": "Home",
+    "public": "Public",
+    "empty": "No charging records yet.",
+    "invalid": "Check the values: positive energy, non-negative cost, final charge at least equal to starting charge and no decreasing odometer readings.",
+    "efficiencyHint": "Efficiency is calculated between charges ending at the same battery percentage. Includes energy from intermediate charges and charging losses."
+  },
   "appearance": {
-  "theme": "Theme on this device",
-  "system": "Follow system",
-  "light": "Light",
-  "dark": "Dark"
-},
+    "theme": "Theme on this device",
+    "system": "Follow system",
+    "light": "Light",
+    "dark": "Dark"
+  },
   "recordActions": {
-  "customCategory": "Custom category",
-  "cancelled": "Cancelled"
-},
+    "customCategory": "Custom category",
+    "cancelled": "Cancelled"
+  },
   "apiKeys": {
-  "title": "API keys",
-  "description": "Connect external services with limited permissions. Keys always respect your household role and cannot manage accounts or members.",
-  "once": "Save this key now. It is displayed only once.",
-  "token": "API key",
-  "saved": "I have saved the key",
-  "name": "Integration name",
-  "days": "Validity in days",
-  "permissions": "Permissions",
-  "read": "Read only",
-  "write": "Read and write",
-  "vehicles": "Vehicles (none selected: all household vehicles)",
-  "vehicleHint": "With selected vehicles, the key only allows operations on those vehicle endpoints; global search and reports are unavailable.",
-  "create": "Create key",
-  "expires": "Expires on",
-  "revoked": "Revoked",
-  "confirmRevoke": "Revoke this key? Integrations using it will lose access."
-}
+    "title": "API keys",
+    "description": "Connect external services with limited permissions. Keys always respect your household role and cannot manage accounts or members.",
+    "once": "Save this key now. It is displayed only once.",
+    "token": "API key",
+    "saved": "I have saved the key",
+    "name": "Integration name",
+    "days": "Validity in days",
+    "permissions": "Permissions",
+    "read": "Read only",
+    "write": "Read and write",
+    "vehicles": "Vehicles (none selected: all household vehicles)",
+    "vehicleHint": "With selected vehicles, the key only allows operations on those vehicle endpoints; global search and reports are unavailable.",
+    "create": "Create key",
+    "expires": "Expires on",
+    "revoked": "Revoked",
+    "confirmRevoke": "Revoke this key? Integrations using it will lose access."
+  },
+  "trash": {
+    "title": "Bin",
+    "description": "Deleted records can be put back or removed for good.",
+    "empty": "Nothing deleted",
+    "emptyHint": "Records you delete wait here before they go for good.",
+    "restore": "Restore",
+    "purge": "Delete for good",
+    "confirmPurge": "Delete for good? This cannot be undone.",
+    "kinds": {
+      "vehicle": "Vehicle",
+      "odometer_reading": "Odometer",
+      "fuel_record": "Fill-up",
+      "charging_record": "Charge",
+      "work_record": "Work",
+      "expense_record": "Expense",
+      "note": "Note",
+      "attachment": "Document",
+      "plan": "Plan",
+      "reminder": "Reminder"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "description": "Who changed what in the household.",
+    "empty": "No activity yet",
+    "emptyHint": "Changes to members, invites, keys and records show up here.",
+    "loadMore": "Show more",
+    "system": "System",
+    "actions": {
+      "member.role_changed": "Role changed",
+      "member.removed": "Member removed",
+      "invite.created": "Invite created",
+      "invite.revoked": "Invite revoked",
+      "api_key.created": "Key created",
+      "api_key.revoked": "Key revoked",
+      "record.deleted": "Record deleted",
+      "record.restored": "Record restored",
+      "record.purged": "Record deleted for good",
+      "vehicle.deleted": "Vehicle deleted",
+      "vehicle.restored": "Vehicle restored",
+      "export.created": "Export created"
+    },
+    "scopes": {
+      "read": "Read only",
+      "write": "Read and write"
+    }
+  }
 }

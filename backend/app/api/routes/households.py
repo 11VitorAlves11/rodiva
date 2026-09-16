@@ -106,7 +106,7 @@ async def update_member_role(
         action=audit.MEMBER_ROLE_CHANGED,
         entity_type="membership",
         entity_id=user_id,
-        summary=f"{member_label}: {previous_role.value} → {payload.role.value}",
+        summary=member_label,
         context={"from": previous_role.value, "to": payload.role.value},
     )
     await db.commit()
@@ -184,7 +184,7 @@ async def create_invite(
         action=audit.INVITE_CREATED,
         entity_type="invite",
         entity_id=invite.id,
-        summary=f"{payload.email or 'any address'} as {payload.role.value}",
+        summary=payload.email or "",
         context={"role": payload.role.value, "email": payload.email},
     )
     await db.commit()
@@ -208,6 +208,6 @@ async def revoke_invite(
         action=audit.INVITE_REVOKED,
         entity_type="invite",
         entity_id=invite.id,
-        summary=invite.email or "any address",
+        summary=invite.email or "",
     )
     await db.commit()
