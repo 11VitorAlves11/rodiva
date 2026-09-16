@@ -13,7 +13,7 @@ default and shipped state, since no Google Cloud OAuth client exists yet.
 import logging
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -31,6 +31,7 @@ from app.models import (
     Vehicle,
 )
 from app.services.token_crypto import decrypt, encrypt
+from app.services.urgency import urgency_of
 
 logger = logging.getLogger(__name__)
 
@@ -154,25 +155,6 @@ _URGENCY_LABELS: dict[str, str] = {
 }
 
 
-def _urgency(reminder: Reminder, current_odometer: int) -> str:
-    # Deliberately duplicated from app.api.routes.reminders._urgency (kept in
-    # sync manually): importing that module here would create an import cycle,
-    # since routes/reminders.py calls into this service on every mutation.
-    if reminder.status == "completed":
-        return "completed"
-    days = (reminder.due_date - date.today()).days if reminder.due_date else None
-    distance = reminder.due_odometer - current_odometer if reminder.due_odometer else None
-    if (days is not None and days < 0) or (distance is not None and distance <= 0):
-        return "overdue"
-    if (days is not None and days <= 7) or (distance is not None and distance <= 250):
-        return "very_urgent"
-    if (days is not None and days <= 30) or (distance is not None and distance <= 1_000):
-        return "urgent"
-    if (days is not None and days <= 90) or (distance is not None and distance <= 3_000):
-        return "upcoming"
-    return "future"
-
-
 async def _current_odometer(vehicle_id: uuid.UUID, db: AsyncSession) -> int:
 
     return (
@@ -273,7 +255,7 @@ async def upsert_event(
     try:
         access_token = await refresh_access_token(connection, db)
         current_odometer = await _current_odometer(vehicle.id, db)
-        urgency = _urgency(reminder, current_odometer)
+        urgency = urgency_of(reminder, current_odometer)
         body = _event_body(vehicle, reminder, urgency)
 
         async with httpx.AsyncClient(timeout=10) as client:

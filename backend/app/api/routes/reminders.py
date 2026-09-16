@@ -8,38 +8,23 @@ from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
 from app.db.filters import active, mark_deleted
 from app.models import OdometerReading, Reminder, Role
-from app.schemas.reminders import ReminderIn, ReminderOut, ReminderUpdate, Urgency
+from app.schemas.reminders import ReminderIn, ReminderOut, ReminderUpdate
 from app.services import audit
 from app.services.google_calendar import (
     sync_reminder,
     sync_reminder_deletion,
     take_pending_deletions,
 )
+from app.services.urgency import urgency_of
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/reminders", tags=["reminders"])
 _CAN_WRITE = {Role.OWNER, Role.MANAGER, Role.EDITOR}
 
 
-def _urgency(reminder: Reminder, current_odometer: int) -> Urgency:
-    if reminder.status == "completed":
-        return "completed"
-    days = (reminder.due_date - date.today()).days if reminder.due_date else None
-    distance = reminder.due_odometer - current_odometer if reminder.due_odometer else None
-    if (days is not None and days < 0) or (distance is not None and distance <= 0):
-        return "overdue"
-    if (days is not None and days <= 7) or (distance is not None and distance <= 250):
-        return "very_urgent"
-    if (days is not None and days <= 30) or (distance is not None and distance <= 1_000):
-        return "urgent"
-    if (days is not None and days <= 90) or (distance is not None and distance <= 3_000):
-        return "upcoming"
-    return "future"
-
-
 def _out(reminder: Reminder, odometer_value: int) -> ReminderOut:
     return ReminderOut.model_validate(
         {column.name: getattr(reminder, column.name) for column in reminder.__table__.columns}
-        | {"urgency": _urgency(reminder, odometer_value)}
+        | {"urgency": urgency_of(reminder, odometer_value)}
     )
 
 
