@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 
 import { auth } from "./api";
+import i18n from "./i18n";
 import { ApiError } from "./api/client";
 import type { Me } from "./api/types";
 
@@ -48,6 +49,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     };
   }, [refresh]);
 
+  useEffect(() => {
+    if (me?.user.locale) void i18n.changeLanguage(me.user.locale);
+  }, [me?.user.locale]);
+
   const signOut = useCallback(async () => {
     await auth.logout();
     setMe(null);
@@ -61,6 +66,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
+// Context and provider intentionally share this module so consumers keep one stable import.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSession(): Session {
   const session = useContext(SessionContext);
   if (!session) throw new Error("useSession must be used inside a SessionProvider");

@@ -21,11 +21,15 @@ type RequestOptions = {
   signal?: AbortSignal;
 };
 
-async function errorFrom(response: Response): Promise<ApiError> {
+export async function errorFrom(response: Response): Promise<ApiError> {
   let detail = response.statusText;
   try {
     const payload = await response.json();
-    if (typeof payload?.detail === "string") detail = payload.detail;
+    if (typeof payload?.message === "string") detail = payload.message;
+    else if (typeof payload?.detail === "string") detail = payload.detail;
+    if (Array.isArray(payload?.fields) && payload.fields.length) {
+      detail += ": " + payload.fields.map((field: { field: string; message: string }) => `${field.field}: ${field.message}`).join("; ");
+    }
   } catch {
     // A body that is not JSON tells us nothing more than the status already does.
   }

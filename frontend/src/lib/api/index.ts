@@ -1,22 +1,58 @@
-import { request } from "./client";
+import { errorFrom, request } from "./client";
 import type {
   Attachment,
+  ApiKey,
+  ApiKeyInput,
+  ChargingInput,
+  ChargingRecord,
+  AuthSession,
+  Membership,
+  User,
+  BulkItem,
+  BulkOperationInput,
+  BulkOperationResult,
+  CalendarFeedCreated,
+  CalendarFeedStatus,
+  GoogleCalendarAuthorizeUrl,
+  GoogleCalendarConnectionInput,
+  GoogleCalendarOption,
+  GoogleCalendarStatus,
   ExpenseRecord,
   ExpenseRecordInput,
+  Equipment,
+  EquipmentEventInput,
+  EquipmentInput,
   FuelRecord,
   FuelRecordInput,
   Invite,
   InviteInput,
   InvitePreview,
+  InventoryItem,
+  InventoryItemInput,
+  Inspection,
+  InspectionInput,
+  InspectionTemplate,
+  InspectionTemplateInput,
   Me,
   Member,
   Note,
   NoteInput,
   OdometerReading,
   OdometerReadingInput,
+  Plan,
+  PlanCompleteInput,
+  PlanInput,
   Reminder,
   ReminderInput,
+  ReminderUpdateInput,
+  ReportSummary,
+  SavedView,
+  SavedViewInput,
+  SearchQuery,
+  SearchResult,
   Role,
+  StockMovement,
+  MovementKind,
   Vehicle,
   VehicleInput,
   WorkRecord,
@@ -24,7 +60,17 @@ import type {
 } from "./types";
 
 export const auth = {
+  options: () => request<{ registration: boolean; password_recovery: boolean }>("/auth/options"),
+  forgotPassword: (email: string) => request<void>("/auth/forgot-password", { method: "POST", body: { email } }),
+  resetPassword: (token: string, password: string) => request<void>("/auth/reset-password", { method: "POST", body: { token, password } }),
   me: () => request<Me>("/auth/me"),
+  profile: (body: Partial<Pick<User, "name" | "locale" | "timezone">>) => request<User>("/auth/profile", { method: "PATCH", body }),
+  sessions: () => request<AuthSession[]>("/auth/sessions"),
+  revokeSession: (id: string) => request<void>(`/auth/sessions/${id}`, { method: "DELETE" }),
+  logoutAll: () => request<void>("/auth/logout-all", { method: "POST" }),
+  changePassword: (body: { current_password: string; new_password: string }) => request<void>("/auth/password", { method: "POST", body }),
+  households: () => request<Membership[]>("/auth/households"),
+  activateHousehold: (id: string) => request<Me>(`/auth/households/${id}/activate`, { method: "POST" }),
   register: (body: { email: string; password: string; name?: string; household_name?: string; invite_token?: string }) =>
     request<Me>("/auth/register", { method: "POST", body }),
   login: (body: { email: string; password: string }) =>
@@ -48,6 +94,9 @@ export const vehicles = {
   list: () => request<Vehicle[]>("/api/vehicles"),
   create: (body: VehicleInput) => request<Vehicle>("/api/vehicles", { method: "POST", body }),
   get: (id: string) => request<Vehicle>(`/api/vehicles/${id}`),
+  update: (id: string, body: Partial<VehicleInput> & { status?: Vehicle["status"] }) =>
+    request<Vehicle>(`/api/vehicles/${id}`, { method: "PATCH", body }),
+  remove: (id: string) => request<void>(`/api/vehicles/${id}`, { method: "DELETE" }),
   uploadPhoto: (id: string, body: { content_base64: string; content_type: string }) =>
     request<Vehicle>(`/api/vehicles/${id}/photo`, { method: "POST", body }),
 };
@@ -94,10 +143,124 @@ export const reminders = {
   list: (vehicleId: string) => request<Reminder[]>(`/api/vehicles/${vehicleId}/reminders`),
   create: (vehicleId: string, body: ReminderInput) =>
     request<Reminder>(`/api/vehicles/${vehicleId}/reminders`, { method: "POST", body }),
+  update: (vehicleId: string, reminderId: string, body: ReminderUpdateInput) =>
+    request<Reminder>(`/api/vehicles/${vehicleId}/reminders/${reminderId}`, { method: "PATCH", body }),
   complete: (vehicleId: string, reminderId: string) =>
     request<Reminder>(`/api/vehicles/${vehicleId}/reminders/${reminderId}/complete`, {
       method: "POST",
     }),
+  reopen: (vehicleId: string, reminderId: string) =>
+    request<Reminder>(`/api/vehicles/${vehicleId}/reminders/${reminderId}/reopen`, {
+      method: "POST",
+    }),
+  remove: (vehicleId: string, reminderId: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/reminders/${reminderId}`, { method: "DELETE" }),
+};
+
+export const plans = {
+  list: (vehicleId: string) => request<Plan[]>(`/api/vehicles/${vehicleId}/plans`),
+  create: (vehicleId: string, body: PlanInput) =>
+    request<Plan>(`/api/vehicles/${vehicleId}/plans`, { method: "POST", body }),
+  update: (vehicleId: string, planId: string, body: Partial<PlanInput>) =>
+    request<Plan>(`/api/vehicles/${vehicleId}/plans/${planId}`, { method: "PATCH", body }),
+  complete: (vehicleId: string, planId: string, body: PlanCompleteInput) =>
+    request<Plan>(`/api/vehicles/${vehicleId}/plans/${planId}/complete`, { method: "POST", body }),
+  remove: (vehicleId: string, planId: string) =>
+    request<void>(`/api/vehicles/${vehicleId}/plans/${planId}`, { method: "DELETE" }),
+};
+
+export const calendarFeed = {
+  status: () => request<CalendarFeedStatus>("/api/calendar-feed"),
+  create: () => request<CalendarFeedCreated>("/api/calendar-feed", { method: "POST" }),
+  revoke: () => request<void>("/api/calendar-feed", { method: "DELETE" }),
+};
+
+export const googleCalendar = {
+  status: () => request<GoogleCalendarStatus>("/api/calendar/google/status"),
+  connect: () => request<GoogleCalendarAuthorizeUrl>("/api/calendar/google/connect"),
+  calendars: () => request<GoogleCalendarOption[]>("/api/calendar/google/calendars"),
+  saveConnection: (body: GoogleCalendarConnectionInput) =>
+    request<GoogleCalendarStatus>("/api/calendar/google/connection", { method: "POST", body }),
+  disconnect: () => request<void>("/api/calendar/google/connection", { method: "DELETE" }),
+};
+
+export const inventory = {
+  list: () => request<InventoryItem[]>("/api/inventory"),
+  create: (body: InventoryItemInput) => request<InventoryItem>("/api/inventory", { method: "POST", body }),
+  update: (id: string, body: Partial<InventoryItemInput>) =>
+    request<InventoryItem>(`/api/inventory/${id}`, { method: "PATCH", body }),
+  remove: (id: string) => request<void>(`/api/inventory/${id}`, { method: "DELETE" }),
+  movements: (id: string) => request<StockMovement[]>(`/api/inventory/${id}/movements`),
+  move: (id: string, body: { kind: MovementKind; quantity: string; notes?: string }) =>
+    request<StockMovement>(`/api/inventory/${id}/movements`, { method: "POST", body }),
+};
+
+export const equipment = {
+  list: (vehicleId: string) => request<Equipment[]>(`/api/vehicles/${vehicleId}/equipment`),
+  create: (vehicleId: string, body: EquipmentInput) => request<Equipment>(`/api/vehicles/${vehicleId}/equipment`, { method: "POST", body }),
+  update: (vehicleId: string, id: string, body: Partial<EquipmentInput>) => request<Equipment>(`/api/vehicles/${vehicleId}/equipment/${id}`, { method: "PATCH", body }),
+  remove: (vehicleId: string, id: string) => request<void>(`/api/vehicles/${vehicleId}/equipment/${id}`, { method: "DELETE" }),
+  mount: (vehicleId: string, id: string, body: EquipmentEventInput) => request(`/api/vehicles/${vehicleId}/equipment/${id}/mount`, { method: "POST", body }),
+  unmount: (vehicleId: string, id: string, body: EquipmentEventInput) => request(`/api/vehicles/${vehicleId}/equipment/${id}/unmount`, { method: "POST", body }),
+  rotate: (vehicleId: string, id: string, body: EquipmentEventInput) => request(`/api/vehicles/${vehicleId}/equipment/${id}/rotate`, { method: "POST", body }),
+  reminders: (vehicleId: string, id: string) => request<Reminder[]>(`/api/vehicles/${vehicleId}/equipment/${id}/reminders`),
+  createReminder: (vehicleId: string, id: string, body: ReminderInput) =>
+    request<Reminder>(`/api/vehicles/${vehicleId}/equipment/${id}/reminders`, { method: "POST", body }),
+};
+
+export const inspections = {
+  templates: () => request<InspectionTemplate[]>("/api/inspection-templates"),
+  createTemplate: (body: InspectionTemplateInput) =>
+    request<InspectionTemplate>("/api/inspection-templates", { method: "POST", body }),
+  versionTemplate: (id: string, body: InspectionTemplateInput) =>
+    request<InspectionTemplate>(`/api/inspection-templates/${id}`, { method: "PATCH", body }),
+  duplicateTemplate: (id: string) =>
+    request<InspectionTemplate>(`/api/inspection-templates/${id}/duplicate`, { method: "POST" }),
+  list: (vehicleId: string) => request<Inspection[]>(`/api/vehicles/${vehicleId}/inspections`),
+  create: (vehicleId: string, body: InspectionInput) =>
+    request<Inspection>(`/api/vehicles/${vehicleId}/inspections`, { method: "POST", body }),
+  update: (vehicleId: string, id: string, body: Partial<Omit<InspectionInput, "template_id">>) =>
+    request<Inspection>(`/api/vehicles/${vehicleId}/inspections/${id}`, { method: "PATCH", body }),
+  complete: (vehicleId: string, id: string) =>
+    request<Inspection>(`/api/vehicles/${vehicleId}/inspections/${id}/complete`, { method: "POST" }),
+};
+
+export const reports = {
+  summary: (query: string) => request<ReportSummary>(`/api/reports/summary${query}`),
+  csvUrl: (query: string) => `/api/reports/export.csv${query}`,
+};
+
+function searchQueryString(query: SearchQuery): string {
+  const params = new URLSearchParams();
+  if (query.q) params.set("q", query.q);
+  for (const value of query.kind ?? []) params.append("kind", value);
+  for (const value of query.vehicle_id ?? []) params.append("vehicle_id", value);
+  if (query.date_from) params.set("date_from", query.date_from);
+  if (query.date_to) params.set("date_to", query.date_to);
+  if (query.sort) params.set("sort", query.sort);
+  return params.toString();
+}
+
+export const search = {
+  query: (query: SearchQuery) => request<SearchResult[]>(`/api/search?${searchQueryString(query)}`),
+  savedViews: {
+    list: () => request<SavedView[]>("/api/search/saved-views"),
+    create: (body: SavedViewInput) =>
+      request<SavedView>("/api/search/saved-views", { method: "POST", body }),
+    remove: (id: string) => request<void>(`/api/search/saved-views/${id}`, { method: "DELETE" }),
+  },
+  bulk: (body: BulkOperationInput) =>
+    request<BulkOperationResult>("/api/search/bulk", { method: "POST", body }),
+  exportCsv: async (items: BulkItem[]): Promise<Blob> => {
+    const response = await fetch("/api/search/bulk", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ operation: "export", items }),
+    });
+    if (!response.ok) throw await errorFrom(response);
+    return response.blob();
+  },
 };
 
 export const notes = {
@@ -118,4 +281,25 @@ export const attachments = {
     `/api/vehicles/${vehicleId}/attachments/${attachmentId}/download`,
   remove: (vehicleId: string, id: string) =>
     request<void>(`/api/vehicles/${vehicleId}/attachments/${id}`, { method: "DELETE" }),
+};
+
+export type ImportKind = "fuel" | "work" | "expenses" | "odometer" | "notes";
+export type ImportInput = { vehicle_id: string; kind: ImportKind; csv_text: string; mapping: Record<string, string>; locale: "pt-PT" | "en" };
+export type ImportPreview = { columns: string[]; fields: string[]; rows: { line: number; data: Record<string, string | number | boolean | null>; errors: string[] }[]; errors: string[]; imported: number; already_imported?: boolean };
+export const imports = {
+  preview: (body: ImportInput) => request<ImportPreview>("/api/imports/preview", { method: "POST", body }),
+  commit: (body: ImportInput) => request<ImportPreview>("/api/imports/commit", { method: "POST", body }),
+};
+
+export const charging = {
+  list: (vehicle: string) => request<ChargingRecord[]>(`/api/vehicles/${vehicle}/charging-records`),
+  create: (vehicle: string, body: ChargingInput) => request<ChargingRecord>(`/api/vehicles/${vehicle}/charging-records`, { method: "POST", body }),
+  update: (vehicle: string, id: string, body: ChargingInput) => request<ChargingRecord>(`/api/vehicles/${vehicle}/charging-records/${id}`, { method: "PATCH", body }),
+  remove: (vehicle: string, id: string) => request<void>(`/api/vehicles/${vehicle}/charging-records/${id}`, { method: "DELETE" }),
+};
+
+export const apiKeys = {
+  list: () => request<ApiKey[]>("/api/api-keys"),
+  create: (body: ApiKeyInput) => request<ApiKey & { token: string }>("/api/api-keys", { method: "POST", body }),
+  revoke: (id: string) => request<void>(`/api/api-keys/${id}`, { method: "DELETE" }),
 };
