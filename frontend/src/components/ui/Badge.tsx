@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cx } from "../../lib/cx";
+import { cn } from "../../lib/cn";
 
 export type BadgeTone = "neutral" | "brand" | "success" | "warning" | "danger" | "info";
 
@@ -24,7 +24,7 @@ export function Badge({
 }) {
   return (
     <span
-      className={cx(
+      className={cn(
         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
         tones[tone],
         className,

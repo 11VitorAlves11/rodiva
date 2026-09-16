@@ -5,7 +5,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 
-import { cx } from "../../lib/cx";
+import { cn } from "../../lib/cn";
 
 /** Shared control surface, so an input, select and textarea sit on the same grid. */
 export const controlClass =
@@ -28,7 +28,7 @@ export function Field({
   className?: string;
 }) {
   return (
-    <label className={cx("block text-sm", className)}>
+    <label className={cn("block text-sm", className)}>
       <span className="mb-1 block font-medium text-ink-muted">
         {label}
         {required && <span aria-hidden="true"> *</span>}
@@ -41,13 +41,13 @@ export function Field({
 }
 
 export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cx(controlClass, className)} {...rest} />;
+  return <input className={cn(controlClass, className)} {...rest} />;
 }
 
 export function Select({ className, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select className={cx(controlClass, className)} {...rest} />;
+  return <select className={cn(controlClass, className)} {...rest} />;
 }
 
 export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={cx(controlClass, className)} {...rest} />;
+  return <textarea className={cn(controlClass, className)} {...rest} />;
 }

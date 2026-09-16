@@ -59,7 +59,7 @@ export function WorkSection({
           <h2 className="text-lg font-semibold text-ink">
             {t("work.title")}
           </h2>
-          <p className="text-sm text-slate-500">{t("work.description")}</p>
+          <p className="text-sm text-ink-subtle">{t("work.description")}</p>
         </div>
         <button
           onClick={() => setShow((value) => !value)}
@@ -96,7 +96,7 @@ export function WorkSection({
             onChange={(event) => setCost(event.target.value)}
             className="rounded-md border border-line bg-raised px-3 py-2"
           />
-          {error && <p className="text-sm text-red-700">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
           <button
             disabled={saving}
             className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
@@ -105,7 +105,7 @@ export function WorkSection({
           </button>
         </form>
       )}
-      <ul className="divide-y divide-slate-100">
+      <ul className="divide-y divide-line">
         {records.map((record) => (
           <li
             key={record.id}
@@ -115,13 +115,13 @@ export function WorkSection({
               <p className="break-words font-medium text-ink">
                 {record.description}
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-subtle">
                 {t(`work.${record.kind}`)}
                 {record.supplier ? ` · ${record.supplier}` : ""}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-subtle">
                 {record.total_cost
                   ? Number(record.total_cost).toLocaleString(i18n.language, {
                       style: "currency",
@@ -131,7 +131,7 @@ export function WorkSection({
               </p>
               <button
                 onClick={() => void remove(record.id)}
-                className="flex items-center gap-1 text-xs font-medium text-red-700"
+                className="flex items-center gap-1 text-xs font-medium text-danger"
               >
                 <TrashIcon aria-hidden="true" className="h-3.5 w-3.5" />
                 {t("common.delete")}

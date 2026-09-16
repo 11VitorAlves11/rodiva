@@ -13,7 +13,7 @@ import { useSession } from "../lib/session";
 type ReminderWithVehicle = Reminder & { vehicleName: string };
 
 const urgencyStyles = {
-  overdue: "border-red-500 bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-100",
+  overdue: "border-red-500 bg-red-50 text-danger dark:bg-red-950/40 dark:text-red-100",
   very_urgent: "border-orange-500 bg-orange-50 text-orange-900 dark:bg-orange-950/40 dark:text-orange-100",
   urgent: "border-amber-500 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100",
   upcoming: "border-blue-400 bg-blue-50 text-blue-900 dark:bg-blue-950/40 dark:text-blue-100",
@@ -120,7 +120,7 @@ export function Reminders() {
         />
       )}
 
-      {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
+      {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-danger dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-sm text-ink-subtle">
@@ -172,7 +172,7 @@ export function Reminders() {
                         void act(() => reminders.remove(item.vehicle_id, item.id));
                       }
                     }}
-                    className="ml-auto text-red-700 underline-offset-4 hover:underline dark:text-red-300"
+                    className="ml-auto text-danger underline-offset-4 hover:underline dark:text-red-300"
                   >
                     {t("common.delete")}
                   </button>

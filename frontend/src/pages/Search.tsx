@@ -404,7 +404,7 @@ export function Search() {
       )}
 
       {error && (
-        <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-200">
+        <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-danger dark:bg-red-950 dark:text-red-200">
           {error}
         </p>
       )}
@@ -429,7 +429,7 @@ export function Search() {
             type="button"
             disabled={busy}
             onClick={confirmDelete}
-            className="rounded-lg border border-red-300 px-3 py-1.5 font-semibold text-red-700 disabled:opacity-50 dark:border-red-800 dark:text-red-300"
+            className="rounded-lg border border-danger/40 px-3 py-1.5 font-semibold text-danger disabled:opacity-50 dark:border-red-800 dark:text-red-300"
           >
             {t("search.bulkDelete")}
           </button>

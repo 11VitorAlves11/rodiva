@@ -42,7 +42,7 @@ export function ChargingSection({ vehicleId, unit }: { vehicleId: string; unit: 
   return <section className="space-y-4 rounded-xl border border-line bg-raised p-4">
     <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">{t("charging.title")}</h2>{canWrite && <button onClick={() => { setForm(blank()); setEditing(null); }} className="rounded-lg bg-copper px-4 py-2 font-semibold text-white">{t("charging.add")}</button>}</div>
     <p className="text-sm text-ink-muted">{t("charging.efficiencyHint")}</p>
-    {error && <p role="alert" className="text-sm text-red-700">{error}<button className="ml-2 underline" onClick={() => { setError(null); setAttempt((value) => value + 1); }}>{t("common.retry")}</button></p>}
+    {error && <p role="alert" className="text-sm text-danger">{error}<button className="ml-2 underline" onClick={() => { setError(null); setAttempt((value) => value + 1); }}>{t("common.retry")}</button></p>}
     {form && <form onSubmit={save}><fieldset disabled={busy} className="grid gap-3 sm:grid-cols-2">
       <label className="text-sm">{t("import.fields.recorded_on")}<input type="date" required value={form.recorded_on} onChange={(event) => setForm({ ...form, recorded_on: event.target.value })} className={inputClass} /></label>
       <label className="text-sm">{t("import.fields.odometer_reading")} ({unit})<input type="number" min="0" max="9999999" value={form.odometer_reading ?? ""} onChange={(event) => setForm({ ...form, odometer_reading: event.target.value ? Number(event.target.value) : null })} className={inputClass} /></label>
@@ -55,12 +55,12 @@ export function ChargingSection({ vehicleId, unit }: { vehicleId: string; unit: 
       <button className="rounded-lg bg-copper px-4 py-2 font-semibold text-white">{t("garage.save")}</button><button type="button" onClick={() => setForm(null)} className="rounded-lg border px-4 py-2">{t("common.cancel")}</button>
     </fieldset></form>}
     {!rows ? <p>{t("common.loading")}</p> : !rows.length ? <p className="text-sm">{t("charging.empty")}</p> : <ul className="divide-y divide-graphite/10 dark:divide-white/10">{rows.map((row) => <li key={row.id} className="flex flex-wrap justify-between gap-3 py-4">
-      <div><p className="font-semibold">{Number(row.energy_kwh).toLocaleString(i18n.language)} kWh · {currency(row.total_cost)}</p><p className="text-sm">{new Intl.DateTimeFormat(i18n.language).format(new Date(`${row.recorded_on}T12:00:00`))} · {row.location || t(`charging.${row.charger_type}`, { defaultValue: row.charger_type })}</p><p className="text-sm">{currency(row.unit_price)} / kWh{row.odometer_reading !== null && row.odometer_reading !== undefined ? ` · ${row.odometer_reading.toLocaleString(i18n.language)} ${unit}` : ""}</p>{row.efficiency_kwh_per_100km && <p className="text-sm">{row.efficiency_kwh_per_100km} kWh/100 km · {(100 / Number(row.efficiency_kwh_per_100km)).toLocaleString(i18n.language, { maximumFractionDigits: 2 })} km/kWh</p>}</div>
+      <div><p className="font-semibold">{Number(row.energy_kwh).toLocaleString(i18n.language)} kWh · {currency(row.total_cost)}</p><p className="text-sm">{new Intl.DateTimeFormat(i18n.language).format(new Date(`${row.recorded_on}T12:00:00`))} · {row.location || t(`charging.${row.charger_type}`, { defaultValue: row.charger_type })}</p><p className="text-sm">{currency(row.unit_price)} / kWh{row.odometer_reading !== null && row.odometer_reading !== undefined ? ` · ${row.odometer_reading.toLocaleString(i18n.language)} ${unit}` : ""}</p>{row.efficiency_kwh_per_100km && <p className="text-sm">{Number(row.efficiency_kwh_per_100km).toLocaleString(i18n.language, { maximumFractionDigits: 1 })} kWh/100 km · {(100 / Number(row.efficiency_kwh_per_100km)).toLocaleString(i18n.language, { maximumFractionDigits: 2 })} km/kWh</p>}</div>
       {canWrite && <div className="flex gap-3"><button disabled={busy} onClick={() => { const { recorded_on, energy_kwh, total_cost, odometer_reading, soc_start, soc_end, location, charger_type, notes } = row; setForm({ recorded_on, energy_kwh, total_cost, odometer_reading, soc_start, soc_end, location, charger_type, notes }); setEditing(row.id); }} className="text-sm text-copper">{t("common.edit")}</button><button disabled={busy} onClick={() => {
         if (!window.confirm(t("common.confirmDelete"))) return;
         setBusy(true); setError(null);
         void charging.remove(vehicleId, row.id).then(() => setAttempt((value) => value + 1)).catch(() => setError(t("common.error"))).finally(() => setBusy(false));
-      }} className="text-sm text-red-700">{t("common.delete")}</button></div>}
+      }} className="text-sm text-danger">{t("common.delete")}</button></div>}
     </li>)}</ul>}
   </section>;
 }

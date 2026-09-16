@@ -31,7 +31,7 @@ export function FuelSection({
           <h2 className="text-lg font-semibold text-ink">
             {t("fuel.title")}
           </h2>
-          <p className="text-sm text-slate-500">{t("fuel.description")}</p>
+          <p className="text-sm text-ink-subtle">{t("fuel.description")}</p>
         </div>
         <button
           onClick={() => setShowForm((value) => !value)}
@@ -51,9 +51,9 @@ export function FuelSection({
         />
       )}
       {records.length === 0 ? (
-        <p className="py-4 text-sm text-slate-500">{t("fuel.empty")}</p>
+        <p className="py-4 text-sm text-ink-subtle">{t("fuel.empty")}</p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {records.map((record) => (
             <li
               key={record.id}
@@ -68,15 +68,15 @@ export function FuelSection({
                     currency: "EUR",
                   })}
                 </p>
-                <p className="break-words text-sm text-slate-500">
+                <p className="break-words text-sm text-ink-subtle">
                   {formatDate(record.recorded_on)}
                   {record.station ? ` · ${record.station}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-ink-subtle">
                   {record.consumption_l_per_100km
-                    ? `${Number(record.consumption_l_per_100km).toLocaleString(i18n.language)} L/100 km`
+                    ? `${Number(record.consumption_l_per_100km).toLocaleString(i18n.language, { maximumFractionDigits: 1 })} L/100 km`
                     : "—"}
                 </p>
                 <button
@@ -84,7 +84,7 @@ export function FuelSection({
                     if (window.confirm(t("common.confirmDelete")))
                       void fuel.remove(vehicleId, record.id).then(onCreated);
                   }}
-                  className="flex items-center gap-1 text-xs font-medium text-red-700"
+                  className="flex items-center gap-1 text-xs font-medium text-danger"
                 >
                   <TrashIcon aria-hidden="true" className="h-3.5 w-3.5" />
                   {t("common.delete")}
@@ -221,7 +221,7 @@ function FuelForm({
         />
         {t("fuel.fullTank")}
       </label>
-      {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
+      {error && <p className="text-sm text-danger sm:col-span-2">{error}</p>}
       <button
         type="submit"
         disabled={submitting}

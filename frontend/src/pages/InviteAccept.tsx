@@ -47,14 +47,14 @@ export function InviteAccept() {
         </div>
 
         {!ready && <p className="text-sm text-graphite/50">{t("common.loading")}</p>}
-        {ready && preview === "invalid" && <p className="text-sm text-red-700">{t("invite.invalid")}</p>}
+        {ready && preview === "invalid" && <p className="text-sm text-danger">{t("invite.invalid")}</p>}
 
         {ready && preview && preview !== "invalid" && (
           <>
             <p className="text-sm text-graphite/70">
               {t("invite.description", { household: preview.household_name, role: t(`settings.roles.${preview.role}`) })}
             </p>
-            {error && <p className="text-sm text-red-700">{error}</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
             {me ? (
               <button
                 onClick={() => void acceptAsCurrentUser()}
@@ -122,7 +122,7 @@ function InviteAuthForm({ token, onJoined }: { token: string; onJoined: (me: Me)
         <span className="mb-1 block font-medium text-graphite/70">{t("login.password")}</span>
         <input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-md border border-graphite/15 px-3 py-2" />
       </label>
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
       <button type="submit" disabled={submitting} className="w-full rounded-md bg-copper px-4 py-2 text-sm font-medium text-white hover:bg-copper-dark disabled:opacity-60">
         {mode === "register" ? t("invite.joinAsNewAccount") : t("invite.joinWithExistingAccount")}
       </button>

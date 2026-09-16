@@ -144,7 +144,7 @@ function VehicleForm({ onCreated }: { onCreated: (vehicle: Vehicle) => void }) {
           className="w-full rounded-md border border-line px-3 py-2 bg-raised"
         />
       </label>
-      {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
+      {error && <p className="text-sm text-danger sm:col-span-2">{error}</p>}
       <button
         type="submit"
         disabled={submitting}

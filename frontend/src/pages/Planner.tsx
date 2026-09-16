@@ -21,10 +21,10 @@ const priorities: PlanPriority[] = ["low", "normal", "high", "urgent"];
 const kinds: WorkKind[] = ["maintenance", "repair", "modification"];
 
 const priorityStyles: Record<PlanPriority, string> = {
-  low: "bg-slate-100 text-ink-muted dark:bg-slate-800 dark:text-slate-200",
+  low: "bg-sunken text-ink-muted dark:bg-slate-800 dark:text-slate-200",
   normal: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-200",
   high: "bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200",
-  urgent: "bg-red-100 text-red-900 dark:bg-red-950/60 dark:text-red-200",
+  urgent: "bg-red-100 text-danger dark:bg-red-950/60 dark:text-red-200",
 };
 
 export function Planner() {
@@ -142,7 +142,7 @@ export function Planner() {
           onCancel={() => setCompleting(null)}
         />
       )}
-      {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
+      {actionError && <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-danger dark:bg-red-950/40 dark:text-red-100">{actionError}</p>}
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-sm text-ink-subtle">

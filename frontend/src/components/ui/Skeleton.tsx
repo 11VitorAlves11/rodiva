@@ -4,7 +4,7 @@ export function Skeleton({ className, lines = 3 }: { className?: string; lines?:
   return (
     <div className={cn("animate-pulse space-y-2", className)} role="status" aria-label="A carregar">
       {Array.from({ length: lines }, (_, index) => (
-        <div key={index} className="h-4 rounded bg-slate-200" />
+        <div key={index} className="h-4 rounded bg-sunken" />
       ))}
     </div>
   );

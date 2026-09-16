@@ -106,7 +106,7 @@ export function History() {
             <option value="asc">{t("search.sorts.occurred_on_asc")}</option>
           </select>
         </label>
-        {invalidRange && <p role="alert" className="text-sm text-red-700 sm:col-span-2 lg:col-span-3">{t("history.invalidRange")}</p>}
+        {invalidRange && <p role="alert" className="text-sm text-danger sm:col-span-2 lg:col-span-3">{t("history.invalidRange")}</p>}
         {hasFilters && <button onClick={() => setSearchParams((current) => {
           const next = new URLSearchParams(current);
           for (const key of ["q", "type", "vehicle", "from", "to", "sort"]) next.delete(key);

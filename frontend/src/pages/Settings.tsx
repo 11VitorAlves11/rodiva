@@ -118,7 +118,7 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
         )}
       </div>
 
-      {error && <p className="mb-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mb-3 text-sm text-danger">{error}</p>}
 
       {showInviteForm && (
         <InviteForm
@@ -172,7 +172,7 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
                   </span>
                 )}
                 {canManage && member.user_id !== currentUserId && (
-                  <button onClick={() => void remove(member.user_id)} className="text-sm font-medium text-red-700">
+                  <button onClick={() => void remove(member.user_id)} className="text-sm font-medium text-danger">
                     {t("settings.remove")}
                   </button>
                 )}
@@ -191,7 +191,7 @@ function MembersSection({ canManage, currentUserId }: { canManage: boolean; curr
                 <span className="text-ink">
                   {invite.email ?? t(`settings.roles.${invite.role}`)}
                 </span>
-                <button onClick={() => void revoke(invite.id)} className="font-medium text-red-700">
+                <button onClick={() => void revoke(invite.id)} className="font-medium text-danger">
                   {t("settings.revoke")}
                 </button>
               </li>
@@ -246,7 +246,7 @@ function InviteForm({ onCreated }: { onCreated: (invite: Invite) => void }) {
           className="w-full rounded-md border border-line px-3 py-2 bg-raised"
         />
       </label>
-      {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
+      {error && <p className="text-sm text-danger sm:col-span-2">{error}</p>}
       <button
         type="submit"
         disabled={saving}
@@ -364,7 +364,7 @@ function GoogleCalendarSection() {
       <h2 className="mb-1 font-semibold text-ink">{t("calendar.google.title")}</h2>
       <p className="mb-4 text-sm text-ink-muted">{t("calendar.google.description")}</p>
 
-      {error && <p className="mb-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mb-3 text-sm text-danger">{error}</p>}
 
       {!status.configured && (
         <p className="rounded-lg bg-graphite/5 p-3 text-sm text-ink-muted dark:bg-white/5">
@@ -399,7 +399,7 @@ function GoogleCalendarSection() {
               {status.synced_vehicle_ids.length}
             </p>
           </div>
-          {status.last_error && <p className="text-sm text-red-700">{status.last_error}</p>}
+          {status.last_error && <p className="text-sm text-danger">{status.last_error}</p>}
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => void changeSelection()}

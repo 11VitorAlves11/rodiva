@@ -94,7 +94,7 @@ export function OdometerForm({
         />
         {t("odometer.adjustmentCheck")}
       </label>
-      {error && <p className="text-sm text-red-700 sm:col-span-2">{error}</p>}
+      {error && <p className="text-sm text-danger sm:col-span-2">{error}</p>}
       <button
         type="submit"
         disabled={submitting}

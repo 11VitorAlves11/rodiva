@@ -42,8 +42,8 @@ export function PasswordRecovery({ reset = false }: { reset?: boolean }) {
           <label className="block text-sm">{t("account.newPassword")}<input required type="password" autoComplete="new-password" minLength={10} maxLength={72} className={input} value={password} onChange={(event) => setPassword(event.target.value)} /></label>
           <label className="block text-sm">{t("account.confirmPassword")}<input required type="password" autoComplete="new-password" minLength={10} maxLength={72} className={input} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>
         </> : <label className="block text-sm">{t("login.email")}<input required type="email" autoComplete="email" className={input} value={email} onChange={(event) => setEmail(event.target.value)} /></label>}
-        {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-        {reset && !token && <p role="alert" className="text-sm text-red-700">{t("recovery.invalid")}</p>}
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+        {reset && !token && <p role="alert" className="text-sm text-danger">{t("recovery.invalid")}</p>}
         <button disabled={busy || (reset && !token)} className="w-full rounded-lg bg-copper px-4 py-2 font-semibold text-white disabled:opacity-60">{t(reset ? "recovery.reset" : "recovery.send")}</button>
       </>}
       <Link to="/login" className="block text-center text-sm font-medium text-copper">{t("login.title")}</Link>

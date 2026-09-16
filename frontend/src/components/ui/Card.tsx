@@ -1,9 +1,9 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
-import { cx } from "../../lib/cx";
+import { cn } from "../../lib/cn";
 
 export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cx("rounded-xl border border-line bg-raised", className)} {...rest} />;
+  return <div className={cn("rounded-xl border border-line bg-raised", className)} {...rest} />;
 }
 
 export function CardHeader({
@@ -18,7 +18,7 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={cx("flex flex-wrap items-start justify-between gap-3", className)}>
+    <div className={cn("flex flex-wrap items-start justify-between gap-3", className)}>
       <div className="min-w-0">
         <h2 className="text-base font-semibold text-ink">{title}</h2>
         {description && <p className="mt-0.5 text-sm text-ink-muted">{description}</p>}

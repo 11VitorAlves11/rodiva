@@ -48,7 +48,7 @@ export function DocumentsSection({
           <h2 className="text-lg font-semibold text-ink">
             {t("documents.title")}
           </h2>
-          <p className="text-sm text-slate-500">{t("documents.description")}</p>
+          <p className="text-sm text-ink-subtle">{t("documents.description")}</p>
         </div>
         {canWrite && <label
           role="button"
@@ -69,11 +69,11 @@ export function DocumentsSection({
           />
         </label>}
       </div>
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
       {records.length === 0 ? (
-        <p className="py-4 text-sm text-slate-500">{t("documents.empty")}</p>
+        <p className="py-4 text-sm text-ink-subtle">{t("documents.empty")}</p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {records.map((document) => (
             <li
               key={document.id}
@@ -90,7 +90,7 @@ export function DocumentsSection({
                   <p className="truncate font-medium text-ink">
                     {document.filename}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-ink-subtle">
                     {(document.size / 1024).toLocaleString(i18n.language, {
                       maximumFractionDigits: 1,
                     })}{" "}
@@ -107,7 +107,7 @@ export function DocumentsSection({
                       .then(onCreated)
                       .catch(() => setError(t("common.error")));
                 }}
-                className="flex shrink-0 items-center gap-1 self-start text-xs font-medium text-red-700"
+                className="flex shrink-0 items-center gap-1 self-start text-xs font-medium text-danger"
               >
                 <TrashIcon aria-hidden="true" className="h-3.5 w-3.5" />
                 {t("common.delete")}

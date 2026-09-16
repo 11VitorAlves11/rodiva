@@ -31,7 +31,7 @@ export function NotesSection({ records, vehicleId, onCreated }: { records: Note[
 
   return <section className="space-y-4 rounded-xl border border-line bg-raised p-4">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">{t("notes.title")}</h2><p className="text-sm text-ink-muted">{t("notes.description")}</p></div>{canWrite && <button onClick={() => { setOpen(true); setEditing(null); setTitle(""); setContent(""); setPinned(false); }} className="rounded-lg bg-copper px-3 py-2 font-semibold text-white">{t("notes.add")}</button>}</div>
-    {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+    {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     {open && <form onSubmit={submit} className="space-y-3">
       <label className="block text-sm">{t("notes.name")}<input required maxLength={300} value={title} onChange={(event) => setTitle(event.target.value)} className={input} /></label>
       <label className="block text-sm">{t("notes.content")}<textarea required maxLength={20000} rows={5} value={content} onChange={(event) => setContent(event.target.value)} className={input} /></label>
@@ -41,7 +41,7 @@ export function NotesSection({ records, vehicleId, onCreated }: { records: Note[
     {!records.length ? <p className="text-sm">{t("notes.empty")}</p> : <div className="grid gap-3 sm:grid-cols-2">{records.map((note) => <article key={note.id} className="min-w-0 rounded-lg border border-line p-4">
       <h3 className="break-words font-semibold">{note.title}{note.pinned && <span className="ml-2 text-xs text-copper">{t("notes.pinned")}</span>}</h3>
       <p className="mt-2 whitespace-pre-wrap break-words text-sm">{note.content}</p>
-      {canWrite && <div className="mt-3 flex gap-3"><button disabled={saving} className="text-sm text-copper" onClick={() => { setEditing(note.id); setTitle(note.title); setContent(note.content); setPinned(note.pinned); setOpen(true); }}>{t("common.edit")}</button><button disabled={saving} className="text-sm text-red-700" onClick={() => {
+      {canWrite && <div className="mt-3 flex gap-3"><button disabled={saving} className="text-sm text-copper" onClick={() => { setEditing(note.id); setTitle(note.title); setContent(note.content); setPinned(note.pinned); setOpen(true); }}>{t("common.edit")}</button><button disabled={saving} className="text-sm text-danger" onClick={() => {
         if (!window.confirm(t("common.confirmDelete"))) return;
         setSaving(true); setError(null);
         void notes.remove(vehicleId, note.id).then(() => { if (editing === note.id) setOpen(false); onCreated(); }).catch(() => setError(t("common.error"))).finally(() => setSaving(false));

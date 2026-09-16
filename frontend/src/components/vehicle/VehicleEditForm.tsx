@@ -132,7 +132,7 @@ export function VehicleEditForm({
         </select>
       </label>
       {error && (
-        <p role="alert" className="text-sm text-red-700 sm:col-span-2">
+        <p role="alert" className="text-sm text-danger sm:col-span-2">
           {error}
         </p>
       )}
@@ -140,7 +140,7 @@ export function VehicleEditForm({
         <button
           type="button"
           onClick={() => void onDelete()}
-          className="rounded-lg border border-red-300 px-4 py-2.5 font-semibold text-red-700 dark:border-red-800 dark:text-red-300"
+          className="rounded-lg border border-danger/40 px-4 py-2.5 font-semibold text-danger dark:border-red-800 dark:text-red-300"
         >
           {t("vehicle.delete")}
         </button>

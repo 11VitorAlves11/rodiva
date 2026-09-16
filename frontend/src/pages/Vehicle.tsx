@@ -158,7 +158,7 @@ export function Vehicle() {
             />
           )}
           <div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-ink-subtle">
               {[vehicle.make, vehicle.model, vehicle.year]
                 .filter(Boolean)
                 .join(" · ")}
@@ -222,9 +222,11 @@ export function Vehicle() {
         />
       )}
 
+      {/* Scrolls sideways on a phone; wraps on wider screens so the last tab is
+          not sliced mid-word against the container edge. */}
       <nav
         aria-label={t("vehicle.sections")}
-        className="flex gap-1 overflow-x-auto rounded-xl bg-raised p-1 shadow-sm"
+        className="flex gap-1 overflow-x-auto rounded-xl bg-raised p-1 shadow-sm md:flex-wrap md:overflow-x-visible"
       >
         {(
           [
@@ -240,7 +242,7 @@ export function Vehicle() {
           <button
             key={section}
             onClick={() => setSearchParams({ section })}
-            className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ${activeSection === section ? "bg-copper text-white" : "text-slate-600 hover:bg-slate-100"}`}
+            className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ${activeSection === section ? "bg-copper text-white" : "text-ink-subtle hover:bg-sunken"}`}
           >
             {t(`${section}.title`)}
           </button>
@@ -256,7 +258,7 @@ export function Vehicle() {
               <h2 className="text-lg font-semibold text-ink">
                 {t("odometer.title")}
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-subtle">
                 {t("odometer.description")}
               </p>
             </div>
@@ -279,9 +281,9 @@ export function Vehicle() {
             />
           )}
           {readings.length === 0 ? (
-            <p className="py-4 text-sm text-slate-500">{t("odometer.empty")}</p>
+            <p className="py-4 text-sm text-ink-subtle">{t("odometer.empty")}</p>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-line">
               {readings.map((item) => (
                 <li
                   key={item.id}
@@ -292,20 +294,20 @@ export function Vehicle() {
                       {item.reading.toLocaleString(i18n.language)}{" "}
                       {vehicle.distance_unit}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-ink-subtle">
                       {formatDate(item.recorded_on)}
                       {item.is_adjustment
                         ? ` · ${t("odometer.adjustment")}`
                         : ""}
                     </p>
                     {item.notes && (
-                      <p className="mt-1 text-sm text-slate-600">
+                      <p className="mt-1 text-sm text-ink-subtle">
                         {item.notes}
                       </p>
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-ink-subtle">
                       {item.distance === null
                         ? "—"
                         : `+${item.distance.toLocaleString(i18n.language)} ${vehicle.distance_unit}`}
@@ -315,7 +317,7 @@ export function Vehicle() {
                         if (window.confirm(t("common.confirmDelete")))
                           void odometer.remove(vehicleId, item.id).then(load);
                       }}
-                      className="flex items-center gap-1 text-xs font-medium text-red-700"
+                      className="flex items-center gap-1 text-xs font-medium text-danger"
                     >
                       <TrashIcon aria-hidden="true" className="h-3.5 w-3.5" />
                       {t("common.delete")}

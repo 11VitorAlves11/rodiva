@@ -66,7 +66,7 @@ export function AccountSettings() {
 
   return (
     <div className="space-y-6">
-      {error && <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}<button className="ml-3 underline" onClick={() => { setError(null); setReload((value) => value + 1); }}>{t("common.retry")}</button></div>}
+      {error && <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-danger">{error}<button className="ml-3 underline" onClick={() => { setError(null); setReload((value) => value + 1); }}>{t("common.retry")}</button></div>}
       {success && <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">{success}</p>}
       {households.length > 1 && <section className={panel}>
         <label className="block text-sm font-semibold">{t("account.activeHousehold")}
@@ -96,7 +96,7 @@ export function AccountSettings() {
         <h2 className="font-semibold">{t("account.sessions")}</h2>
         {!sessions ? <p>{t("common.loading")}</p> : <ul className="divide-y divide-graphite/10 dark:divide-white/10">{sessions.map((session) => <li key={session.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="min-w-0 flex-1"><p className="break-words text-sm">{session.user_agent || t("account.unknownDevice")}</p><p className="text-xs text-ink-muted">{new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium", timeStyle: "short", timeZone: me?.user.timezone }).format(new Date(session.created_at))}{session.current ? ` · ${t("account.currentSession")}` : ""}</p></div>
-          <button disabled={busy} className="text-sm font-semibold text-red-700 disabled:opacity-60" onClick={() => void run(async () => { await auth.revokeSession(session.id); if (session.current) setMe(null); else setSessions((rows) => rows?.filter((row) => row.id !== session.id) ?? null); })}>{t("account.endSession")}</button>
+          <button disabled={busy} className="text-sm font-semibold text-danger disabled:opacity-60" onClick={() => void run(async () => { await auth.revokeSession(session.id); if (session.current) setMe(null); else setSessions((rows) => rows?.filter((row) => row.id !== session.id) ?? null); })}>{t("account.endSession")}</button>
         </li>)}</ul>}
         <button disabled={busy} className="rounded-lg border border-copper/30 px-4 py-2 text-sm font-semibold text-copper disabled:opacity-60" onClick={() => {
           if (window.confirm(t("account.endAllConfirm"))) void run(async () => { await auth.logoutAll(); setMe(null); });

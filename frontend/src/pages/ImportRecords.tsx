@@ -48,7 +48,7 @@ export function ImportRecords() {
   return <div className="space-y-5">
     <h1 className="text-2xl font-bold">{t("import.title")}</h1>
     <p className="text-sm text-ink-muted">{t("import.description")}</p>
-    {error && <p role="alert" className="text-sm text-red-700">{error}<button className="ml-2 underline" onClick={() => { setError(null); setAttempt((value) => value + 1); }}>{t("common.retry")}</button></p>}
+    {error && <p role="alert" className="text-sm text-danger">{error}<button className="ml-2 underline" onClick={() => { setError(null); setAttempt((value) => value + 1); }}>{t("common.retry")}</button></p>}
     {done !== null && <p role="status" className="rounded-lg bg-emerald-50 p-3 text-emerald-800">{t("import.done", { count: done })} <Link className="underline" to={`/vehicles/${vehicleId}?section=${kind}`}>{t("import.openVehicle")}</Link></p>}
     <fieldset disabled={busy} className="grid gap-4 rounded-xl border border-line bg-raised p-4 sm:grid-cols-2">
       <label className="text-sm">{t("search.vehicleFilter")}<select value={vehicleId} onChange={(event) => { setVehicleId(event.target.value); invalidate(); }} className={input}><option value="" disabled>{t("import.chooseVehicle")}</option>{list.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name}</option>)}</select></label>
@@ -69,8 +69,8 @@ export function ImportRecords() {
     {preview && <section className="space-y-3">
       <h2 className="font-semibold">{t("import.previewCount", { count: preview.rows.length })}</h2>
       {preview.already_imported && <p role="status">{t("import.alreadyImported")}</p>}
-      {preview.errors.map((message) => <p key={message} role="alert" className="text-sm text-red-700">{message}</p>)}
-      <div className="max-h-96 overflow-auto rounded-lg border border-line"><table className="w-full text-left text-sm"><thead><tr><th className="p-3">{t("import.line")}</th><th className="p-3">{t("import.values")}</th><th className="p-3">{t("import.validation")}</th></tr></thead><tbody>{preview.rows.map((row) => <tr key={row.line} className="border-t border-line"><td className="p-3">{row.line}</td><td className="p-3"><dl>{Object.entries(row.data).filter(([,value]) => value !== null).map(([field,value]) => <div key={field}><dt className="inline font-medium">{t(`import.fields.${field}`)}: </dt><dd className="inline break-words">{String(value)}</dd></div>)}</dl></td><td className="p-3">{row.errors.length ? <ul className="text-red-700">{row.errors.map((message) => <li key={message}>{message}</li>)}</ul> : t("import.valid")}</td></tr>)}</tbody></table></div>
+      {preview.errors.map((message) => <p key={message} role="alert" className="text-sm text-danger">{message}</p>)}
+      <div className="max-h-96 overflow-auto rounded-lg border border-line"><table className="w-full text-left text-sm"><thead><tr><th className="p-3">{t("import.line")}</th><th className="p-3">{t("import.values")}</th><th className="p-3">{t("import.validation")}</th></tr></thead><tbody>{preview.rows.map((row) => <tr key={row.line} className="border-t border-line"><td className="p-3">{row.line}</td><td className="p-3"><dl>{Object.entries(row.data).filter(([,value]) => value !== null).map(([field,value]) => <div key={field}><dt className="inline font-medium">{t(`import.fields.${field}`)}: </dt><dd className="inline break-words">{String(value)}</dd></div>)}</dl></td><td className="p-3">{row.errors.length ? <ul className="text-danger">{row.errors.map((message) => <li key={message}>{message}</li>)}</ul> : t("import.valid")}</td></tr>)}</tbody></table></div>
       <button disabled={busy || !valid || done !== null || preview.already_imported} onClick={() => void inspect(true)} className="rounded-lg bg-copper px-4 py-2 font-semibold text-white disabled:opacity-60">{t("import.commit", { count: preview.rows.length })}</button>
     </section>}
   </div>;

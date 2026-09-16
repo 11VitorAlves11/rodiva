@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 
-import { cx } from "../../lib/cx";
+import { cn } from "../../lib/cn";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md";
@@ -28,7 +28,7 @@ export function Button({ variant = "primary", size = "md", className, type = "bu
   return (
     <button
       type={type}
-      className={cx(
+      className={cn(
         "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors",
         "disabled:cursor-not-allowed disabled:opacity-50",
         variants[variant],
