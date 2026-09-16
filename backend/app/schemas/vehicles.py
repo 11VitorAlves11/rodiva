@@ -17,6 +17,18 @@ class VehicleIn(BaseModel):
     distance_unit: str = Field(default="km", pattern="^(km|mi)$")
 
 
+class VehicleUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    type: str | None = None
+    make: str | None = None
+    model: str | None = None
+    year: int | None = Field(default=None, ge=1900, le=2100)
+    license_plate: str | None = None
+    vin: str | None = None
+    distance_unit: str | None = Field(default=None, pattern="^(km|mi)$")
+    status: VehicleStatus | None = None
+
+
 class VehicleOut(BaseModel):
     id: uuid.UUID
     name: str

@@ -76,3 +76,39 @@ async def test_update_and_delete_work_record(user_client: AsyncClient) -> None:
 
     listed = await user_client.get(f"/api/vehicles/{vehicle_id}/work-records")
     assert listed.json() == []
+
+
+async def test_deleting_work_record_restores_requisitioned_stock(
+    user_client: AsyncClient,
+) -> None:
+    vehicle_id = await _vehicle(user_client)
+    record = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/work-records",
+        json={"recorded_on": "2026-01-05", "kind": "maintenance", "description": "Filtros"},
+    )
+    record_id = record.json()["id"]
+
+    item = await user_client.post(
+        "/api/inventory",
+        json={"name": "Filtro de óleo", "unit": "unit", "quantity": "5.000"},
+    )
+    item_id = item.json()["id"]
+    await user_client.post(
+        f"/api/inventory/{item_id}/movements",
+        json={"kind": "requisition", "quantity": "2.000", "work_record_id": record_id},
+    )
+    after_requisition = await user_client.get("/api/inventory")
+    assert after_requisition.json()[0]["quantity"] == "3.000"
+
+    deleted = await user_client.delete(f"/api/vehicles/{vehicle_id}/work-records/{record_id}")
+    assert deleted.status_code == 204
+
+    restored = await user_client.get("/api/inventory")
+    assert restored.json()[0]["quantity"] == "5.000"
+
+    movements = await user_client.get(f"/api/inventory/{item_id}/movements")
+    kinds = [entry["kind"] for entry in movements.json()]
+    assert kinds.count("return") == 1
+    return_movement = next(entry for entry in movements.json() if entry["kind"] == "return")
+    assert return_movement["quantity_delta"] == "2.000"
+    assert return_movement["work_record_id"] is None

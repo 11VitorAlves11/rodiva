@@ -54,6 +54,10 @@ async def _recalculate(vehicle_id: uuid.UUID, db: AsyncSession) -> list[Odometer
             else None
         )
         previous = item
+    # Mounted equipment derives its distance from the same canonical readings.
+    from app.api.routes.equipment import recalculate_equipment_distance
+
+    await recalculate_equipment_distance(vehicle_id, db)
     return readings
 
 

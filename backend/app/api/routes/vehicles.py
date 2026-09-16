@@ -7,6 +7,7 @@ comes from the caller's own membership, never from a client-supplied id.
 import base64
 import binascii
 import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, status
@@ -14,7 +15,7 @@ from sqlalchemy import select
 
 from app.api.deps import AppSettings, CurrentMembership, CurrentUser, DbSession
 from app.models import Role, Vehicle, VehicleStatus
-from app.schemas.vehicles import VehicleIn, VehicleOut, VehiclePhotoIn
+from app.schemas.vehicles import VehicleIn, VehicleOut, VehiclePhotoIn, VehicleUpdate
 
 router = APIRouter(prefix="/vehicles", tags=["vehicles"])
 
@@ -30,6 +31,13 @@ async def list_vehicles(membership: CurrentMembership, db: DbSession) -> list[Ve
         .order_by(Vehicle.created_at)
     )
     return list(result)
+
+
+def _require_manage(membership: CurrentMembership) -> None:
+    if membership.role not in _CAN_CREATE_VEHICLE:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot manage vehicles"
+        )
 
 
 @router.post("", response_model=VehicleOut, status_code=status.HTTP_201_CREATED)
@@ -62,6 +70,39 @@ async def get_vehicle(
     return vehicle
 
 
+@router.patch("/{vehicle_id}", response_model=VehicleOut)
+async def update_vehicle(
+    vehicle_id: uuid.UUID,
+    payload: VehicleUpdate,
+    membership: CurrentMembership,
+    db: DbSession,
+) -> Vehicle:
+    _require_manage(membership)
+    vehicle = await get_vehicle(vehicle_id, membership, db)
+    changes = payload.model_dump(exclude_unset=True)
+    if any(
+        changes.get(field) is None
+        for field in ("name", "distance_unit", "status")
+        if field in changes
+    ):
+        raise HTTPException(status_code=422, detail="Required vehicle fields cannot be null")
+    for field, value in changes.items():
+        setattr(vehicle, field, value)
+    await db.commit()
+    await db.refresh(vehicle)
+    return vehicle
+
+
+@router.delete("/{vehicle_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_vehicle(
+    vehicle_id: uuid.UUID, membership: CurrentMembership, db: DbSession
+) -> None:
+    _require_manage(membership)
+    vehicle = await get_vehicle(vehicle_id, membership, db)
+    vehicle.deleted_at = datetime.now(UTC)
+    await db.commit()
+
+
 @router.post("/{vehicle_id}/photo", response_model=VehicleOut)
 async def upload_vehicle_photo(
     vehicle_id: uuid.UUID,
@@ -71,10 +112,7 @@ async def upload_vehicle_photo(
     settings: AppSettings,
 ) -> Vehicle:
     vehicle = await get_vehicle(vehicle_id, membership, db)
-    if membership.role not in {Role.OWNER, Role.MANAGER, Role.EDITOR}:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot edit vehicle"
-        )
+    _require_manage(membership)
     extensions = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
     extension = extensions.get(payload.content_type)
     if extension is None:

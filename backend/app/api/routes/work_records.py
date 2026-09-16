@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _recalculate, _vehicle_in_household
-from app.models import OdometerReading, Role, WorkRecord
+from app.models import InventoryItem, OdometerReading, Role, StockMovement, WorkRecord
 from app.schemas.work_records import WorkRecordIn, WorkRecordOut, WorkRecordUpdate
 
 router = APIRouter(prefix="/vehicles/{vehicle_id}/work-records", tags=["work records"])
@@ -89,7 +89,11 @@ async def update_work_record(
 
 @router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_work_record(
-    vehicle_id: uuid.UUID, record_id: uuid.UUID, membership: CurrentMembership, db: DbSession
+    vehicle_id: uuid.UUID,
+    record_id: uuid.UUID,
+    user: CurrentUser,
+    membership: CurrentMembership,
+    db: DbSession,
 ) -> None:
     await _vehicle_in_household(vehicle_id, membership, db)
     if membership.role not in _CAN_WRITE_RECORDS:
@@ -97,5 +101,36 @@ async def delete_work_record(
             status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot delete records"
         )
     record = await _work_record_in_vehicle(vehicle_id, record_id, db)
+    await _restore_requisitioned_stock(record_id, user.id, db)
     await db.delete(record)
     await db.commit()
+
+
+async def _restore_requisitioned_stock(
+    record_id: uuid.UUID, user_id: uuid.UUID, db: DbSession
+) -> None:
+    movements = list(
+        await db.scalars(
+            select(StockMovement).where(
+                StockMovement.work_record_id == record_id, StockMovement.quantity_delta < 0
+            )
+        )
+    )
+    for movement in movements:
+        item = await db.scalar(
+            select(InventoryItem).where(InventoryItem.id == movement.item_id).with_for_update()
+        )
+        if item is None:
+            continue
+        restored = -movement.quantity_delta
+        item.quantity += restored
+        db.add(
+            StockMovement(
+                item_id=item.id,
+                kind="return",
+                quantity_delta=restored,
+                quantity_after=item.quantity,
+                notes="Stock restored after deleting the work record that requisitioned it",
+                created_by=user_id,
+            )
+        )
