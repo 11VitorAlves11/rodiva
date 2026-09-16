@@ -9,6 +9,7 @@ import { useSession } from "./lib/session";
 import { Garage } from "./pages/Garage";
 import { History } from "./pages/History";
 import { Dashboard } from "./pages/Dashboard";
+import { Calendar } from "./pages/Calendar";
 import { InviteAccept } from "./pages/InviteAccept";
 import { Inventory } from "./pages/Inventory";
 import { Inspections } from "./pages/Inspections";
@@ -16,6 +17,8 @@ import { PasswordRecovery } from "./pages/PasswordRecovery";
 import { Login } from "./pages/Login";
 import { Planner } from "./pages/Planner";
 import { Reminders } from "./pages/Reminders";
+import { Reports } from "./pages/Reports";
+import { Search } from "./pages/Search";
 import { Settings } from "./pages/Settings";
 import { Vehicle } from "./pages/Vehicle";
 
@@ -55,6 +58,9 @@ export function App() {
       <Route path="/garage" element={<RequireSession><Garage /></RequireSession>} />
       <Route path="/history" element={<RequireSession><History /></RequireSession>} />
       <Route path="/reminders" element={<RequireSession><Reminders /></RequireSession>} />
+      <Route path="/reports" element={<RequireSession><Reports /></RequireSession>} />
+      <Route path="/search" element={<RequireSession><Search /></RequireSession>} />
+      <Route path="/calendar" element={<RequireSession><Calendar /></RequireSession>} />
       <Route path="/inventory" element={<RequireSession><Inventory /></RequireSession>} />
       <Route path="/equipment" element={<RequireSession><Equipment /></RequireSession>} />
       <Route path="/inspections" element={<RequireSession><Inspections /></RequireSession>} />
