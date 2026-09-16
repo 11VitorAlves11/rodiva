@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     smtp_from: str = ""
     smtp_starttls: bool = True
 
+    # How often the API evaluates reminders and flushes the delivery queue
+    # (RF-NOT-005). Zero turns the in-process schedule off, for deployments
+    # driving POST /api/v1/notifications/run from their own scheduler.
+    notification_interval_seconds: int = 900
+
     cors_origins: list[str] = ["http://localhost:5173"]
 
     # Household defaults applied to a newly created household (RF-ADM-001).

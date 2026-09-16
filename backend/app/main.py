@@ -21,6 +21,7 @@ from app.api.routes import (
     inspections,
     inventory,
     notes,
+    notifications,
     odometer,
     plans,
     reminders,
@@ -33,13 +34,16 @@ from app.api.routes import (
 )
 from app.core.config import get_settings
 from app.db.session import dispose_engine
+from app.services import scheduler
 
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    task = scheduler.start()
     yield
+    await scheduler.stop(task)
     await dispose_engine()
 
 
@@ -76,6 +80,7 @@ for resource in [
     reports,
     search,
     notes,
+    notifications,
     attachments,
     trash,
 ]:

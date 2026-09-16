@@ -18,6 +18,11 @@ from app.models.inventory import InventoryItem, StockMovement
 from app.models.invite import Invite
 from app.models.membership import Membership
 from app.models.note import Note
+from app.models.notification import (
+    Notification,
+    NotificationDelivery,
+    NotificationPreference,
+)
 from app.models.odometer_reading import OdometerReading
 from app.models.plan import Plan
 from app.models.reminder import Reminder
@@ -50,6 +55,9 @@ __all__ = [
     "Membership",
     "MountPeriod",
     "Note",
+    "Notification",
+    "NotificationDelivery",
+    "NotificationPreference",
     "OdometerReading",
     "Plan",
     "Reminder",
