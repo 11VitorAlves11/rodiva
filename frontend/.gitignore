@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist_stale_root_owned_*/
 dev-dist/
 coverage/
 .env

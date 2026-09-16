@@ -12,11 +12,13 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      includeAssets: ["favicon.svg", "icons/*.png", "icons/*.svg"],
+      devOptions: { enabled: true },
       workbox: {
         // Authentication and API navigations belong to FastAPI. If Workbox's
         // SPA fallback handled them, an installed PWA would serve index.html
         // instead of letting a login round-trip reach the backend.
-        navigateFallbackDenylist: [/^\/auth(?:\/|$)/, /^\/api(?:\/|$)/],
+        navigateFallbackDenylist: [/^\/auth(?:\/|$)/, /^\/api(?:\/|$)/, /^\/storage(?:\/|$)/],
       },
       manifest: {
         name: "Rodiva",
@@ -28,9 +30,10 @@ export default defineConfig({
         display: "standalone",
         start_url: "/",
         icons: [
-          // SVG works for modern install prompts; still needs real 192/512
-          // and maskable PNGs before shipping (RF-PWA-001, spec §34 question 1).
-          { src: "/favicon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
+          { src: "/icons/pwa-light-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "/icons/pwa-light-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "/icons/pwa-maskable-light-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+          { src: "/icons/pwa-maskable-light-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
     }),
@@ -41,6 +44,7 @@ export default defineConfig({
     proxy: {
       "/api": { target: apiTarget, changeOrigin: true },
       "/auth": { target: apiTarget, changeOrigin: true },
+      "/storage": { target: apiTarget, changeOrigin: true },
     },
   },
   preview: {
@@ -49,6 +53,7 @@ export default defineConfig({
     proxy: {
       "/api": { target: apiTarget, changeOrigin: true },
       "/auth": { target: apiTarget, changeOrigin: true },
+      "/storage": { target: apiTarget, changeOrigin: true },
     },
   },
   test: {
