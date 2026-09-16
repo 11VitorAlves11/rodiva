@@ -15,6 +15,8 @@ dependencies = [
     "email-validator>=2.2",
     "itsdangerous>=2.2",
     "bcrypt>=4.2",
+    "httpx>=0.28",
+    "cryptography>=43.0",
 ]
 
 [project.optional-dependencies]
@@ -22,7 +24,7 @@ dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
     "pytest-cov>=6.0",
-    "httpx>=0.28",
+    "respx>=0.21",
     "ruff>=0.9,<0.16",
     "mypy>=1.13",
 ]
