@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from app.api.errors import install_error_handlers
 from app.api.routes import (
@@ -16,6 +15,7 @@ from app.api.routes import (
     notes,
     odometer,
     reminders,
+    storage,
     vehicles,
     work_records,
 )
@@ -58,7 +58,6 @@ for resource in [
     app.include_router(resource.router, prefix="/api", include_in_schema=False)
     app.include_router(resource.router, prefix="/api/v1")
 app.include_router(auth.router)
-app.mount("/storage", StaticFiles(directory=settings.storage_path, check_dir=False), name="storage")
 app.include_router(storage.router)
 
 

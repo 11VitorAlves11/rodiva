@@ -86,3 +86,26 @@ async def test_rejects_invalid_base64_payload(user_client: AsyncClient) -> None:
         },
     )
     assert response.status_code == 422
+
+
+async def test_storage_cannot_bypass_attachment_authorization(
+    user_client: AsyncClient,
+    client: AsyncClient,
+) -> None:
+    vehicle = (await user_client.post("/api/vehicles", json={"name": "Private"})).json()
+    response = await user_client.post(
+        f"/api/vehicles/{vehicle['id']}/attachments",
+        json={
+            "filename": "private.pdf",
+            "content_type": "application/pdf",
+            "content_base64": "JVBERi0xLjQ=",
+        },
+    )
+    assert response.status_code == 201
+    attachment = response.json()
+    assert (
+        await client.get(f"/storage/attachments/{vehicle['id']}/{attachment['id']}")
+    ).status_code == 404
+    assert (
+        await client.get(f"/api/vehicles/{vehicle['id']}/attachments/{attachment['id']}/download")
+    ).status_code == 401
