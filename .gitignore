@@ -28,6 +28,9 @@ pgdata/
 .idea/
 .vscode/
 
+# Especificação e material de origem (locais, não publicados)
+PRD/
+
 # Ferramentas de assistência (locais, não publicadas)
 CLAUDE.md
 .claude/

@@ -11,8 +11,8 @@ sem reproduzir o respetivo código ou desenho visual.
 > **Estado:** em desenvolvimento. Inclui contas e agregados, garagem, histórico,
 > abastecimentos e carregamentos elétricos, intervenções, despesas, documentos,
 > lembretes, planeamento, inventário, equipamento, inspeções, pesquisa, relatórios
-> e importação CSV dos registos principais. A cobertura integral do PRD ainda está
-> por concluir; consulte [o estado e as lacunas conhecidas](PRD/Estado_Implementacao.md).
+> e importação CSV dos registos principais. A cobertura funcional integral ainda está
+> por concluir.
 
 ## Stack
 
@@ -50,7 +50,6 @@ cd frontend && npm install && npm run dev
 |---|---|
 | `backend/` | Aplicação FastAPI, migrações Alembic, testes pytest |
 | `frontend/` | Aplicação React + Vite, PWA, testes vitest |
-| `PRD/` | Especificação funcional e técnica de referência |
 
 ## Testes e lint
 
