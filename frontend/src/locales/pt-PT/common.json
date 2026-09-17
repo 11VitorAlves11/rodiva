@@ -696,5 +696,21 @@
       "pending": "Pendente",
       "failed": "Falhou"
     }
+  },
+  "tags": {
+    "title": "Etiquetas",
+    "description": "Rótulos partilhados pelo agregado. A mesma etiqueta vale para todos os veículos e registos.",
+    "name": "Nome",
+    "namePlaceholder": "Inverno, garantia, viagem…",
+    "colour": "Cor",
+    "create": "Criar etiqueta",
+    "add": "+ Etiqueta",
+    "remove": "Retirar {{name}}",
+    "noneYet": "Ainda não há etiquetas.",
+    "usage_one": "{{count}} registo",
+    "usage_other": "{{count}} registos",
+    "confirmDelete": "Eliminar a etiqueta {{name}}? Sai de {{count}} registos; os registos ficam intactos.",
+    "saveFailed": "Não foi possível guardar as etiquetas.",
+    "filter": "Etiquetas"
   }
 }

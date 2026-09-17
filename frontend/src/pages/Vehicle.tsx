@@ -15,6 +15,7 @@ import { ExpensesSection } from "../components/vehicle/ExpensesSection";
 import { DocumentsSection } from "../components/vehicle/DocumentsSection";
 import { NotesSection } from "../components/vehicle/NotesSection";
 import { VehicleEditForm } from "../components/vehicle/VehicleEditForm";
+import { TagPicker } from "../components/tags/TagPicker";
 import { WorkSection } from "../components/vehicle/WorkSection";
 import { FuelSection } from "../components/vehicle/FuelSection";
 import { OdometerForm } from "../components/vehicle/OdometerForm";
@@ -45,6 +46,7 @@ export function Vehicle() {
   const navigate = useNavigate();
   const canManage =
     me?.membership.role === "owner" || me?.membership.role === "manager";
+  const canEdit = canManage || me?.membership.role === "editor";
   const [vehicle, setVehicle] = useState<VehicleType | null>(null);
   const [readings, setReadings] = useState<OdometerReading[] | null>(null);
   const [fuelRecords, setFuelRecords] = useState<FuelRecord[] | null>(null);
@@ -205,6 +207,7 @@ export function Vehicle() {
             </button>
           )}
         </div>
+        <TagPicker kind="vehicle" recordId={vehicle.id} canEdit={canEdit} className="mt-4" />
       </div>
 
       {editingVehicle && (

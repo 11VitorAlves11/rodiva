@@ -6,7 +6,7 @@ import { XMarkIcon } from "@heroicons/react/20/solid";
 
 import { Skeleton } from "../components/ui/Skeleton";
 import { NAV_ICONS } from "../lib/icons";
-import { search, vehicles } from "../lib/api";
+import { search, tags as tagsApi, vehicles } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type {
   BulkFailure,
@@ -15,8 +15,10 @@ import type {
   SearchKind,
   SearchResult,
   SearchSort,
+  TagUsage,
   Vehicle,
 } from "../lib/api/types";
+import { TagChip } from "../components/ui/TagChip";
 
 const KINDS: SearchKind[] = [
   "vehicle",
@@ -39,11 +41,13 @@ export function Search() {
   const [appliedTerm, setAppliedTerm] = useState("");
   const [kinds, setKinds] = useState<SearchKind[]>([]);
   const [vehicleIds, setVehicleIds] = useState<string[]>([]);
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [sort, setSort] = useState<SearchSort>("occurred_on_desc");
 
   const [vehicleList, setVehicleList] = useState<Vehicle[] | null>(null);
+  const [tagList, setTagList] = useState<TagUsage[] | null>(null);
   const [savedViews, setSavedViews] = useState<SavedView[] | null>(null);
   const [results, setResults] = useState<SearchResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +62,7 @@ export function Search() {
 
   useEffect(() => {
     vehicles.list().then(setVehicleList).catch(() => setVehicleList([]));
+    tagsApi.list().then(setTagList).catch(() => setTagList([]));
     reloadSavedViews();
   }, []);
 
@@ -71,6 +76,7 @@ export function Search() {
         q: appliedTerm.trim() || undefined,
         kind: kinds.length ? kinds : undefined,
         vehicle_id: vehicleIds.length ? vehicleIds : undefined,
+        tag_id: tagIds.length ? tagIds : undefined,
         date_from: dateFrom || undefined,
         date_to: dateTo || undefined,
         sort,
@@ -99,6 +105,12 @@ export function Search() {
     );
   }
 
+  function toggleTag(id: string) {
+    setTagIds((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
+  }
+
   function toggleSelected(key: string) {
     setSelected((current) => {
       const next = new Set(current);
@@ -118,6 +130,7 @@ export function Search() {
           q: appliedTerm || undefined,
           kind: kinds,
           vehicle_id: vehicleIds,
+          tag_id: tagIds,
           date_from: dateFrom || undefined,
           date_to: dateTo || undefined,
           sort,
@@ -134,6 +147,7 @@ export function Search() {
       q?: string;
       kind?: SearchKind[];
       vehicle_id?: string[];
+      tag_id?: string[];
       date_from?: string;
       date_to?: string;
       sort?: SearchSort;
@@ -142,6 +156,7 @@ export function Search() {
     setAppliedTerm(query.q ?? "");
     setKinds(query.kind ?? []);
     setVehicleIds(query.vehicle_id ?? []);
+    setTagIds(query.tag_id ?? []);
     setDateFrom(query.date_from ?? "");
     setDateTo(query.date_to ?? "");
     setSort(query.sort ?? "occurred_on_desc");
@@ -240,6 +255,10 @@ export function Search() {
     const name = vehicleList?.find((item) => item.id === id)?.name ?? id;
     activeFilters.push({ key: `vehicle-${id}`, label: name, onRemove: () => toggleVehicle(id) });
   }
+  for (const id of tagIds) {
+    const name = tagList?.find((item) => item.id === id)?.name ?? id;
+    activeFilters.push({ key: `tag-${id}`, label: name, onRemove: () => toggleTag(id) });
+  }
   if (dateFrom) {
     activeFilters.push({
       key: "date_from",
@@ -313,6 +332,32 @@ export function Search() {
                     onChange={() => toggleVehicle(vehicle.id)}
                   />
                   {vehicle.name}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
+        {tagList && tagList.length > 0 && (
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium">{t("tags.filter")}</legend>
+            <div className="flex flex-wrap gap-2">
+              {tagList.map((tag) => (
+                <label
+                  key={tag.id}
+                  className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={tagIds.includes(tag.id)}
+                    onChange={() => toggleTag(tag.id)}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="size-2.5 shrink-0 rounded-full ring-1 ring-inset ring-black/10"
+                    style={{ backgroundColor: tag.color }}
+                  />
+                  {tag.name}
                 </label>
               ))}
             </div>
@@ -509,6 +554,13 @@ export function Search() {
                     {item.subtitle && (
                       <span className="mt-0.5 block line-clamp-2 break-words text-sm text-ink-subtle">
                         {item.subtitle}
+                      </span>
+                    )}
+                    {item.tags.length > 0 && (
+                      <span className="mt-1.5 flex flex-wrap gap-1">
+                        {item.tags.map((tag) => (
+                          <TagChip key={tag.id} tag={tag} />
+                        ))}
                       </span>
                     )}
                     {item.occurred_on && (

@@ -58,6 +58,10 @@ import type {
   SavedView,
   SavedViewInput,
   SearchQuery,
+  Tag,
+  TagInput,
+  TaggableKind,
+  TagUsage,
   SearchResult,
   Role,
   StockMovement,
@@ -244,6 +248,7 @@ function searchQueryString(query: SearchQuery): string {
   if (query.q) params.set("q", query.q);
   for (const value of query.kind ?? []) params.append("kind", value);
   for (const value of query.vehicle_id ?? []) params.append("vehicle_id", value);
+  for (const value of query.tag_id ?? []) params.append("tag_id", value);
   if (query.date_from) params.set("date_from", query.date_from);
   if (query.date_to) params.set("date_to", query.date_to);
   if (query.sort) params.set("sort", query.sort);
@@ -270,6 +275,21 @@ export const search = {
     if (!response.ok) throw await errorFrom(response);
     return response.blob();
   },
+};
+
+export const tags = {
+  list: () => request<TagUsage[]>("/api/tags"),
+  create: (body: TagInput) => request<Tag>("/api/tags", { method: "POST", body }),
+  update: (id: string, body: Partial<TagInput>) =>
+    request<Tag>(`/api/tags/${id}`, { method: "PATCH", body }),
+  remove: (id: string) => request<void>(`/api/tags/${id}`, { method: "DELETE" }),
+  forRecord: (kind: TaggableKind, recordId: string) =>
+    request<Tag[]>(`/api/tags/records/${kind}/${recordId}`),
+  setForRecord: (kind: TaggableKind, recordId: string, tagIds: string[]) =>
+    request<Tag[]>(`/api/tags/records/${kind}/${recordId}`, {
+      method: "PUT",
+      body: { tag_ids: tagIds },
+    }),
 };
 
 export const notes = {

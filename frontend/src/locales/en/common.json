@@ -696,5 +696,21 @@
       "pending": "Pending",
       "failed": "Failed"
     }
+  },
+  "tags": {
+    "title": "Tags",
+    "description": "Labels shared by the household. The same tag means one thing across every vehicle and record.",
+    "name": "Name",
+    "namePlaceholder": "Winter, warranty, road trip…",
+    "colour": "Colour",
+    "create": "Create tag",
+    "add": "+ Tag",
+    "remove": "Remove {{name}}",
+    "noneYet": "No tags yet.",
+    "usage_one": "{{count}} record",
+    "usage_other": "{{count}} records",
+    "confirmDelete": "Delete the tag {{name}}? It leaves {{count}} records; the records themselves are untouched.",
+    "saveFailed": "Could not save the tags.",
+    "filter": "Tags"
   }
 }

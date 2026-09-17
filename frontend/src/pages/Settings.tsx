@@ -11,6 +11,7 @@ import { NotificationSettings } from "../components/settings/NotificationSetting
 import { WebhookSettings } from "../components/settings/WebhookSettings";
 import { ApiKeySettings } from "../components/settings/ApiKeySettings";
 import { AccountSettings } from "../components/settings/AccountSettings";
+import { TagSettings } from "../components/settings/TagSettings";
 
 function initials(name: string | null | undefined, email: string) {
   const source = (name ?? email).trim();
@@ -40,6 +41,8 @@ export function Settings() {
       </section>
 
       <MembersSection canManage={canManageMembers} currentUserId={me?.user.id} />
+
+      <TagSettings canManage={canManageMembers} />
 
       <GoogleCalendarSection />
 

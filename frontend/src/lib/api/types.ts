@@ -410,6 +410,33 @@ export type SearchResult = {
   vehicle_id: string | null;
   occurred_on: string | null;
   url: string;
+  tags: Tag[];
+};
+
+/** The record kinds a tag can sit on (RF-DOC-009). */
+export type TaggableKind =
+  | "vehicle"
+  | "odometer"
+  | "fuel"
+  | "work"
+  | "expense"
+  | "note"
+  | "plan"
+  | "inspection";
+
+export type Tag = {
+  id: string;
+  name: string;
+  color: string;
+  created_at: string;
+};
+
+/** A tag plus how many records carry it, for the management screen. */
+export type TagUsage = Tag & { record_count: number };
+
+export type TagInput = {
+  name: string;
+  color?: string;
 };
 
 export type SearchSort = "occurred_on_desc" | "occurred_on_asc" | "title_asc" | "title_desc";
@@ -418,6 +445,7 @@ export type SearchQuery = {
   q?: string;
   kind?: SearchKind[];
   vehicle_id?: string[];
+  tag_id?: string[];
   date_from?: string;
   date_to?: string;
   sort?: SearchSort;
