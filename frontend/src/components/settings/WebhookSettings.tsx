@@ -11,6 +11,7 @@ import { webhooks } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
 import type { Webhook, WebhookDelivery } from "../../lib/api/types";
 import { useSession } from "../../lib/session";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 const statusTones: Record<string, BadgeTone> = {
   sent: "success",
@@ -20,6 +21,7 @@ const statusTones: Record<string, BadgeTone> = {
 
 export function WebhookSettings() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const [items, setItems] = useState<Webhook[] | null>(null);
   const [description, setDescription] = useState("");
@@ -135,8 +137,8 @@ export function WebhookSettings() {
                     size="sm"
                     variant="danger"
                     disabled={busy}
-                    onClick={() => {
-                      if (window.confirm(t("common.confirmDelete"))) {
+                    onClick={async () => {
+                      if (await confirm(t("common.confirmDelete"))) {
                         void act(() => webhooks.remove(hook.id));
                       }
                     }}

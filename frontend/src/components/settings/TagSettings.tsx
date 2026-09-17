@@ -5,6 +5,7 @@ import { tags as tagsApi } from "../../lib/api";
 import type { TagUsage } from "../../lib/api/types";
 import { Button } from "../ui/Button";
 import { Field, Input } from "../ui/Field";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 /** A short, legible set to pick from, rather than a full colour wheel. */
 const PALETTE = [
@@ -21,6 +22,7 @@ const PALETTE = [
 
 export function TagSettings({ canManage }: { canManage: boolean }) {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [items, setItems] = useState<TagUsage[] | null>(null);
   const [name, setName] = useState("");
   const [color, setColor] = useState(PALETTE[0]);
@@ -47,7 +49,7 @@ export function TagSettings({ canManage }: { canManage: boolean }) {
   }
 
   async function remove(tag: TagUsage) {
-    if (!window.confirm(t("tags.confirmDelete", { name: tag.name, count: tag.record_count })))
+    if (!await confirm(t("tags.confirmDelete", { name: tag.name, count: tag.record_count })))
       return;
     setError(null);
     try {

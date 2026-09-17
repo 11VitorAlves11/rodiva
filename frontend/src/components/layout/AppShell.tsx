@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <header className="safe-header flex items-center justify-between border-b border-line bg-surface pb-4 md:hidden">
+      <header className="print-hide safe-header flex items-center justify-between border-b border-line bg-surface pb-4 md:hidden">
         <Link to="/" className="flex items-center gap-2">
           <Logo size={30} />
           <span className="text-lg font-bold text-ink">Rodiva</span>
@@ -140,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </button>
       </header>
 
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-raised p-4 md:flex">
+      <aside className="print-hide hidden w-64 shrink-0 flex-col border-r border-line bg-raised p-4 md:flex">
         <Link to="/" className="mb-6 flex items-center gap-3 px-2">
           <Logo size={34} />
           <div>
@@ -255,7 +255,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 items-center border-t border-line bg-white/95 backdrop-blur dark:bg-surface-dark/95 md:hidden">
+      <nav className="print-hide safe-bottom fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 items-center border-t border-line bg-white/95 backdrop-blur dark:bg-surface-dark/95 md:hidden">
         {mobileTabs.map((item) => (
           <NavLink key={item.to} end={item.end} to={item.to} className={({ isActive }) => mobileTabClass(isActive)}>
             <Icon name={item.icon} />

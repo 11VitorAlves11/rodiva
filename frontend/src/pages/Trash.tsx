@@ -11,9 +11,11 @@ import { trash, vehicles } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type { TrashItem, Vehicle } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { useConfirm } from "../components/ui/confirm-context";
 
 export function Trash() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const [items, setItems] = useState<TrashItem[] | null>(null);
   const [vehicleList, setVehicleList] = useState<Vehicle[]>([]);
@@ -112,8 +114,8 @@ export function Trash() {
                     size="sm"
                     variant="danger"
                     disabled={busy === item.entity_id}
-                    onClick={() => {
-                      if (window.confirm(t("trash.confirmPurge"))) {
+                    onClick={async () => {
+                      if (await confirm(t("trash.confirmPurge"))) {
                         void act(item, () => trash.purge(item.entity_type, item.entity_id));
                       }
                     }}

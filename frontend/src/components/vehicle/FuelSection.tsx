@@ -6,6 +6,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { fuel } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
 import type { FuelRecord } from "../../lib/api/types";
+import { useConfirm } from "../../components/ui/confirm-context";
 export function FuelSection({
   records,
   vehicleId,
@@ -18,6 +19,7 @@ export function FuelSection({
   onCreated: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const [showForm, setShowForm] = useState(false);
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat(i18n.language).format(
@@ -80,8 +82,8 @@ export function FuelSection({
                     : "—"}
                 </p>
                 <button
-                  onClick={() => {
-                    if (window.confirm(t("common.confirmDelete")))
+                  onClick={async () => {
+                    if (await confirm(t("common.confirmDelete")))
                       void fuel.remove(vehicleId, record.id).then(onCreated);
                   }}
                   className="flex items-center gap-1 text-xs font-medium text-danger"

@@ -6,6 +6,7 @@ import type { AuthSession, Membership } from "../../lib/api/types";
 import { useTheme } from "../../lib/theme";
 import type { Theme } from "../../lib/theme";
 import { useSession } from "../../lib/session";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 const panel = "space-y-4 rounded-xl border border-line bg-raised p-5 shadow-sm";
 const input = "mt-1 w-full rounded-md border border-line px-3 py-2 bg-raised";
@@ -13,6 +14,7 @@ const button = "rounded-lg bg-copper px-4 py-2 text-sm font-semibold text-white 
 
 export function AccountSettings() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me, setMe } = useSession();
   const { theme, setTheme } = useTheme();
   const [name, setName] = useState(me?.user.name ?? "");
@@ -98,8 +100,8 @@ export function AccountSettings() {
           <div className="min-w-0 flex-1"><p className="break-words text-sm">{session.user_agent || t("account.unknownDevice")}</p><p className="text-xs text-ink-muted">{new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium", timeStyle: "short", timeZone: me?.user.timezone }).format(new Date(session.created_at))}{session.current ? ` · ${t("account.currentSession")}` : ""}</p></div>
           <button disabled={busy} className="text-sm font-semibold text-danger disabled:opacity-60" onClick={() => void run(async () => { await auth.revokeSession(session.id); if (session.current) setMe(null); else setSessions((rows) => rows?.filter((row) => row.id !== session.id) ?? null); })}>{t("account.endSession")}</button>
         </li>)}</ul>}
-        <button disabled={busy} className="rounded-lg border border-copper/30 px-4 py-2 text-sm font-semibold text-copper disabled:opacity-60" onClick={() => {
-          if (window.confirm(t("account.endAllConfirm"))) void run(async () => { await auth.logoutAll(); setMe(null); });
+        <button disabled={busy} className="rounded-lg border border-copper/30 px-4 py-2 text-sm font-semibold text-copper disabled:opacity-60" onClick={async () => {
+          if (await confirm(t("account.endAllConfirm"))) void run(async () => { await auth.logoutAll(); setMe(null); });
         }}>{t("account.endAll")}</button>
       </section>
     </div>

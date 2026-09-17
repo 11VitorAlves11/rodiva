@@ -11,6 +11,7 @@ import type {
   RecurrenceUnit,
 } from "../../lib/api/types";
 import { useSession } from "../../lib/session";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 const PRESET_CATEGORIES = ["insurance", "tax", "inspection", "tolls", "other"];
 const STATUSES: ExpenseStatus[] = ["paid", "pending", "planned", "cancelled"];
@@ -62,6 +63,7 @@ export function ExpensesSection({
   onCreated: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const canWrite = me?.membership.role !== "reader";
   const [form, setForm] = useState<ExpenseRecordInput | null>(null);
@@ -381,8 +383,8 @@ export function ExpensesSection({
                     <button
                       disabled={saving}
                       className="text-sm text-danger"
-                      onClick={() => {
-                        if (!window.confirm(t("common.confirmDelete"))) return;
+                      onClick={async () => {
+                        if (!await confirm(t("common.confirmDelete"))) return;
                         setSaving(true);
                         setError(null);
                         void expenses

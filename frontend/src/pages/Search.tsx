@@ -19,6 +19,7 @@ import type {
   Vehicle,
 } from "../lib/api/types";
 import { TagChip } from "../components/ui/TagChip";
+import { useAskText, useConfirm } from "../components/ui/confirm-context";
 
 const KINDS: SearchKind[] = [
   "vehicle",
@@ -37,6 +38,8 @@ const SORTS: SearchSort[] = ["occurred_on_desc", "occurred_on_asc", "title_asc",
 export function Search() {
   const { t, i18n } = useTranslation();
 
+  const confirm = useConfirm();
+  const askText = useAskText();
   const [term, setTerm] = useState("");
   const [appliedTerm, setAppliedTerm] = useState("");
   const [kinds, setKinds] = useState<SearchKind[]>([]);
@@ -121,7 +124,11 @@ export function Search() {
   }
 
   async function saveCurrentView() {
-    const name = window.prompt(t("search.savedViewNamePrompt"));
+    const name = await askText({
+      message: t("search.saveView"),
+      input: { label: t("search.savedViewNamePrompt"), maxLength: 80 },
+      confirmLabel: t("garage.save"),
+    });
     if (!name || !name.trim()) return;
     try {
       await search.savedViews.create({
@@ -163,7 +170,7 @@ export function Search() {
   }
 
   async function deleteSavedView(id: string) {
-    if (!window.confirm(t("common.confirmDelete"))) return;
+    if (!(await confirm({ message: t("common.confirmDelete"), tone: "danger" }))) return;
     try {
       await search.savedViews.remove(id);
       reloadSavedViews();
@@ -219,16 +226,18 @@ export function Search() {
     }
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     const count = selected.size;
-    if (window.confirm(t("search.bulkDeleteConfirm", { count }))) void runBulk("delete");
+    if (await confirm({ message: t("search.bulkDeleteConfirm", { count }), tone: "danger" })) {
+      void runBulk("delete");
+    }
   }
 
-  function confirmMove() {
+  async function confirmMove() {
     const count = selected.size;
     const vehicleName = vehicleList?.find((item) => item.id === moveTarget)?.name ?? "";
     if (!moveTarget) return;
-    if (window.confirm(t("search.bulkMoveConfirm", { count, vehicle: vehicleName }))) {
+    if (await confirm(t("search.bulkMoveConfirm", { count, vehicle: vehicleName }))) {
       void runBulk("move", moveTarget);
     }
   }
@@ -473,7 +482,7 @@ export function Search() {
           <button
             type="button"
             disabled={busy}
-            onClick={confirmDelete}
+            onClick={() => void confirmDelete()}
             className="rounded-lg border border-danger/40 px-3 py-1.5 font-semibold text-danger disabled:opacity-50"
           >
             {t("search.bulkDelete")}
@@ -501,7 +510,7 @@ export function Search() {
           <button
             type="button"
             disabled={busy || !moveTarget}
-            onClick={confirmMove}
+            onClick={() => void confirmMove()}
             className="rounded-lg border border-line px-3 py-1.5 font-semibold disabled:opacity-50"
           >
             {t("search.bulkMove")}

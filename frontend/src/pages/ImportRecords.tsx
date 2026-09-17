@@ -5,10 +5,12 @@ import { imports, vehicles } from "../lib/api";
 import type { ImportKind, ImportPreview } from "../lib/api";
 import type { Vehicle } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { useConfirm } from "../components/ui/confirm-context";
 
 const input = "mt-1 w-full rounded-lg border border-line px-3 py-2 bg-raised";
 export function ImportRecords() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const [list, setList] = useState<Vehicle[]>([]);
   const [vehicleId, setVehicleId] = useState("");
@@ -30,7 +32,7 @@ export function ImportRecords() {
   }, [t, attempt]);
 
   async function inspect(commit = false) {
-    if (commit && !window.confirm(t("import.confirm", { count: preview?.rows.length }))) return;
+    if (commit && !await confirm(t("import.confirm", { count: preview?.rows.length }))) return;
     setBusy(true); setError(null);
     try {
       const payload = { vehicle_id: vehicleId, kind, csv_text: text, mapping, locale } as const;

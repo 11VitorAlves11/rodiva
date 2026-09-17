@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { charging } from "../../lib/api";
 import type { ChargingInput, ChargingRecord } from "../../lib/api/types";
 import { useSession } from "../../lib/session";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 const inputClass = "mt-1 w-full rounded-lg border border-line px-3 py-2 bg-raised";
 function blank(): ChargingInput {
@@ -13,6 +14,7 @@ function blank(): ChargingInput {
 
 export function ChargingSection({ vehicleId, unit }: { vehicleId: string; unit: string }) {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const canWrite = me?.membership.role !== "reader";
   const [rows, setRows] = useState<ChargingRecord[] | null>(null);
@@ -56,8 +58,8 @@ export function ChargingSection({ vehicleId, unit }: { vehicleId: string; unit: 
     </fieldset></form>}
     {!rows ? <p>{t("common.loading")}</p> : !rows.length ? <p className="text-sm">{t("charging.empty")}</p> : <ul className="divide-y divide-graphite/10 dark:divide-white/10">{rows.map((row) => <li key={row.id} className="flex flex-wrap justify-between gap-3 py-4">
       <div><p className="font-semibold">{Number(row.energy_kwh).toLocaleString(i18n.language)} kWh · {currency(row.total_cost)}</p><p className="text-sm">{new Intl.DateTimeFormat(i18n.language).format(new Date(`${row.recorded_on}T12:00:00`))} · {row.location || t(`charging.${row.charger_type}`, { defaultValue: row.charger_type })}</p><p className="text-sm">{currency(row.unit_price)} / kWh{row.odometer_reading !== null && row.odometer_reading !== undefined ? ` · ${row.odometer_reading.toLocaleString(i18n.language)} ${unit}` : ""}</p>{row.efficiency_kwh_per_100km && <p className="text-sm">{Number(row.efficiency_kwh_per_100km).toLocaleString(i18n.language, { maximumFractionDigits: 1 })} kWh/100 km · {(100 / Number(row.efficiency_kwh_per_100km)).toLocaleString(i18n.language, { maximumFractionDigits: 2 })} km/kWh</p>}</div>
-      {canWrite && <div className="flex gap-3"><button disabled={busy} onClick={() => { const { recorded_on, energy_kwh, total_cost, odometer_reading, soc_start, soc_end, location, charger_type, notes } = row; setForm({ recorded_on, energy_kwh, total_cost, odometer_reading, soc_start, soc_end, location, charger_type, notes }); setEditing(row.id); }} className="text-sm text-copper">{t("common.edit")}</button><button disabled={busy} onClick={() => {
-        if (!window.confirm(t("common.confirmDelete"))) return;
+      {canWrite && <div className="flex gap-3"><button disabled={busy} onClick={() => { const { recorded_on, energy_kwh, total_cost, odometer_reading, soc_start, soc_end, location, charger_type, notes } = row; setForm({ recorded_on, energy_kwh, total_cost, odometer_reading, soc_start, soc_end, location, charger_type, notes }); setEditing(row.id); }} className="text-sm text-copper">{t("common.edit")}</button><button disabled={busy} onClick={async () => {
+        if (!await confirm(t("common.confirmDelete"))) return;
         setBusy(true); setError(null);
         void charging.remove(vehicleId, row.id).then(() => setAttempt((value) => value + 1)).catch(() => setError(t("common.error"))).finally(() => setBusy(false));
       }} className="text-sm text-danger">{t("common.delete")}</button></div>}

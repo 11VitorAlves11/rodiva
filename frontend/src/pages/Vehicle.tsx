@@ -38,10 +38,12 @@ import type {
   WorkRecord,
 } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { useConfirm } from "../components/ui/confirm-context";
 
 export function Vehicle() {
   const { vehicleId = "" } = useParams();
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const navigate = useNavigate();
   const canManage =
@@ -218,7 +220,7 @@ export function Vehicle() {
             setEditingVehicle(false);
           }}
           onDelete={async () => {
-            if (!window.confirm(t("vehicle.confirmDelete"))) return;
+            if (!await confirm(t("vehicle.confirmDelete"))) return;
             await vehicles.remove(vehicle.id);
             navigate("/garage");
           }}
@@ -316,8 +318,8 @@ export function Vehicle() {
                         : `+${item.distance.toLocaleString(i18n.language)} ${vehicle.distance_unit}`}
                     </p>
                     <button
-                      onClick={() => {
-                        if (window.confirm(t("common.confirmDelete")))
+                      onClick={async () => {
+                        if (await confirm(t("common.confirmDelete")))
                           void odometer.remove(vehicleId, item.id).then(load);
                       }}
                       className="flex items-center gap-1 text-xs font-medium text-danger"

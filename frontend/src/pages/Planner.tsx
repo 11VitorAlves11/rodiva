@@ -11,6 +11,7 @@ import { inventory, odometer, plans, vehicles } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type { InventoryItem, Plan, PlanInput, PlanPriority, PlanStage, Vehicle, WorkKind } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { useConfirm } from "../components/ui/confirm-context";
 
 type PlanWithVehicle = Plan & { vehicleName: string; currentOdometer: number; distanceUnit: string };
 type EditableStage = Exclude<PlanStage, "completed">;
@@ -29,6 +30,7 @@ const priorityStyles: Record<PlanPriority, string> = {
 
 export function Planner() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const [vehicleList, setVehicleList] = useState<Vehicle[] | null>(null);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
@@ -197,7 +199,7 @@ export function Planner() {
                           <button onClick={() => { setEditing(null); setCompleting(plan); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="w-full rounded-md bg-success-solid px-3 py-2 text-sm font-semibold text-white">{t("planner.complete")}</button>
                           <div className="flex items-center justify-between gap-3 text-sm">
                             <button onClick={() => { setCompleting(null); setEditing(plan); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-1 font-medium text-copper"><PencilIcon aria-hidden="true" className="h-4 w-4" />{t("common.edit")}</button>
-                            <button onClick={() => { if (window.confirm(t("common.confirmDelete"))) void act(() => plans.remove(plan.vehicle_id, plan.id)); }} className="flex items-center gap-1 font-medium text-danger"><TrashIcon aria-hidden="true" className="h-4 w-4" />{t("common.delete")}</button>
+                            <button onClick={async () => { if (await confirm(t("common.confirmDelete"))) void act(() => plans.remove(plan.vehicle_id, plan.id)); }} className="flex items-center gap-1 font-medium text-danger"><TrashIcon aria-hidden="true" className="h-4 w-4" />{t("common.delete")}</button>
                           </div>
                         </div>
                       )}

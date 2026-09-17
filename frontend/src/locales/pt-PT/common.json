@@ -287,7 +287,8 @@
     "cancel": "Cancelar",
     "close": "Fechar",
     "edit": "Editar",
-    "saveChanges": "Guardar alterações"
+    "saveChanges": "Guardar alterações",
+    "confirm": "Confirmar"
   },
   "equipment": {
     "title": "Equipamento e pneus",

@@ -9,6 +9,7 @@ import { reminders, vehicles } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type { Reminder, ReminderUpdateInput, Vehicle } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { useConfirm } from "../components/ui/confirm-context";
 
 type ReminderWithVehicle = Reminder & { vehicleName: string };
 
@@ -35,6 +36,7 @@ const urgencyOrder = {
 
 export function Reminders() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const [vehicleList, setVehicleList] = useState<Vehicle[] | null>(null);
   const [items, setItems] = useState<ReminderWithVehicle[] | null>(null);
@@ -170,8 +172,8 @@ export function Reminders() {
                     {t("reminders.edit")}
                   </button>
                   <button
-                    onClick={() => {
-                      if (window.confirm(t("common.confirmDelete"))) {
+                    onClick={async () => {
+                      if (await confirm(t("common.confirmDelete"))) {
                         void act(() => reminders.remove(item.vehicle_id, item.id));
                       }
                     }}

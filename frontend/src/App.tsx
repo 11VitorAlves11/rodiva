@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AppShell } from "./components/layout/AppShell";
+import { ConfirmProvider } from "./components/ui/ConfirmDialog";
 import { ErrorState } from "./components/ui/ErrorState";
 import { Equipment } from "./pages/Equipment";
 import { Skeleton } from "./components/ui/Skeleton";
@@ -47,7 +48,8 @@ function RequireSession({ children }: { children: ReactNode }) {
 
 export function App() {
   return (
-    <Routes>
+    <ConfirmProvider>
+      <Routes>
       <Route path="/forgot-password" element={<PasswordRecovery />} />
       <Route path="/reset-password" element={<PasswordRecovery reset />} />
       <Route path="/login" element={<Login />} />
@@ -81,6 +83,7 @@ export function App() {
         element={<RequireSession><Vehicle /></RequireSession>}
       />
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </ConfirmProvider>
   );
 }

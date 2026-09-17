@@ -5,9 +5,11 @@ import { notes } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
 import type { Note } from "../../lib/api/types";
 import { useSession } from "../../lib/session";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 export function NotesSection({ records, vehicleId, onCreated }: { records: Note[]; vehicleId: string; onCreated: () => void }) {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const canWrite = me?.membership.role !== "reader";
   const [open, setOpen] = useState(false);
@@ -41,8 +43,8 @@ export function NotesSection({ records, vehicleId, onCreated }: { records: Note[
     {!records.length ? <p className="text-sm">{t("notes.empty")}</p> : <div className="grid gap-3 sm:grid-cols-2">{records.map((note) => <article key={note.id} className="min-w-0 rounded-lg border border-line p-4">
       <h3 className="break-words font-semibold">{note.title}{note.pinned && <span className="ml-2 text-xs text-copper">{t("notes.pinned")}</span>}</h3>
       <p className="mt-2 whitespace-pre-wrap break-words text-sm">{note.content}</p>
-      {canWrite && <div className="mt-3 flex gap-3"><button disabled={saving} className="text-sm text-copper" onClick={() => { setEditing(note.id); setTitle(note.title); setContent(note.content); setPinned(note.pinned); setOpen(true); }}>{t("common.edit")}</button><button disabled={saving} className="text-sm text-danger" onClick={() => {
-        if (!window.confirm(t("common.confirmDelete"))) return;
+      {canWrite && <div className="mt-3 flex gap-3"><button disabled={saving} className="text-sm text-copper" onClick={() => { setEditing(note.id); setTitle(note.title); setContent(note.content); setPinned(note.pinned); setOpen(true); }}>{t("common.edit")}</button><button disabled={saving} className="text-sm text-danger" onClick={async () => {
+        if (!await confirm(t("common.confirmDelete"))) return;
         setSaving(true); setError(null);
         void notes.remove(vehicleId, note.id).then(() => { if (editing === note.id) setOpen(false); onCreated(); }).catch(() => setError(t("common.error"))).finally(() => setSaving(false));
       }}>{t("common.delete")}</button></div>}

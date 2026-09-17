@@ -176,3 +176,66 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* Printing (RF-REL-005).
+   The report page offers a print button, so what comes out of the printer is
+   part of the product. Two things have to happen: the app's chrome — sidebar,
+   mobile header, bottom bar, every button — must go, since none of it means
+   anything on paper; and the dark theme must not, because a dark ground either
+   floods the page with ink or drops out entirely and prints white on white. */
+@media print {
+  :root,
+  :root[data-theme="dark"],
+  :root:not([data-theme="light"]) {
+    --color-surface: #ffffff;
+    --color-raised: #ffffff;
+    --color-sunken: #ffffff;
+    --color-ink: #000000;
+    --color-ink-muted: #333333;
+    --color-ink-subtle: #444444;
+    --color-line: #999999;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .print-hide,
+  button,
+  [role="button"] {
+    display: none !important;
+  }
+
+  /* The sidebar and bars are laid out for a screen; on paper the content
+     should simply run the full width of the sheet. */
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .safe-content,
+  .safe-header,
+  .safe-bottom {
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* A card split across a page break loses the figure from its label. */
+  section,
+  li,
+  tr,
+  table {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+}

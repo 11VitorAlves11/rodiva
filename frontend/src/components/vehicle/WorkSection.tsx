@@ -6,6 +6,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { workRecords } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
 import type { WorkKind, WorkRecord, WorkRecordItemInput } from "../../lib/api/types";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 const CONTROL = "rounded-md border border-line bg-raised px-3 py-2";
 
@@ -24,6 +25,7 @@ export function WorkSection({
   onCreated: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const [show, setShow] = useState(false);
   const [description, setDescription] = useState("");
   const [cost, setCost] = useState("");
@@ -76,7 +78,7 @@ export function WorkSection({
     }
   }
   async function remove(id: string) {
-    if (window.confirm(t("common.confirmDelete"))) {
+    if (await confirm(t("common.confirmDelete"))) {
       await workRecords.remove(vehicleId, id);
       onCreated();
     }

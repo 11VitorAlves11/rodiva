@@ -287,7 +287,8 @@
     "cancel": "Cancel",
     "close": "Close",
     "edit": "Edit",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "confirm": "Confirm"
   },
   "equipment": {
     "title": "Equipment and tires",

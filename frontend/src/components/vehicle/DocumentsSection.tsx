@@ -6,6 +6,7 @@ import { useSession } from "../../lib/session";
 import { attachments } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
 import type { Attachment } from "../../lib/api/types";
+import { useConfirm } from "../../components/ui/confirm-context";
 
 export function DocumentsSection({
   records,
@@ -17,6 +18,7 @@ export function DocumentsSection({
   onCreated: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const { me } = useSession();
   const canWrite = me?.membership.role !== "reader";
   const [uploading, setUploading] = useState(false);
@@ -100,8 +102,8 @@ export function DocumentsSection({
               </a>
               {canWrite && <button
                 disabled={uploading}
-                onClick={() => {
-                  if (window.confirm(t("common.confirmDelete")))
+                onClick={async () => {
+                  if (await confirm(t("common.confirmDelete")))
                     void attachments
                       .remove(vehicleId, document.id)
                       .then(onCreated)
