@@ -53,6 +53,17 @@ fi
 echo "Stopping the api service"
 "${COMPOSE[@]}" stop api >/dev/null
 
+# Empty the schema first. The dump drops only the objects it carries, so replaying
+# it over a newer schema would leave the tables added since as orphans, while
+# alembic_version went back to the older revision the dump holds — and the next
+# `alembic upgrade head` would then fail creating tables that already exist.
+echo "Emptying the current schema"
+"${COMPOSE[@]}" exec -T db psql \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --quiet --set ON_ERROR_STOP=on \
+  --command "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" >/dev/null
+
 echo "Restoring the database"
 gunzip -c "${SOURCE}/database.sql.gz" \
   | "${COMPOSE[@]}" exec -T db psql \

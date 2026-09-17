@@ -90,6 +90,10 @@ com a data e a versão. Correr a partir da pasta do `docker-compose.yml`, com a
 stack a funcionar. Para uma cópia diária, agendar o `backup.sh` no cron do
 anfitrião e guardar o destino fora da máquina.
 
+A reposição substitui o estado por inteiro: esvazia o esquema antes de reproduzir
+o dump, para que repor uma cópia antiga numa instância já migrada não deixe
+tabelas órfãs das migrações posteriores.
+
 Reponha uma cópia de vez em quando para um ambiente de teste: uma salvaguarda que
 nunca foi reposta é uma suposição, não um backup.
 
