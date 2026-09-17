@@ -12,6 +12,9 @@ import { WebhookSettings } from "../components/settings/WebhookSettings";
 import { ApiKeySettings } from "../components/settings/ApiKeySettings";
 import { AccountSettings } from "../components/settings/AccountSettings";
 import { TagSettings } from "../components/settings/TagSettings";
+import { CustomFieldSettings } from "../components/settings/CustomFieldSettings";
+import { InstanceSettings } from "../components/settings/InstanceSettings";
+import { PushSettings } from "../components/settings/PushSettings";
 
 function initials(name: string | null | undefined, email: string) {
   const source = (name ?? email).trim();
@@ -44,12 +47,16 @@ export function Settings() {
 
       <TagSettings canManage={canManageMembers} />
 
+      <CustomFieldSettings canManage={canManageMembers} />
+
       <GoogleCalendarSection />
 
       <AccountSettings />
       <NotificationSettings />
+      <PushSettings />
       <ApiKeySettings />
       <WebhookSettings />
+      <InstanceSettings isOwner={me?.membership.role === "owner"} />
 
       <button
         onClick={() => void signOut()}

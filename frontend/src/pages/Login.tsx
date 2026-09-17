@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
 
 import { Button } from "../components/ui/Button";
 import { Field, Input } from "../components/ui/Field";
@@ -22,8 +22,13 @@ export function Login() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [options, setOptions] = useState({ registration: true, password_recovery: false });
+  const [options, setOptions] = useState({ registration: true, password_recovery: false, oidc: false });
   useEffect(() => { void auth.options().then(setOptions).catch(() => {}); }, []);
+
+  // The OIDC callback cannot render anything itself, so it lands back here with
+  // the reason in the query rather than echoing the provider's own message.
+  const [searchParams] = useSearchParams();
+  const oidcOutcome = searchParams.get("oidc");
 
   if (me) {
     const from = (location.state as { from?: string } | null)?.from ?? "/";
@@ -81,12 +86,34 @@ export function Login() {
           />
         </Field>
 
+        {oidcOutcome && !error && (
+          <p role="alert" className="text-sm text-danger">
+            {oidcOutcome === "unknown" ? t("login.oidcUnknown") : t("login.oidcFailed")}
+          </p>
+        )}
         {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button type="submit" disabled={submitting} className="w-full">
           {mode === "login" ? t("login.submit") : t("register.submit")}
         </Button>
 
+        {options.oidc && (
+          <>
+            <div className="flex items-center gap-3 text-xs text-ink-subtle">
+              <span className="h-px flex-1 bg-line" />
+              {t("login.or")}
+              <span className="h-px flex-1 bg-line" />
+            </div>
+            {/* A full page navigation, not fetch: the provider answers with a
+                redirect the browser has to follow itself. */}
+            <a
+              href="/auth/oidc/start"
+              className="block w-full rounded-lg border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-sunken"
+            >
+              {t("login.withProvider")}
+            </a>
+          </>
+        )}
         {options.password_recovery && <Link to="/forgot-password" className="block text-center text-sm font-medium text-brand">{t("recovery.forgot")}</Link>}
         <p className="text-center text-sm text-ink-subtle">
           {mode === "login" && options.registration ? (

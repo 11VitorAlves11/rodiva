@@ -57,6 +57,12 @@ import type {
   ReportSummary,
   SavedView,
   SavedViewInput,
+  CustomField,
+  CustomFieldInput,
+  CustomFieldValues,
+  InstanceStatus,
+  PushKey,
+  PushSubscriptionRow,
   SearchQuery,
   Tag,
   TagInput,
@@ -73,7 +79,10 @@ import type {
 } from "./types";
 
 export const auth = {
-  options: () => request<{ registration: boolean; password_recovery: boolean }>("/auth/options"),
+  options: () =>
+    request<{ registration: boolean; password_recovery: boolean; oidc: boolean }>(
+      "/auth/options",
+    ),
   forgotPassword: (email: string) => request<void>("/auth/forgot-password", { method: "POST", body: { email } }),
   resetPassword: (token: string, password: string) => request<void>("/auth/reset-password", { method: "POST", body: { token, password } }),
   me: () => request<Me>("/auth/me"),
@@ -282,6 +291,37 @@ export const search = {
     if (!response.ok) throw await errorFrom(response);
     return response.blob();
   },
+};
+
+export const admin = {
+  status: () => request<InstanceStatus>("/api/admin/status"),
+};
+
+export const customFields = {
+  list: (recordKind?: string) =>
+    request<CustomField[]>(
+      recordKind ? `/api/custom-fields?record_kind=${recordKind}` : "/api/custom-fields",
+    ),
+  create: (body: CustomFieldInput) =>
+    request<CustomField>("/api/custom-fields", { method: "POST", body }),
+  update: (id: string, body: Partial<CustomFieldInput> & { archived?: boolean }) =>
+    request<CustomField>(`/api/custom-fields/${id}`, { method: "PATCH", body }),
+  valuesFor: (kind: string, recordId: string) =>
+    request<CustomFieldValues>(`/api/custom-fields/records/${kind}/${recordId}`),
+  setValues: (kind: string, recordId: string, values: CustomFieldValues) =>
+    request<CustomFieldValues>(`/api/custom-fields/records/${kind}/${recordId}`, {
+      method: "PUT",
+      body: { values },
+    }),
+};
+
+export const push = {
+  key: () => request<PushKey>("/api/push/key"),
+  list: () => request<PushSubscriptionRow[]>("/api/push"),
+  subscribe: (body: { endpoint: string; p256dh: string; auth: string }) =>
+    request<PushSubscriptionRow>("/api/push", { method: "POST", body }),
+  unsubscribe: (endpoint: string) =>
+    request<void>("/api/push", { method: "DELETE", body: { endpoint, p256dh: "x", auth: "x" } }),
 };
 
 export const tags = {

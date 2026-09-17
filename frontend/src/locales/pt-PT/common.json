@@ -5,7 +5,11 @@
     "password": "Palavra-passe",
     "submit": "Entrar",
     "noAccount": "Ainda não tem conta?",
-    "register": "Criar agregado"
+    "register": "Criar agregado",
+    "or": "ou",
+    "withProvider": "Entrar com o fornecedor de identidade",
+    "oidcFailed": "Não foi possível concluir a autenticação.",
+    "oidcUnknown": "Esta conta não existe neste agregado. Peça um convite."
   },
   "nav": {
     "garage": "Garagem",
@@ -763,5 +767,86 @@
     "confirmDelete": "Eliminar a etiqueta {{name}}? Sai de {{count}} registos; os registos ficam intactos.",
     "saveFailed": "Não foi possível guardar as etiquetas.",
     "filter": "Etiquetas"
+  },
+  "instance": {
+    "title": "Instância",
+    "description": "Estado desta instalação. Visível apenas ao proprietário.",
+    "version": "Versão",
+    "database": "Base de dados",
+    "reachable": "Acessível",
+    "unreachable": "Inacessível",
+    "migration": "Migração",
+    "storage": "Armazenamento",
+    "free": "{{value}} livres",
+    "storageMissing": "Pasta inexistente",
+    "tasks": "Tarefas",
+    "running": "A correr",
+    "stopped": "Parada",
+    "everySeconds_one": "a cada {{count}} segundo",
+    "everySeconds_other": "a cada {{count}} segundos",
+    "registration": "Registo",
+    "open": "Aberto",
+    "inviteOnly": "Apenas por convite",
+    "integrations": "Integrações",
+    "off": "desligada",
+    "counts": "Registos",
+    "integrationNames": {
+      "smtp": "Correio",
+      "google_calendar": "Google Calendar",
+      "oidc": "OIDC",
+      "web_push": "Web Push"
+    },
+    "countNames": {
+      "vehicles": "veículos",
+      "attachments": "anexos",
+      "notifications": "notificações",
+      "webhooks": "webhooks"
+    }
+  },
+  "push": {
+    "title": "Notificações no dispositivo",
+    "description": "Avisos que chegam mesmo com a aplicação fechada.",
+    "notConfigured": "Esta instalação não tem chaves configuradas para notificações push.",
+    "unsupported": "Este navegador não suporta notificações push.",
+    "iphoneHint": "No iPhone é preciso instalar primeiro a aplicação no ecrã principal.",
+    "enable": "Ativar notificações",
+    "disable": "Desativar notificações",
+    "denied": "A autorização foi recusada. Tem de a alterar nas definições do navegador.",
+    "failed": "Não foi possível alterar as notificações."
+  },
+  "customFields": {
+    "title": "Campos personalizados",
+    "description": "Campos próprios do agregado, acrescentados a cada tipo de registo.",
+    "recordKind": "Tipo de registo",
+    "label": "Nome",
+    "type": "Tipo",
+    "options": "Opções",
+    "optionsHint": "Separadas por vírgulas.",
+    "required": "Obrigatório",
+    "create": "Criar campo",
+    "noneYet": "Ainda não há campos personalizados.",
+    "archive": "Arquivar",
+    "labelNeeded": "O nome tem de conter letras ou números.",
+    "confirmArchive": "Arquivar o campo {{label}}? Deixa de aparecer nos formulários; os valores já guardados mantêm-se.",
+    "kinds": {
+      "vehicle": "Veículo",
+      "fuel": "Abastecimento",
+      "work": "Intervenção",
+      "expense": "Despesa",
+      "note": "Nota",
+      "plan": "Plano",
+      "inspection": "Inspeção"
+    },
+    "types": {
+      "text": "Texto",
+      "number": "Número",
+      "currency": "Moeda",
+      "date": "Data",
+      "choice": "Opção",
+      "multi_choice": "Múltipla escolha",
+      "checkbox": "Caixa de verificação",
+      "url": "Ligação",
+      "secret": "Segredo"
+    }
   }
 }

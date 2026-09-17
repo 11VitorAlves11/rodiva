@@ -15,6 +15,9 @@ export default defineConfig({
       includeAssets: ["favicon.svg", "icons/*.png", "icons/*.svg"],
       devOptions: { enabled: true },
       workbox: {
+        // generateSW writes the worker, so the push handlers live in their own
+        // file and are pulled in rather than appended to a generated one.
+        importScripts: ["/push-sw.js"],
         // Authentication and API navigations belong to FastAPI. If Workbox's
         // SPA fallback handled them, an installed PWA would serve index.html
         // instead of letting a login round-trip reach the backend.

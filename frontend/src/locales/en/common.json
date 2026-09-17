@@ -5,7 +5,11 @@
     "password": "Password",
     "submit": "Sign in",
     "noAccount": "Don't have an account yet?",
-    "register": "Create household"
+    "register": "Create household",
+    "or": "or",
+    "withProvider": "Sign in with the identity provider",
+    "oidcFailed": "The sign-in could not be completed.",
+    "oidcUnknown": "That account is not in this household. Ask for an invite."
   },
   "nav": {
     "garage": "Garage",
@@ -763,5 +767,86 @@
     "confirmDelete": "Delete the tag {{name}}? It leaves {{count}} records; the records themselves are untouched.",
     "saveFailed": "Could not save the tags.",
     "filter": "Tags"
+  },
+  "instance": {
+    "title": "Instance",
+    "description": "The state of this installation. Owner only.",
+    "version": "Version",
+    "database": "Database",
+    "reachable": "Reachable",
+    "unreachable": "Unreachable",
+    "migration": "Migration",
+    "storage": "Storage",
+    "free": "{{value}} free",
+    "storageMissing": "Directory missing",
+    "tasks": "Tasks",
+    "running": "Running",
+    "stopped": "Stopped",
+    "everySeconds_one": "every {{count}} second",
+    "everySeconds_other": "every {{count}} seconds",
+    "registration": "Registration",
+    "open": "Open",
+    "inviteOnly": "Invite only",
+    "integrations": "Integrations",
+    "off": "off",
+    "counts": "Records",
+    "integrationNames": {
+      "smtp": "Email",
+      "google_calendar": "Google Calendar",
+      "oidc": "OIDC",
+      "web_push": "Web Push"
+    },
+    "countNames": {
+      "vehicles": "vehicles",
+      "attachments": "attachments",
+      "notifications": "notifications",
+      "webhooks": "webhooks"
+    }
+  },
+  "push": {
+    "title": "Device notifications",
+    "description": "Alerts that arrive even with the app closed.",
+    "notConfigured": "This installation has no keys configured for push notifications.",
+    "unsupported": "This browser does not support push notifications.",
+    "iphoneHint": "On iPhone the app must be installed to the home screen first.",
+    "enable": "Turn on notifications",
+    "disable": "Turn off notifications",
+    "denied": "Permission was refused. You will have to change it in the browser's settings.",
+    "failed": "Could not change the notifications."
+  },
+  "customFields": {
+    "title": "Custom fields",
+    "description": "The household's own fields, added to each kind of record.",
+    "recordKind": "Record kind",
+    "label": "Name",
+    "type": "Type",
+    "options": "Options",
+    "optionsHint": "Separated by commas.",
+    "required": "Required",
+    "create": "Create field",
+    "noneYet": "No custom fields yet.",
+    "archive": "Archive",
+    "labelNeeded": "The name must contain letters or numbers.",
+    "confirmArchive": "Archive the field {{label}}? It stops appearing on forms; values already saved are kept.",
+    "kinds": {
+      "vehicle": "Vehicle",
+      "fuel": "Fuel",
+      "work": "Work",
+      "expense": "Expense",
+      "note": "Note",
+      "plan": "Plan",
+      "inspection": "Inspection"
+    },
+    "types": {
+      "text": "Text",
+      "number": "Number",
+      "currency": "Currency",
+      "date": "Date",
+      "choice": "Choice",
+      "multi_choice": "Multiple choice",
+      "checkbox": "Checkbox",
+      "url": "Link",
+      "secret": "Secret"
+    }
   }
 }

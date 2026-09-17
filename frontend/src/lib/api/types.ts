@@ -614,3 +614,71 @@ export type NotificationRun = { created: number; delivered: number; failed: numb
 export type Webhook = { id: string; description: string; url: string; events: string[]; active: boolean; created_at: string; last_success_at: string | null; last_error: string };
 export type WebhookInput = { description: string; url: string; events: string[] };
 export type WebhookDelivery = { id: string; event: string; payload: Record<string, unknown>; status: string; attempts: number; next_attempt_at: string; response_status: number | null; last_error: string; created_at: string; delivered_at: string | null };
+
+/** What the instance is doing right now (RF-ADM-009). */
+export type InstanceStatus = {
+  app_name: string;
+  version: string;
+  environment: string;
+  auth_mode: string;
+  public_registration: boolean;
+  database_reachable: boolean;
+  database_version: string;
+  migration_revision: string | null;
+  storage: {
+    path: string;
+    exists: boolean;
+    readable: boolean;
+    used_bytes: number;
+    free_bytes: number;
+  };
+  tasks: { notifications_interval_seconds: number; notifications_running: boolean };
+  integrations: Record<string, boolean>;
+  counts: Record<string, number>;
+};
+
+export type CustomFieldType =
+  | "text"
+  | "number"
+  | "currency"
+  | "date"
+  | "choice"
+  | "multi_choice"
+  | "checkbox"
+  | "url"
+  | "secret";
+
+export type CustomField = {
+  id: string;
+  record_kind: string;
+  key: string;
+  label: string;
+  field_type: CustomFieldType;
+  required: boolean;
+  options: string[];
+  position: number;
+  archived: boolean;
+  created_at: string;
+};
+
+export type CustomFieldInput = {
+  record_kind: string;
+  key: string;
+  label: string;
+  field_type: CustomFieldType;
+  required?: boolean;
+  options?: string[];
+  position?: number;
+};
+
+export type CustomFieldValues = Record<string, unknown>;
+
+export type PushKey = { enabled: boolean; public_key: string };
+
+export type PushSubscriptionRow = {
+  id: string;
+  endpoint: string;
+  user_agent: string | null;
+  created_at: string;
+  last_used_at: string | null;
+};
