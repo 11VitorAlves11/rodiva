@@ -6,6 +6,12 @@ from app.models.auth_session import AuthSession
 from app.models.base import Base
 from app.models.calendar_feed import CalendarFeed
 from app.models.charging_record import ChargingRecord
+from app.models.custom_field import (
+    CUSTOM_FIELD_KINDS,
+    FIELD_TYPES,
+    CustomFieldDefinition,
+    CustomFieldValue,
+)
 from app.models.enums import Role, VehicleStatus
 from app.models.equipment import Equipment, MountPeriod, TireRotation
 from app.models.expense_record import ExpenseRecord
@@ -25,6 +31,7 @@ from app.models.notification import (
 )
 from app.models.odometer_reading import OdometerReading
 from app.models.plan import Plan
+from app.models.push_subscription import PushSubscription
 from app.models.reminder import Reminder
 from app.models.saved_view import SavedView
 from app.models.tag import TAGGABLE_KINDS, RecordTag, Tag
@@ -35,6 +42,10 @@ from app.models.work_record import WorkRecord, WorkRecordItem
 
 __all__ = [
     "ApiKey",
+    "CUSTOM_FIELD_KINDS",
+    "CustomFieldDefinition",
+    "CustomFieldValue",
+    "FIELD_TYPES",
     "Attachment",
     "AuditEvent",
     "AuthSession",
@@ -62,6 +73,7 @@ __all__ = [
     "NotificationPreference",
     "OdometerReading",
     "Plan",
+    "PushSubscription",
     "RecordTag",
     "Reminder",
     "Role",

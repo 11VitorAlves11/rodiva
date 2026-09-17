@@ -19,6 +19,10 @@ from app.services.notifications import run_once
 
 logger = logging.getLogger(__name__)
 
+#: The running task, so the admin page can say whether the schedule is alive
+#: rather than only what it was configured to be.
+_task: asyncio.Task[None] | None = None
+
 
 async def _loop(interval: int) -> None:
     session_maker = get_sessionmaker()
@@ -42,13 +46,22 @@ async def _loop(interval: int) -> None:
 
 
 def start() -> asyncio.Task[None] | None:
+    global _task
     interval = get_settings().notification_interval_seconds
     if interval <= 0:
+        _task = None
         return None
-    return asyncio.create_task(_loop(interval))
+    _task = asyncio.create_task(_loop(interval))
+    return _task
+
+
+def is_running() -> bool:
+    return _task is not None and not _task.done()
 
 
 async def stop(task: asyncio.Task[None] | None) -> None:
+    global _task
+    _task = None
     if task is None:
         return
     task.cancel()

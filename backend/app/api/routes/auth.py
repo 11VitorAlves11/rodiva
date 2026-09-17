@@ -1,19 +1,25 @@
-"""Local authentication, revocable sessions and household selection."""
+"""Authentication (local and OIDC), revocable sessions and household selection."""
 
 import hashlib
+import logging
 import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy import delete, select, update
 
 from app.api.deps import AppSettings, CurrentMembership, CurrentSession, CurrentUser, DbSession
 from app.core.config import Settings
 from app.core.security import (
+    OIDC_FLOW_COOKIE,
+    OIDC_FLOW_MAX_AGE,
     PasswordTooLongError,
     hash_password,
+    issue_oidc_flow,
     issue_session,
+    read_oidc_flow,
     verify_password,
 )
 from app.models import AuthSession, Household, Invite, Membership, PasswordReset, Role, User
@@ -30,7 +36,10 @@ from app.schemas.auth import (
     UserOut,
 )
 from app.schemas.households import InvitePreviewOut
+from app.services import oidc
 from app.services.account_recovery import send_password_reset, throttle
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -365,7 +374,121 @@ async def auth_options(settings: AppSettings) -> dict[str, bool]:
     return {
         "registration": settings.allow_public_registration,
         "password_recovery": bool(settings.smtp_host and settings.smtp_from),
+        "oidc": settings.oidc_enabled,
     }
+
+
+def _oidc_redirect_uri(settings: Settings) -> str:
+    """Where the provider sends the browser back. Must match what was registered."""
+    return f"{settings.public_base_url.rstrip('/')}/auth/oidc/callback"
+
+
+@router.get("/oidc/start")
+async def oidc_start(request: Request, settings: AppSettings) -> RedirectResponse:
+    """Begin an OIDC sign-in (RF-AUT-006).
+
+    The PKCE verifier and the nonce are carried in a short-lived signed cookie
+    rather than in server state: this instance may be behind more than one
+    worker, and a verifier that only one of them knows would fail at random.
+    """
+    if not settings.oidc_enabled:
+        raise HTTPException(status_code=404, detail="This instance has no OIDC provider")
+    try:
+        document = await oidc.discover(settings.oidc_issuer)
+    except oidc.OidcError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+
+    verifier, challenge = oidc.new_pkce_pair()
+    state = secrets.token_urlsafe(24)
+    nonce = secrets.token_urlsafe(16)
+    response = RedirectResponse(
+        oidc.authorization_url(
+            document,
+            client_id=settings.oidc_client_id,
+            redirect_uri=_oidc_redirect_uri(settings),
+            scopes=settings.oidc_scopes,
+            state=state,
+            challenge=challenge,
+        ),
+        status_code=302,
+    )
+    response.set_cookie(
+        OIDC_FLOW_COOKIE,
+        issue_oidc_flow({"verifier": verifier, "state": state, "nonce": nonce}),
+        max_age=OIDC_FLOW_MAX_AGE,
+        httponly=True,
+        # The provider posts the browser back to us cross-site, so the cookie
+        # has to survive that navigation; "lax" does for a GET redirect.
+        samesite="lax",
+        secure=settings.cookies_secure,
+        path="/auth",
+    )
+    return response
+
+
+@router.get("/oidc/callback")
+async def oidc_callback(
+    request: Request,
+    db: DbSession,
+    settings: AppSettings,
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+) -> RedirectResponse:
+    """Finish an OIDC sign-in and land the browser back in the app."""
+    if not settings.oidc_enabled:
+        raise HTTPException(status_code=404, detail="This instance has no OIDC provider")
+    frontend = settings.public_frontend_url.rstrip("/")
+    if error or not code or not state:
+        return RedirectResponse(f"{frontend}/login?oidc=failed", status_code=302)
+
+    flow = read_oidc_flow(request.cookies.get(OIDC_FLOW_COOKIE, ""))
+    # A state that does not match the one we issued means this callback belongs
+    # to someone else's sign-in, which is the CSRF the parameter exists to stop.
+    if flow is None or not secrets.compare_digest(flow.get("state", ""), state):
+        return RedirectResponse(f"{frontend}/login?oidc=failed", status_code=302)
+
+    try:
+        document = await oidc.discover(settings.oidc_issuer)
+        tokens = await oidc.exchange_code(
+            document,
+            code=code,
+            verifier=flow["verifier"],
+            client_id=settings.oidc_client_id,
+            client_secret=settings.oidc_client_secret,
+            redirect_uri=_oidc_redirect_uri(settings),
+        )
+        identity = await oidc.verify_id_token(
+            tokens["id_token"],
+            document,
+            client_id=settings.oidc_client_id,
+            nonce=flow.get("nonce"),
+        )
+    except oidc.OidcError:
+        # Never echo the provider's message into a URL a browser will keep.
+        logger.warning("An OIDC sign-in could not be completed")
+        return RedirectResponse(f"{frontend}/login?oidc=failed", status_code=302)
+
+    user = await db.scalar(select(User).where(User.oidc_subject == identity.subject))
+    if user is None:
+        # Fall back to the email so an existing local account is adopted rather
+        # than shadowed by a second account for the same person.
+        user = await db.scalar(select(User).where(User.email == identity.email))
+        if user is not None:
+            user.oidc_subject = identity.subject
+    if user is None:
+        return RedirectResponse(f"{frontend}/login?oidc=unknown", status_code=302)
+
+    membership = await db.scalar(
+        select(Membership).where(Membership.user_id == user.id).order_by(Membership.created_at)
+    )
+    if membership is None:
+        return RedirectResponse(f"{frontend}/login?oidc=unknown", status_code=302)
+
+    response = RedirectResponse(frontend, status_code=302)
+    await _set_session_cookie(response, user.id, membership.household_id, settings, request, db)
+    response.delete_cookie(OIDC_FLOW_COOKIE, path="/auth")
+    return response
 
 
 @router.post("/forgot-password", status_code=202)

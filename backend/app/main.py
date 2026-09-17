@@ -7,12 +7,14 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.errors import install_error_handlers
 from app.api.routes import (
+    admin,
     api_keys,
     attachments,
     audit,
     auth,
     calendar,
     charging,
+    custom_fields,
     equipment,
     expenses,
     fuel,
@@ -25,6 +27,7 @@ from app.api.routes import (
     notifications,
     odometer,
     plans,
+    push,
     reminders,
     reports,
     search,
@@ -67,7 +70,9 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
 
 # Preserve existing clients while making v1 the documented integration API.
 for resource in [
+    admin,
     api_keys,
+    custom_fields,
     audit,
     charging,
     imports,
@@ -80,6 +85,7 @@ for resource in [
     vehicles,
     odometer,
     plans,
+    push,
     fuel,
     work_records,
     expenses,

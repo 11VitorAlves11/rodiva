@@ -25,6 +25,9 @@ class NotificationPreference(Base):
     )
     channel_inapp: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     channel_email: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    #: Web Push (RF-NOT-002). Off until the member turns it on from a browser
+    #: that has granted permission — RF-PWA-012 forbids asking unprompted.
+    channel_push: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # Notify at this urgency or anything more pressing.
     min_urgency: Mapped[str] = mapped_column(String(20), nullable=False, default="urgent")
     # Empty means every vehicle in the household.

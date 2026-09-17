@@ -26,10 +26,12 @@ from app.models import (
     NotificationDelivery,
     NotificationPreference,
     OdometerReading,
+    PushSubscription,
     Reminder,
     User,
     Vehicle,
 )
+from app.services import web_push
 from app.services.events import emit
 from app.services.events import flush as flush_webhooks
 from app.services.urgency import at_least_as_urgent_as, urgency_of
@@ -38,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 INAPP = "inapp"
 EMAIL = "email"
+PUSH = "push"
 
 
 @dataclass
@@ -181,6 +184,8 @@ async def _queue(
     channels = [INAPP] if preference.channel_inapp else []
     if preference.channel_email:
         channels.append(EMAIL)
+    if preference.channel_push:
+        channels.append(PUSH)
     for channel in channels:
         db.add(
             NotificationDelivery(
@@ -244,6 +249,11 @@ async def deliver_pending(db: AsyncSession, limit: int = 100) -> tuple[int, int]
     delivered = failed = 0
     now = datetime.now(UTC)
     for delivery in rows:
+        if delivery.channel == PUSH:
+            sent, lost = await _deliver_push(delivery, settings, db, now)
+            delivered += sent
+            failed += lost
+            continue
         if delivery.channel != EMAIL:
             continue
         if not settings.smtp_host or not settings.smtp_from:
@@ -273,6 +283,74 @@ async def deliver_pending(db: AsyncSession, limit: int = 100) -> tuple[int, int]
             delivery.last_error = ""
             delivered += 1
     return delivered, failed
+
+
+async def _deliver_push(
+    delivery: NotificationDelivery, settings: Settings, db: AsyncSession, now: datetime
+) -> tuple[int, int]:
+    """Push one notification to every browser the member registered.
+
+    A subscription the push service has retired is deleted rather than retried:
+    that endpoint will never work again, and keeping it would fail on every run.
+    """
+    if not settings.web_push_enabled:
+        return 0, 0  # Unconfigured, not failed: leave it pending.
+    notification = await db.get(Notification, delivery.notification_id)
+    if notification is None:
+        return 0, 0
+    user = await db.get(User, notification.user_id)
+    if user is None:
+        return 0, 0
+    preference = await preference_for(user.id, notification.household_id, db)
+    if _in_quiet_hours(preference, user.timezone or "UTC", now):
+        return 0, 0
+
+    subscriptions = list(
+        await db.scalars(select(PushSubscription).where(PushSubscription.user_id == user.id))
+    )
+    if not subscriptions:
+        # Nothing to push to: the member turned the channel on and then removed
+        # every browser. Mark it done so it does not sit pending for ever.
+        delivery.status = "sent"
+        delivery.sent_at = now
+        return 0, 0
+
+    payload = {
+        "title": notification.title,
+        "body": notification.body,
+        "url": f"/vehicles/{notification.vehicle_id}" if notification.vehicle_id else "/reminders",
+    }
+    delivery.attempts += 1
+    any_sent = False
+    for subscription in subscriptions:
+        try:
+            result = await web_push.send(
+                endpoint=subscription.endpoint,
+                p256dh=subscription.p256dh,
+                auth=subscription.auth,
+                payload=payload,
+                public_key=settings.vapid_public_key,
+                private_key=settings.vapid_private_key,
+                subject=settings.vapid_subject,
+            )
+        except Exception as error:  # noqa: BLE001 - a bad endpoint must not end the run
+            delivery.last_error = type(error).__name__[:500]
+            logger.warning("Web push could not be delivered")
+            continue
+        if result.expired:
+            await db.delete(subscription)
+        elif result.status_code < 300:
+            any_sent = True
+            subscription.last_used_at = now
+
+    if any_sent:
+        delivery.status = "sent"
+        delivery.sent_at = now
+        delivery.last_error = ""
+        return 1, 0
+    if delivery.attempts >= 5:
+        delivery.status = "failed"
+    return 0, 1
 
 
 async def run_once(db: AsyncSession) -> EvaluationResult:

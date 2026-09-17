@@ -18,6 +18,12 @@ MIN_PASSWORD_LENGTH = 10
 MAX_CLOCK_SKEW_SECONDS = 60
 
 SESSION_SALT = "rodiva.session"
+#: Carries the PKCE verifier and nonce across the round trip to the provider.
+#: Signed rather than stored, so more than one worker can finish the flow.
+OIDC_FLOW_SALT = "rodiva.oidc_flow"
+OIDC_FLOW_COOKIE = "rodiva_oidc_flow"
+#: A sign-in redirect and back is seconds of work; ten minutes is generous.
+OIDC_FLOW_MAX_AGE = 60 * 10
 GOOGLE_OAUTH_STATE_SALT = "rodiva.google_oauth_state"
 #: The OAuth round trip to Google and back should take seconds, not minutes —
 #: keep the state token's window tight since it's the CSRF binding for the flow.
@@ -103,3 +109,23 @@ def _within_clock_skew(signed_at: datetime | None) -> bool:
         return False
     ahead = (signed_at - datetime.now(UTC)).total_seconds()
     return 0 < ahead <= MAX_CLOCK_SKEW_SECONDS
+
+
+def issue_oidc_flow(flow: dict[str, str]) -> str:
+    """Sign the PKCE verifier, state and nonce for the trip to the provider."""
+    serializer = URLSafeTimedSerializer(get_settings().secret_key, salt=OIDC_FLOW_SALT)
+    return serializer.dumps(flow)
+
+
+def read_oidc_flow(token: str) -> dict[str, str] | None:
+    """Return the flow a valid, unexpired cookie carries, else None."""
+    if not token:
+        return None
+    serializer = URLSafeTimedSerializer(get_settings().secret_key, salt=OIDC_FLOW_SALT)
+    try:
+        raw = serializer.loads(token, max_age=OIDC_FLOW_MAX_AGE)
+    except (BadSignature, SignatureExpired):
+        return None
+    if not isinstance(raw, dict):
+        return None
+    return {str(key): str(value) for key, value in raw.items()}
