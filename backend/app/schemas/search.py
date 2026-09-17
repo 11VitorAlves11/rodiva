@@ -13,6 +13,12 @@ SearchSort = Literal["occurred_on_desc", "occurred_on_asc", "title_asc", "title_
 BulkOperation = Literal["delete", "duplicate", "move", "edit", "export"]
 
 
+class SearchResultTag(BaseModel):
+    id: uuid.UUID
+    name: str
+    color: str
+
+
 class SearchResult(BaseModel):
     id: uuid.UUID
     kind: SearchKind
@@ -21,6 +27,7 @@ class SearchResult(BaseModel):
     vehicle_id: uuid.UUID | None
     occurred_on: date | datetime | None
     url: str
+    tags: list[SearchResultTag] = Field(default_factory=list)
 
 
 class BulkItem(BaseModel):

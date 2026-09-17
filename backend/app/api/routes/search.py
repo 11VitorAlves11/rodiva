@@ -2,6 +2,7 @@ import csv
 import io
 import unicodedata
 import uuid
+from collections import defaultdict
 from collections.abc import Callable
 from datetime import date
 from decimal import Decimal
@@ -22,6 +23,7 @@ from app.api.routes import plans as plans_routes
 from app.api.routes import work_records as work_records_routes
 from app.db.filters import active
 from app.models import (
+    TAGGABLE_KINDS,
     Equipment,
     ExpenseRecord,
     FuelRecord,
@@ -29,8 +31,10 @@ from app.models import (
     InventoryItem,
     Note,
     Plan,
+    RecordTag,
     Role,
     SavedView,
+    Tag,
     Vehicle,
     WorkRecord,
 )
@@ -47,9 +51,11 @@ from app.schemas.search import (
     BulkOperationResult,
     SearchKind,
     SearchResult,
+    SearchResultTag,
     SearchSort,
 )
 from app.schemas.work_records import WorkRecordUpdate
+from app.services import tags as tag_service
 
 router = APIRouter(prefix="/search", tags=["search"])
 _ACCENTS = "áàâãäéèêëíìîïóòôõöúùûüçñýÿ"
@@ -120,6 +126,24 @@ def _matches(*columns: Any, term: str) -> Any:
             for column in columns
         )
     )
+
+
+async def _attach_tags(results: list[SearchResult], db: DbSession) -> None:
+    """Fill in each result's tags with one query per kind, not one per result."""
+    by_kind: dict[str, list[uuid.UUID]] = defaultdict(list)
+    for result in results:
+        if result.kind in TAGGABLE_KINDS:
+            by_kind[result.kind].append(result.id)
+    if not by_kind:
+        return
+    found: dict[tuple[str, uuid.UUID], list[SearchResultTag]] = {}
+    for entity_kind, ids in by_kind.items():
+        for record_id, tags in (await tag_service.tags_for(entity_kind, ids, db)).items():
+            found[(entity_kind, record_id)] = [
+                SearchResultTag(id=tag.id, name=tag.name, color=tag.color) for tag in tags
+            ]
+    for result in results:
+        result.tags = found.get((result.kind, result.id), [])
 
 
 def _vehicle_result(item: Vehicle) -> SearchResult:
@@ -205,6 +229,7 @@ async def global_search(
     q: str | None = Query(default=None, min_length=2, max_length=100),
     kind: Annotated[list[str] | None, Query()] = None,
     vehicle_id: Annotated[list[uuid.UUID] | None, Query()] = None,
+    tag_id: Annotated[list[uuid.UUID] | None, Query()] = None,
     date_from: date | None = None,
     date_to: date | None = None,
     sort: SearchSort = "occurred_on_desc",
@@ -215,6 +240,26 @@ async def global_search(
     if requested_kinds and not requested_kinds.issubset(_KNOWN_KINDS):
         raise HTTPException(status_code=422, detail="Unknown kind filter")
     term = _term(q.strip()) if q else ""
+
+    # Tag filtering (RF-PES-001): resolve the tagged ids once, per kind, and let
+    # each kind's own query narrow to them. A kind nothing is tagged with drops
+    # out entirely rather than running a query that cannot match.
+    tagged: dict[str, set[uuid.UUID]] | None = None
+    if tag_id:
+        owned = set(
+            await db.scalars(
+                select(Tag.id).where(
+                    Tag.household_id == membership.household_id, Tag.id.in_(tag_id)
+                )
+            )
+        )
+        if owned != set(tag_id):
+            raise HTTPException(status_code=404, detail="One or more tags were not found")
+        tagged = defaultdict(set)
+        for row in await db.execute(
+            select(RecordTag.record_kind, RecordTag.record_id).where(RecordTag.tag_id.in_(owned))
+        ):
+            tagged[row.record_kind].add(row.record_id)
 
     if vehicle_id:
         matched = set(
@@ -230,7 +275,16 @@ async def global_search(
             raise HTTPException(status_code=404, detail="One or more vehicles were not found")
 
     def _wants(entity_kind: str) -> bool:
-        return requested_kinds is None or entity_kind in requested_kinds
+        if requested_kinds is not None and entity_kind not in requested_kinds:
+            return False
+        # Nothing of this kind carries any of the requested tags.
+        return tagged is None or bool(tagged.get(entity_kind))
+
+    def _tagged_only(query: Any, entity_kind: str) -> Any:
+        if tagged is None:
+            return query
+        model = cast(Any, _ALL_MODELS[entity_kind])
+        return query.where(model.id.in_(tagged[entity_kind]))
 
     def _dated(query: Any, column: Any) -> Any:
         if date_from:
@@ -264,7 +318,7 @@ async def global_search(
         if vehicle_id:
             vehicle_query = vehicle_query.where(Vehicle.id.in_(vehicle_id))
         vehicle_query = _dated(vehicle_query, Vehicle.created_at).limit(per_kind_limit)
-        vehicles = list(await db.scalars(vehicle_query))
+        vehicles = list(await db.scalars(_tagged_only(vehicle_query, "vehicle")))
 
     queries: list[tuple[str, Any]] = []
     if _wants("fuel"):
@@ -351,7 +405,10 @@ async def global_search(
             )
         )
 
-    found = {entity_kind: list(await db.scalars(query)) for entity_kind, query in queries}
+    found = {
+        entity_kind: list(await db.scalars(_tagged_only(query, entity_kind)))
+        for entity_kind, query in queries
+    }
     vehicle_names = {
         item.id: item.name
         for item in await db.scalars(
@@ -363,6 +420,7 @@ async def global_search(
     for entity_kind, items in found.items():
         for item in items:
             results.append(_build_result(entity_kind, item, vehicle_names))
+    await _attach_tags(results, db)
 
     def _occurred_key(result: SearchResult) -> str:
         return result.occurred_on.isoformat() if result.occurred_on else ""

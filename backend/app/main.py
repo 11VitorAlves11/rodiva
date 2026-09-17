@@ -29,6 +29,7 @@ from app.api.routes import (
     reports,
     search,
     storage,
+    tags,
     trash,
     vehicles,
     webhooks,
@@ -90,6 +91,7 @@ for resource in [
     attachments,
     trash,
     webhooks,
+    tags,
 ]:
     app.include_router(resource.router, prefix="/api", include_in_schema=False)
     app.include_router(resource.router, prefix="/api/v1")

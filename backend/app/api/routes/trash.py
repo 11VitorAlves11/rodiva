@@ -34,6 +34,7 @@ from app.models import (
 from app.models.mixins import SoftDelete
 from app.schemas.trash import TrashItem
 from app.services import audit
+from app.services import tags as tag_service
 
 router = APIRouter(prefix="/trash", tags=["trash"])
 
@@ -62,6 +63,19 @@ KINDS: dict[str, Kind] = {
     "attachment": Kind(Attachment, lambda row: row.filename),
     "plan": Kind(Plan, lambda row: row.description),
     "reminder": Kind(Reminder, lambda row: row.title),
+}
+
+
+# The bin names a record by its table, tags name it by its kind. Only the types
+# that can carry a tag appear here; anything missing simply has none to clear.
+_TAG_KINDS: dict[str, str] = {
+    "vehicle": "vehicle",
+    "odometer_reading": "odometer",
+    "fuel_record": "fuel",
+    "work_record": "work",
+    "expense_record": "expense",
+    "note": "note",
+    "plan": "plan",
 }
 
 
@@ -223,6 +237,11 @@ async def purge(
         vehicle_id=None if entity_type == "vehicle" else row.vehicle_id,
         summary=summary,
     )
+    # There is no foreign key from a tag link to the record, so nothing would
+    # cascade: the rows have to go with the record they describe.
+    tag_kind = _TAG_KINDS.get(entity_type)
+    if tag_kind is not None:
+        await tag_service.clear_tags(tag_kind, entity_id, db)
     await db.delete(row)
     await db.commit()
     if stored is not None:

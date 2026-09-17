@@ -27,6 +27,7 @@ from app.models.odometer_reading import OdometerReading
 from app.models.plan import Plan
 from app.models.reminder import Reminder
 from app.models.saved_view import SavedView
+from app.models.tag import TAGGABLE_KINDS, RecordTag, Tag
 from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.models.webhook import Webhook, WebhookDelivery
@@ -61,10 +62,13 @@ __all__ = [
     "NotificationPreference",
     "OdometerReading",
     "Plan",
+    "RecordTag",
     "Reminder",
     "Role",
     "SavedView",
     "StockMovement",
+    "TAGGABLE_KINDS",
+    "Tag",
     "TireRotation",
     "User",
     "Vehicle",
