@@ -39,3 +39,8 @@ skills-lock.json
 
 # Cópias de segurança locais
 backups/
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
