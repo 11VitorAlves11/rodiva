@@ -31,7 +31,7 @@ from app.models.tag import TAGGABLE_KINDS, RecordTag, Tag
 from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.models.webhook import Webhook, WebhookDelivery
-from app.models.work_record import WorkRecord
+from app.models.work_record import WorkRecord, WorkRecordItem
 
 __all__ = [
     "ApiKey",
@@ -76,4 +76,5 @@ __all__ = [
     "WebhookDelivery",
     "VehicleStatus",
     "WorkRecord",
+    "WorkRecordItem",
 ]

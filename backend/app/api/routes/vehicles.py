@@ -13,15 +13,23 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from app.api.deps import AppSettings, CurrentMembership, CurrentUser, DbSession
-from app.db.filters import mark_deleted
+from app.db.filters import active, mark_deleted
 from app.models import Role, Vehicle, VehicleStatus
-from app.schemas.vehicles import VehicleIn, VehicleOut, VehiclePhotoIn, VehicleUpdate
+from app.schemas.vehicles import (
+    VehicleIn,
+    VehicleOrderIn,
+    VehicleOut,
+    VehiclePhotoIn,
+    VehicleUpdate,
+)
 from app.services import audit, events
 
 router = APIRouter(prefix="/vehicles", tags=["vehicles"])
 
 # RF-AGR matrix §2.3: owner and manager create vehicles; editor and reader cannot.
 _CAN_CREATE_VEHICLE = {Role.OWNER, Role.MANAGER}
+# Reordering the garage is a shared view, not a record: editors may rearrange it.
+_CAN_REORDER = {Role.OWNER, Role.MANAGER, Role.EDITOR}
 
 
 @router.get("", response_model=list[VehicleOut])
@@ -29,7 +37,7 @@ async def list_vehicles(membership: CurrentMembership, db: DbSession) -> list[Ve
     result = await db.scalars(
         select(Vehicle)
         .where(Vehicle.household_id == membership.household_id, Vehicle.deleted_at.is_(None))
-        .order_by(Vehicle.created_at)
+        .order_by(Vehicle.sort_order, Vehicle.created_at)
     )
     return list(result)
 
@@ -69,6 +77,36 @@ async def create_vehicle(
     await db.commit()
     await db.refresh(vehicle)
     return vehicle
+
+
+@router.put("/order", status_code=status.HTTP_204_NO_CONTENT)
+async def reorder_vehicles(
+    payload: VehicleOrderIn, membership: CurrentMembership, db: DbSession
+) -> None:
+    """Store the garage's manual order (RF-VEI-008).
+
+    Positions come from the list's order rather than from numbers the client
+    invents, so a reorder cannot leave two vehicles claiming the same slot.
+    Vehicles left out keep the order they had, after the ones named here.
+    """
+    if membership.role not in _CAN_REORDER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot reorder the garage"
+        )
+    owned = {
+        vehicle.id: vehicle
+        for vehicle in await db.scalars(
+            select(Vehicle).where(Vehicle.household_id == membership.household_id, active(Vehicle))
+        )
+    }
+    unknown = [str(one) for one in payload.vehicle_ids if one not in owned]
+    if unknown:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="One or more vehicles were not found"
+        )
+    for position, vehicle_id in enumerate(payload.vehicle_ids):
+        owned[vehicle_id].sort_order = position
+    await db.commit()
 
 
 @router.get("/{vehicle_id}", response_model=VehicleOut)
