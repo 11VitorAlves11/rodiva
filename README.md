@@ -71,6 +71,18 @@ sessões. OIDC continua por implementar.
 Os recursos estão documentados em `/api/v1`; os endereços `/api` anteriores mantêm
 compatibilidade. A autenticação continua em `/auth`.
 
+## Segurança
+
+A API responde com `Content-Security-Policy`, `X-Content-Type-Options`,
+`X-Frame-Options`, `Referrer-Policy` e `Cross-Origin-Opener-Policy` em todas as
+respostas, incluindo transferências de anexos; o nginx que serve a aplicação
+aplica a política equivalente aos ficheiros estáticos. Com `ENVIRONMENT=prod`
+acresce `Strict-Transport-Security`.
+
+`ALLOWED_HOSTS` restringe os nomes de anfitrião aceites. Fica aberto por omissão,
+porque uma instalação auto-hospedada não consegue adivinhar o seu próprio nome;
+uma instância acessível a partir da internet deve indicá-lo.
+
 ## Licença
 
 [AGPL-3.0-or-later](LICENSE).

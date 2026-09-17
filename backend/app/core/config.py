@@ -41,6 +41,13 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["http://localhost:5173"]
 
+    # Host header allowlist (RNF-SEG). The reverse proxy forwards whatever Host it
+    # was given, so without this an attacker-chosen host reaches the app and ends
+    # up inside absolute links it builds. Left open by default because a
+    # self-hosted instance has no way to guess its own hostname; a deployment
+    # reachable from outside the LAN should name it.
+    allowed_hosts: list[str] = ["*"]
+
     # Household defaults applied to a newly created household (RF-ADM-001).
     default_locale: str = "pt-PT"
     default_currency: str = "EUR"
@@ -68,6 +75,11 @@ class Settings(BaseSettings):
     @property
     def cookies_secure(self) -> bool:
         """Session cookies are HTTPS-only everywhere except local development."""
+        return self.environment == "prod"
+
+    @property
+    def hsts_enabled(self) -> bool:
+        """Only production terminates TLS; pinning a dev browser to HTTPS would break it."""
         return self.environment == "prod"
 
     @property
