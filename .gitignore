@@ -36,3 +36,6 @@ CLAUDE.md
 .claude/
 .agents/
 skills-lock.json
+
+# Cópias de segurança locais
+backups/

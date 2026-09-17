@@ -71,6 +71,28 @@ sessões. OIDC continua por implementar.
 Os recursos estão documentados em `/api/v1`; os endereços `/api` anteriores mantêm
 compatibilidade. A autenticação continua em `/auth`.
 
+## Cópias de segurança
+
+A aplicação guarda o histórico em dois sítios: a base de dados e o volume de
+armazenamento com os ficheiros carregados. É preciso salvaguardar os dois — a base
+de dados sabe que anexos existem, o volume tem os bytes, e cada um sozinho repõe
+uma instalação que lista documentos que não abre, ou que guarda ficheiros que
+ninguém referencia.
+
+```bash
+./scripts/backup.sh                      # escreve em ./backups, mantém as 14 mais recentes
+./scripts/backup.sh /destino 30          # destino e retenção próprios
+./scripts/restore.sh backups/rodiva-…    # repõe; pede confirmação escrita
+```
+
+Cada cópia é uma pasta com `database.sql.gz`, `storage.tar.gz` e um `manifest.txt`
+com a data e a versão. Correr a partir da pasta do `docker-compose.yml`, com a
+stack a funcionar. Para uma cópia diária, agendar o `backup.sh` no cron do
+anfitrião e guardar o destino fora da máquina.
+
+Reponha uma cópia de vez em quando para um ambiente de teste: uma salvaguarda que
+nunca foi reposta é uma suposição, não um backup.
+
 ## Segurança
 
 A API responde com `Content-Security-Policy`, `X-Content-Type-Options`,
