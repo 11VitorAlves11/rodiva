@@ -4,7 +4,19 @@ import { useTranslation } from "react-i18next";
 
 import { vehicles } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
-import type { Vehicle as VehicleType } from "../../lib/api/types";
+import type { EnergyType, Vehicle as VehicleType } from "../../lib/api/types";
+
+const ENERGY_TYPES: EnergyType[] = [
+  "petrol",
+  "diesel",
+  "electric",
+  "hybrid",
+  "plugin_hybrid",
+  "lpg",
+  "other",
+];
+
+const FIELD = "mt-1 w-full rounded-lg border px-3 py-2.5 bg-raised";
 export function VehicleEditForm({
   vehicle,
   onSaved,
@@ -23,6 +35,19 @@ export function VehicleEditForm({
   const [vin, setVin] = useState(vehicle.vin ?? "");
   const [unit, setUnit] = useState<"km" | "mi">(vehicle.distance_unit);
   const [status, setStatus] = useState(vehicle.status);
+  const [energy, setEnergy] = useState<EnergyType>(vehicle.energy_type);
+  const [initialOdometer, setInitialOdometer] = useState(
+    vehicle.initial_odometer?.toString() ?? "",
+  );
+  const [offset, setOffset] = useState(vehicle.odometer_offset.toString());
+  const [multiplier, setMultiplier] = useState(vehicle.odometer_multiplier);
+  const [purchaseDate, setPurchaseDate] = useState(vehicle.purchase_date ?? "");
+  const [purchasePrice, setPurchasePrice] = useState(vehicle.purchase_price ?? "");
+  const [purchaseOdometer, setPurchaseOdometer] = useState(
+    vehicle.purchase_odometer?.toString() ?? "",
+  );
+  const [saleDate, setSaleDate] = useState(vehicle.sale_date ?? "");
+  const [salePrice, setSalePrice] = useState(vehicle.sale_price ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   async function submit(event: FormEvent) {
@@ -40,6 +65,16 @@ export function VehicleEditForm({
           vin: vin || null,
           distance_unit: unit,
           status,
+          energy_type: energy,
+          initial_odometer: initialOdometer ? Number(initialOdometer) : null,
+          odometer_offset: Number(offset) || 0,
+          // Comma is how a decimal is typed in pt-PT; the API takes a point.
+          odometer_multiplier: multiplier.replace(",", ".") || "1.0",
+          purchase_date: purchaseDate || null,
+          purchase_price: purchasePrice ? purchasePrice.replace(",", ".") : null,
+          purchase_odometer: purchaseOdometer ? Number(purchaseOdometer) : null,
+          sale_date: saleDate || null,
+          sale_price: salePrice ? salePrice.replace(",", ".") : null,
         }),
       );
     } catch (cause) {
@@ -131,6 +166,109 @@ export function VehicleEditForm({
           ))}
         </select>
       </label>
+      <label className="text-sm">
+        {t("vehicle.energyType")}
+        <select
+          value={energy}
+          onChange={(event) => setEnergy(event.target.value as EnergyType)}
+          className={FIELD}
+        >
+          {ENERGY_TYPES.map((value) => (
+            <option key={value} value={value}>
+              {t(`vehicle.energyTypes.${value}`)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="text-sm">
+        {t("vehicle.initialOdometer")}
+        <input
+          type="number"
+          inputMode="numeric"
+          value={initialOdometer}
+          onChange={(event) => setInitialOdometer(event.target.value)}
+          className={FIELD}
+        />
+      </label>
+
+      <fieldset className="rounded-lg border border-line p-3 sm:col-span-2">
+        <legend className="px-1 text-sm font-medium">{t("vehicle.odometerCorrection")}</legend>
+        <p className="mb-2 text-xs text-ink-subtle">{t("vehicle.odometerCorrectionHint")}</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="text-sm">
+            {t("vehicle.odometerOffset")}
+            <input
+              type="number"
+              inputMode="numeric"
+              value={offset}
+              onChange={(event) => setOffset(event.target.value)}
+              className={FIELD}
+            />
+          </label>
+          <label className="text-sm">
+            {t("vehicle.odometerMultiplier")}
+            <input
+              inputMode="decimal"
+              value={multiplier}
+              onChange={(event) => setMultiplier(event.target.value)}
+              className={FIELD}
+            />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset className="rounded-lg border border-line p-3 sm:col-span-2">
+        <legend className="px-1 text-sm font-medium">{t("vehicle.ownership")}</legend>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <label className="text-sm">
+            {t("vehicle.purchaseDate")}
+            <input
+              type="date"
+              value={purchaseDate}
+              onChange={(event) => setPurchaseDate(event.target.value)}
+              className={FIELD}
+            />
+          </label>
+          <label className="text-sm">
+            {t("vehicle.purchasePrice")}
+            <input
+              inputMode="decimal"
+              value={purchasePrice}
+              onChange={(event) => setPurchasePrice(event.target.value)}
+              className={FIELD}
+            />
+          </label>
+          <label className="text-sm">
+            {t("vehicle.purchaseOdometer")}
+            <input
+              type="number"
+              inputMode="numeric"
+              value={purchaseOdometer}
+              onChange={(event) => setPurchaseOdometer(event.target.value)}
+              className={FIELD}
+            />
+          </label>
+          <label className="text-sm">
+            {t("vehicle.saleDate")}
+            <input
+              type="date"
+              value={saleDate}
+              onChange={(event) => setSaleDate(event.target.value)}
+              className={FIELD}
+            />
+          </label>
+          <label className="text-sm">
+            {t("vehicle.salePrice")}
+            <input
+              inputMode="decimal"
+              value={salePrice}
+              onChange={(event) => setSalePrice(event.target.value)}
+              className={FIELD}
+            />
+          </label>
+        </div>
+      </fieldset>
+
       {error && (
         <p role="alert" className="text-sm text-danger sm:col-span-2">
           {error}

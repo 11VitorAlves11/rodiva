@@ -5,7 +5,13 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 
 import { workRecords } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
-import type { WorkKind, WorkRecord } from "../../lib/api/types";
+import type { WorkKind, WorkRecord, WorkRecordItemInput } from "../../lib/api/types";
+
+const CONTROL = "rounded-md border border-line bg-raised px-3 py-2";
+
+function blankItem(): WorkRecordItemInput {
+  return { description: "", quantity: "1" };
+}
 export function WorkSection({
   records,
   vehicleId,
@@ -21,6 +27,11 @@ export function WorkSection({
   const [show, setShow] = useState(false);
   const [description, setDescription] = useState("");
   const [cost, setCost] = useState("");
+  const [labour, setLabour] = useState("");
+  const [parts, setParts] = useState("");
+  const [tax, setTax] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [items, setItems] = useState<WorkRecordItemInput[]>([]);
   const [kind, setKind] = useState<WorkKind>("maintenance");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,16 +40,34 @@ export function WorkSection({
     setSaving(true);
     setError(null);
     try {
+      const decimal = (value: string) => value.replace(",", ".") || undefined;
       await workRecords.create(vehicleId, {
         recorded_on: new Date().toISOString().slice(0, 10),
         kind,
         description,
-        total_cost: cost.replace(",", ".") || undefined,
+        total_cost: decimal(cost),
+        labour_cost: decimal(labour),
+        parts_cost: decimal(parts),
+        tax_cost: decimal(tax),
+        discount: decimal(discount),
         odometer_reading: currentReading ?? undefined,
+        // Blank rows are the ones the member added and never filled in.
+        items: items
+          .filter((item) => item.description.trim())
+          .map((item) => ({
+            description: item.description.trim(),
+            quantity: item.quantity.replace(",", ".") || "1",
+            unit_cost: item.unit_cost ? item.unit_cost.replace(",", ".") : undefined,
+          })),
       });
       setShow(false);
       setDescription("");
       setCost("");
+      setLabour("");
+      setParts("");
+      setTax("");
+      setDiscount("");
+      setItems([]);
       onCreated();
     } catch (cause) {
       setError(cause instanceof ApiError ? cause.message : t("common.error"));
@@ -94,9 +123,109 @@ export function WorkSection({
             placeholder={t("work.cost")}
             value={cost}
             onChange={(event) => setCost(event.target.value)}
-            className="rounded-md border border-line bg-raised px-3 py-2"
+            className={CONTROL}
           />
-          {error && <p className="text-sm text-danger">{error}</p>}
+
+          <fieldset className="rounded-lg border border-line p-3 sm:col-span-2">
+            <legend className="px-1 text-sm font-medium">{t("work.breakdown")}</legend>
+            <p className="mb-2 text-xs text-ink-subtle">{t("work.breakdownHint")}</p>
+            <div className="grid gap-2 sm:grid-cols-4">
+              <input
+                inputMode="decimal"
+                placeholder={t("work.labour")}
+                value={labour}
+                onChange={(event) => setLabour(event.target.value)}
+                className={CONTROL}
+              />
+              <input
+                inputMode="decimal"
+                placeholder={t("work.parts")}
+                value={parts}
+                onChange={(event) => setParts(event.target.value)}
+                className={CONTROL}
+              />
+              <input
+                inputMode="decimal"
+                placeholder={t("work.tax")}
+                value={tax}
+                onChange={(event) => setTax(event.target.value)}
+                className={CONTROL}
+              />
+              <input
+                inputMode="decimal"
+                placeholder={t("work.discount")}
+                value={discount}
+                onChange={(event) => setDiscount(event.target.value)}
+                className={CONTROL}
+              />
+            </div>
+          </fieldset>
+
+          <fieldset className="rounded-lg border border-line p-3 sm:col-span-2">
+            <legend className="px-1 text-sm font-medium">{t("work.items")}</legend>
+            {items.map((item, index) => (
+              <div key={index} className="mb-2 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
+                <input
+                  aria-label={t("work.itemDescription")}
+                  placeholder={t("work.itemDescription")}
+                  value={item.description}
+                  onChange={(event) =>
+                    setItems(
+                      items.map((one, at) =>
+                        at === index ? { ...one, description: event.target.value } : one,
+                      ),
+                    )
+                  }
+                  className={CONTROL}
+                />
+                <input
+                  aria-label={t("work.itemQuantity")}
+                  inputMode="decimal"
+                  placeholder={t("work.itemQuantity")}
+                  value={item.quantity}
+                  onChange={(event) =>
+                    setItems(
+                      items.map((one, at) =>
+                        at === index ? { ...one, quantity: event.target.value } : one,
+                      ),
+                    )
+                  }
+                  className={CONTROL}
+                />
+                <input
+                  aria-label={t("work.itemUnitCost")}
+                  inputMode="decimal"
+                  placeholder={t("work.itemUnitCost")}
+                  value={item.unit_cost ?? ""}
+                  onChange={(event) =>
+                    setItems(
+                      items.map((one, at) =>
+                        at === index ? { ...one, unit_cost: event.target.value } : one,
+                      ),
+                    )
+                  }
+                  className={CONTROL}
+                />
+                <button
+                  type="button"
+                  aria-label={`${t("common.delete")} ${index + 1}`}
+                  onClick={() => setItems(items.filter((_, at) => at !== index))}
+                  className="rounded-md border border-line px-2 text-danger"
+                >
+                  <TrashIcon aria-hidden="true" className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setItems([...items, blankItem()])}
+              className="rounded-md border border-dashed border-line px-3 py-1.5 text-sm text-ink-muted"
+            >
+              {t("work.addItem")}
+            </button>
+          </fieldset>
+
+          {error && <p className="text-sm text-danger sm:col-span-2">{error}</p>}
           <button
             disabled={saving}
             className="rounded-md bg-copper px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
@@ -119,6 +248,21 @@ export function WorkSection({
                 {t(`work.${record.kind}`)}
                 {record.supplier ? ` · ${record.supplier}` : ""}
               </p>
+              {record.items.length > 0 && (
+                <ul className="mt-1 text-xs text-ink-subtle">
+                  {record.items.map((item) => (
+                    <li key={item.id}>
+                      {Number(item.quantity)} × {item.description}
+                      {item.unit_cost
+                        ? ` · ${Number(item.unit_cost).toLocaleString(i18n.language, {
+                            style: "currency",
+                            currency: "EUR",
+                          })}`
+                        : ""}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <p className="text-sm text-ink-subtle">

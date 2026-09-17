@@ -155,7 +155,30 @@
       "parked": "Parked",
       "sold": "Sold",
       "archived": "Archived"
-    }
+    },
+    "energyType": "Energy",
+    "energyTypes": {
+      "petrol": "Petrol",
+      "diesel": "Diesel",
+      "electric": "Electric",
+      "hybrid": "Hybrid",
+      "plugin_hybrid": "Plug-in hybrid",
+      "lpg": "LPG",
+      "other": "Other"
+    },
+    "initialOdometer": "Initial odometer",
+    "odometerCorrection": "Odometer correction",
+    "odometerCorrectionHint": "For a replaced or miscalibrated odometer: the offset is added to a reading, the multiplier rescales it.",
+    "odometerOffset": "Offset",
+    "odometerMultiplier": "Multiplier",
+    "ownership": "Ownership",
+    "purchaseDate": "Purchase date",
+    "purchasePrice": "Purchase price",
+    "purchaseOdometer": "Odometer at purchase",
+    "saleDate": "Sale date",
+    "salePrice": "Sale price",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
   },
   "odometer": {
     "title": "Odometer",
@@ -188,7 +211,18 @@
     "repair": "Repair",
     "modification": "Modification",
     "placeholder": "Work description",
-    "cost": "Cost (€)"
+    "cost": "Cost (€)",
+    "breakdown": "Cost breakdown",
+    "breakdownHint": "Optional. If you fill it in, the parts must add up to the total.",
+    "labour": "Labour",
+    "parts": "Parts",
+    "tax": "Tax",
+    "discount": "Discount",
+    "items": "Items",
+    "addItem": "+ Item",
+    "itemDescription": "Description",
+    "itemQuantity": "Quantity",
+    "itemUnitCost": "Unit cost"
   },
   "expenses": {
     "title": "Expenses and obligations",
@@ -205,7 +239,23 @@
     "paid": "Paid",
     "pending": "Pending",
     "planned": "Planned",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "dueOn": "Due",
+    "paidOn": "Paid on",
+    "reference": "Reference",
+    "notes": "Notes",
+    "recurrence": "Recurrence",
+    "recurrenceUnit": "Repeats",
+    "recurrenceNone": "Does not repeat",
+    "recurrenceInterval": "Every",
+    "recurrenceVaries": "Amount varies",
+    "recurrenceUnits": {
+      "day": "Days",
+      "month": "Months",
+      "year": "Years"
+    },
+    "nextOccurrence": "Raise next",
+    "overdue": "Overdue"
   },
   "settings": {
     "title": "Settings",

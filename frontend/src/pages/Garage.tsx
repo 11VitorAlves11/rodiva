@@ -14,6 +14,7 @@ export function Garage() {
   const { t } = useTranslation();
   const { me } = useSession();
   const canManage = me?.membership.role === "owner" || me?.membership.role === "manager";
+  const canReorder = canManage || me?.membership.role === "editor";
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +23,24 @@ export function Garage() {
   const load = () => {
     setError(null);
     vehiclesApi.list().then(setVehicles).catch(setError);
+  };
+
+  /**
+   * Manual ordering (RF-VEI-008) by moving one card at a time rather than by
+   * dragging: it needs no new dependency, and it works from the keyboard and
+   * from a phone, where a drag competes with the page's own scroll.
+   */
+  const move = (index: number, delta: number) => {
+    if (!vehicles) return;
+    const next = [...vehicles];
+    const target = index + delta;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    const previous = vehicles;
+    setVehicles(next);
+    vehiclesApi.reorder(next.map((vehicle) => vehicle.id)).catch(() => {
+      setVehicles(previous);
+    });
   };
 
   useEffect(load, []);
@@ -57,7 +76,7 @@ export function Garage() {
         <p className="text-sm text-ink-subtle">{t("garage.empty")}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {vehicles.map((vehicle) => (
+          {vehicles.map((vehicle, index) => (
             <li key={vehicle.id} className="overflow-hidden rounded-xl border border-line bg-raised shadow-sm">
               {vehicle.photo_url && <img src={vehicle.photo_url} alt="" className="h-36 w-full object-cover" />}
               <div className="p-4">
@@ -67,6 +86,28 @@ export function Garage() {
               <p className="text-sm text-ink-subtle">
                 {[vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(" · ") || "—"}
               </p>
+              {canReorder && vehicles.length > 1 && (
+                <div className="mt-2 flex gap-1">
+                  <button
+                    type="button"
+                    aria-label={`${t("vehicle.moveUp")}: ${vehicle.name}`}
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                    className="rounded border border-line px-2 py-0.5 text-xs text-ink-muted disabled:opacity-30"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`${t("vehicle.moveDown")}: ${vehicle.name}`}
+                    disabled={index === vehicles.length - 1}
+                    onClick={() => move(index, 1)}
+                    className="rounded border border-line px-2 py-0.5 text-xs text-ink-muted disabled:opacity-30"
+                  >
+                    ↓
+                  </button>
+                </div>
+              )}
               </div>
             </li>
           ))}

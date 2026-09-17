@@ -155,7 +155,30 @@
       "parked": "Estacionado",
       "sold": "Vendido",
       "archived": "Arquivado"
-    }
+    },
+    "energyType": "Energia",
+    "energyTypes": {
+      "petrol": "Gasolina",
+      "diesel": "Gasóleo",
+      "electric": "Elétrico",
+      "hybrid": "Híbrido",
+      "plugin_hybrid": "Híbrido plug-in",
+      "lpg": "GPL",
+      "other": "Outro"
+    },
+    "initialOdometer": "Leitura inicial",
+    "odometerCorrection": "Correção do odómetro",
+    "odometerCorrectionHint": "Para um odómetro substituído ou mal calibrado: a diferença soma-se à leitura, o multiplicador ajusta a escala.",
+    "odometerOffset": "Diferença",
+    "odometerMultiplier": "Multiplicador",
+    "ownership": "Propriedade",
+    "purchaseDate": "Data de compra",
+    "purchasePrice": "Preço de compra",
+    "purchaseOdometer": "Odómetro na compra",
+    "saleDate": "Data de venda",
+    "salePrice": "Preço de venda",
+    "moveUp": "Subir",
+    "moveDown": "Descer"
   },
   "odometer": {
     "title": "Quilometragem",
@@ -188,7 +211,18 @@
     "repair": "Reparação",
     "modification": "Modificação",
     "placeholder": "Descrição da intervenção",
-    "cost": "Custo (€)"
+    "cost": "Custo (€)",
+    "breakdown": "Decomposição do custo",
+    "breakdownHint": "Opcional. Se preencher, a soma tem de bater certo com o total.",
+    "labour": "Mão de obra",
+    "parts": "Peças",
+    "tax": "Impostos",
+    "discount": "Desconto",
+    "items": "Itens",
+    "addItem": "+ Item",
+    "itemDescription": "Descrição",
+    "itemQuantity": "Quantidade",
+    "itemUnitCost": "Preço unitário"
   },
   "expenses": {
     "title": "Despesas e obrigações",
@@ -205,7 +239,23 @@
     "paid": "Paga",
     "pending": "Pendente",
     "planned": "Planeada",
-    "cancelled": "Cancelada"
+    "cancelled": "Cancelada",
+    "dueOn": "Vencimento",
+    "paidOn": "Pago em",
+    "reference": "Referência",
+    "notes": "Notas",
+    "recurrence": "Recorrência",
+    "recurrenceUnit": "Repete",
+    "recurrenceNone": "Não repete",
+    "recurrenceInterval": "A cada",
+    "recurrenceVaries": "Valor varia",
+    "recurrenceUnits": {
+      "day": "Dias",
+      "month": "Meses",
+      "year": "Anos"
+    },
+    "nextOccurrence": "Gerar seguinte",
+    "overdue": "Vencida"
   },
   "settings": {
     "title": "Definições",

@@ -112,6 +112,9 @@ export const vehicles = {
   remove: (id: string) => request<void>(`/api/vehicles/${id}`, { method: "DELETE" }),
   uploadPhoto: (id: string, body: { content_base64: string; content_type: string }) =>
     request<Vehicle>(`/api/vehicles/${id}/photo`, { method: "POST", body }),
+  /** Positions come from the list order, so two vehicles cannot claim one slot. */
+  reorder: (vehicleIds: string[]) =>
+    request<void>("/api/vehicles/order", { method: "PUT", body: { vehicle_ids: vehicleIds } }),
 };
 
 export const odometer = {
@@ -150,6 +153,10 @@ export const expenses = {
     request<ExpenseRecord>(`/api/vehicles/${vehicleId}/expenses/${id}`, { method: "PATCH", body }),
   remove: (vehicleId: string, id: string) =>
     request<void>(`/api/vehicles/${vehicleId}/expenses/${id}`, { method: "DELETE" }),
+  nextOccurrence: (vehicleId: string, id: string) =>
+    request<ExpenseRecord>(`/api/vehicles/${vehicleId}/expenses/${id}/next-occurrence`, {
+      method: "POST",
+    }),
 };
 
 export const reminders = {

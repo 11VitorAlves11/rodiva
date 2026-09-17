@@ -56,9 +56,29 @@ export type Vehicle = {
   photo_url: string | null;
   distance_unit: "km" | "mi";
   status: VehicleStatus;
+  energy_type: EnergyType;
+  initial_odometer: number | null;
+  odometer_offset: number;
+  odometer_multiplier: string;
+  sort_order: number;
+  purchase_date: string | null;
+  purchase_price: string | null;
+  purchase_odometer: number | null;
+  sale_date: string | null;
+  sale_price: string | null;
   created_at: string;
   updated_at: string;
 };
+
+/** What the vehicle runs on (RF-VEI-005); "other" covers bikes and trailers. */
+export type EnergyType =
+  | "petrol"
+  | "diesel"
+  | "electric"
+  | "hybrid"
+  | "plugin_hybrid"
+  | "lpg"
+  | "other";
 
 export type VehicleInput = {
   name: string;
@@ -69,6 +89,15 @@ export type VehicleInput = {
   license_plate?: string | null;
   vin?: string | null;
   distance_unit?: "km" | "mi";
+  energy_type?: EnergyType;
+  initial_odometer?: number | null;
+  odometer_offset?: number;
+  odometer_multiplier?: string;
+  purchase_date?: string | null;
+  purchase_price?: string | null;
+  purchase_odometer?: number | null;
+  sale_date?: string | null;
+  sale_price?: string | null;
 };
 
 export type OdometerReading = {
@@ -133,10 +162,29 @@ export type WorkRecord = {
   description: string;
   odometer_reading: number | null;
   total_cost: string | null;
+  labour_cost: string | null;
+  parts_cost: string | null;
+  tax_cost: string | null;
+  discount: string | null;
   supplier: string | null;
   notes: string | null;
+  items: WorkRecordItem[];
   created_at: string;
   updated_at: string;
+};
+
+export type WorkRecordItem = {
+  id: string;
+  description: string;
+  quantity: string;
+  unit_cost: string | null;
+  position: number;
+};
+
+export type WorkRecordItemInput = {
+  description: string;
+  quantity: string;
+  unit_cost?: string;
 };
 
 export type WorkRecordInput = {
@@ -145,11 +193,19 @@ export type WorkRecordInput = {
   description: string;
   odometer_reading?: number;
   total_cost?: string;
+  labour_cost?: string;
+  parts_cost?: string;
+  tax_cost?: string;
+  discount?: string;
   supplier?: string;
   notes?: string;
+  items?: WorkRecordItemInput[];
 };
 
 export type ExpenseStatus = "planned" | "pending" | "paid" | "cancelled";
+/** "overdue" only ever arrives from the server; it is derived, never submitted. */
+export type ExpenseStatusOut = ExpenseStatus | "overdue";
+export type RecurrenceUnit = "day" | "month" | "year";
 
 export type ExpenseRecord = {
   id: string;
@@ -158,7 +214,15 @@ export type ExpenseRecord = {
   category: string;
   amount: string;
   supplier: string | null;
-  status: ExpenseStatus;
+  status: ExpenseStatusOut;
+  due_on: string | null;
+  paid_on: string | null;
+  reference: string | null;
+  notes: string | null;
+  recurrence_interval: number | null;
+  recurrence_unit: RecurrenceUnit | null;
+  recurrence_amount_varies: boolean;
+  recurrence_parent_id: string | null;
   created_at: string;
 };
 
@@ -168,6 +232,13 @@ export type ExpenseRecordInput = {
   amount: string;
   supplier?: string;
   status: ExpenseStatus;
+  due_on?: string | null;
+  paid_on?: string | null;
+  reference?: string;
+  notes?: string;
+  recurrence_interval?: number | null;
+  recurrence_unit?: RecurrenceUnit | null;
+  recurrence_amount_varies?: boolean;
 };
 
 export type ReminderUrgency = "future" | "upcoming" | "urgent" | "very_urgent" | "overdue" | "completed";
