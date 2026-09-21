@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 import { ErrorState } from "../components/ui/ErrorState";
 import { Skeleton } from "../components/ui/Skeleton";
@@ -12,6 +13,20 @@ function currency(value: string | number, locale: string, code = "EUR") {
     style: "currency",
     currency: code,
   }).format(Number(value));
+}
+
+/** Name a report bucket. The API sends keys — "fuel", "work:<kind>", "expense:<category>" —
+ * and an expense category is whatever the household typed, so it falls back to itself. */
+function categoryLabel(category: string, t: TFunction) {
+  const [prefix, rest] = category.split(/:(.*)/s);
+  if (prefix === "work") return t(`work.${rest}`, { defaultValue: rest });
+  if (prefix === "expense") return t(`expenses.${rest}`, { defaultValue: rest });
+  if (prefix === "charging") return t("charging.title");
+  return t(`reports.${prefix}`, { defaultValue: prefix });
+}
+
+function consumption(value: string | number, locale: string) {
+  return `${Number(value).toLocaleString(locale, { maximumFractionDigits: 1 })} L/100 km`;
 }
 
 function buildQuery(
@@ -161,6 +176,8 @@ export function Reports() {
 
 function ReportContent({ report }: { report: ReportSummary }) {
   const { t, i18n } = useTranslation();
+  // The household total only carries a unit when every vehicle measures in the same one.
+  const units = new Set(report.vehicles.map((vehicle) => vehicle.distance_unit));
   const metrics = [
     [
       t("reports.totalCost"),
@@ -168,7 +185,7 @@ function ReportContent({ report }: { report: ReportSummary }) {
     ],
     [
       t("reports.totalDistance"),
-      report.total_distance.toLocaleString(i18n.language),
+      `${report.total_distance.toLocaleString(i18n.language)} ${units.size === 1 ? [...units][0] : ""}`.trim(),
     ],
     [
       t("reports.inventoryValue"),
@@ -248,17 +265,25 @@ function VehicleReportBlock({
           label={t("reports.averageConsumption")}
           value={
             vehicle.consumption_average
-              ? `${vehicle.consumption_average} ${t("reports.consumptionUnit")}`
+              ? consumption(vehicle.consumption_average, i18n.language)
               : "—"
           }
         />
         <Metric
           label={t("reports.minimum")}
-          value={vehicle.consumption_minimum ?? "—"}
+          value={
+            vehicle.consumption_minimum
+              ? consumption(vehicle.consumption_minimum, i18n.language)
+              : "—"
+          }
         />
         <Metric
           label={t("reports.maximum")}
-          value={vehicle.consumption_maximum ?? "—"}
+          value={
+            vehicle.consumption_maximum
+              ? consumption(vehicle.consumption_maximum, i18n.language)
+              : "—"
+          }
         />
       </div>
       <div>
@@ -273,7 +298,7 @@ function VehicleReportBlock({
                 className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"
               >
                 <div className="min-w-0">
-                  <div className="mb-1 truncate text-xs">{item.category}</div>
+                  <div className="mb-1 truncate text-xs">{categoryLabel(item.category, t)}</div>
                   <div className="h-2 overflow-hidden rounded-full bg-graphite/10 dark:bg-white/10">
                     <div
                       className="h-full rounded-full bg-copper"

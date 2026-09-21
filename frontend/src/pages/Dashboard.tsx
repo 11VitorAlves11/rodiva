@@ -163,6 +163,7 @@ export function Dashboard() {
   const compactCurrency = (value: number) => value.toLocaleString(i18n.language, { maximumFractionDigits: 0 }) + " €";
   const yearOptions = [year, year - 1, year - 2];
   const monthLabels = new Intl.DateTimeFormat(i18n.language, { month: "short" });
+  const dates = new Intl.DateTimeFormat(i18n.language);
 
   // A month is read against what this household usually spends, not against a
   // fixed amount: the median of the months that had any spending. The median
@@ -394,7 +395,7 @@ export function Dashboard() {
                     <li key={item.id} className="flex items-center justify-between gap-3 py-3">
                       <span className="text-sm font-medium text-ink">{item.title}</span>
                       <span className="text-sm text-ink-subtle">
-                        {[item.due_date, item.due_odometer ? `${item.due_odometer.toLocaleString(i18n.language)} km` : null].filter(Boolean).join(" · ")}
+                        {[item.due_date ? dates.format(new Date(`${item.due_date}T12:00:00`)) : null, item.due_odometer ? `${item.due_odometer.toLocaleString(i18n.language)} km` : null].filter(Boolean).join(" · ")}
                       </span>
                     </li>
                   ))}
