@@ -52,7 +52,7 @@ class MeOut(BaseModel):
 
 class ProfileIn(BaseModel):
     name: str | None = Field(default=None, max_length=200)
-    locale: Literal["pt-PT", "en"] = "pt-PT"
+    locale: Literal["pt-PT", "en", "fr", "es"] = "pt-PT"
     timezone: str = Field(default="Europe/Lisbon", max_length=50)
 
     @field_validator("timezone")

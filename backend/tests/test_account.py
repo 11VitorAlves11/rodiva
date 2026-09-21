@@ -1,5 +1,6 @@
 import uuid
 
+import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.core.config import get_settings
@@ -67,22 +68,25 @@ async def test_password_change_ends_other_sessions(register: RegisterFn) -> None
         ).status_code == 200
 
 
-async def test_profile_is_persistent_and_validated(user_client: AsyncClient) -> None:
+@pytest.mark.parametrize("locale", ["pt-PT", "en", "fr", "es"])
+async def test_profile_is_persistent_and_validated(user_client: AsyncClient, locale: str) -> None:
     response = await user_client.patch(
-        "/auth/profile", json={"name": "Maria", "locale": "en", "timezone": "Atlantic/Azores"}
+        "/auth/profile", json={"name": "Maria", "locale": locale, "timezone": "Atlantic/Azores"}
     )
     assert response.status_code == 200
     profile = (await user_client.get("/auth/me")).json()["user"]
     assert (profile["name"], profile["locale"], profile["timezone"]) == (
         "Maria",
-        "en",
+        locale,
         "Atlantic/Azores",
     )
     assert (
         await user_client.patch("/auth/profile", json={"timezone": "Invalid/Zone"})
     ).status_code == 422
     assert (await user_client.patch("/auth/profile", json={"locale": "unknown"})).status_code == 422
-    assert (await user_client.patch("/auth/profile", json={"name": "Ana"})).json()["locale"] == "en"
+    assert (await user_client.patch("/auth/profile", json={"name": "Ana"})).json()[
+        "locale"
+    ] == locale
 
 
 async def test_household_switch_changes_access(register: RegisterFn) -> None:

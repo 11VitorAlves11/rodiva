@@ -149,7 +149,7 @@
     "sections": "Vehicle sections",
     "addPhoto": "Add photo",
     "changePhoto": "Change photo",
-    "licensePlate": "License plate",
+    "licensePlate": "Licence plate",
     "distanceUnit": "Distance unit",
     "status": "Status",
     "delete": "Delete vehicle",
@@ -295,8 +295,8 @@
     "confirm": "Confirm"
   },
   "equipment": {
-    "title": "Equipment and tires",
-    "description": "Track mounting, rotations and distance for tires and accessories.",
+    "title": "Equipment and tyres",
+    "description": "Track mounting, rotations and distance for tyres and accessories.",
     "add": "Add equipment",
     "empty": "There is no equipment yet.",
     "name": "Name",
@@ -307,9 +307,9 @@
     "distance": "Accumulated distance",
     "mount": "Mount",
     "unmount": "Unmount",
-    "rotate": "Rotate tires",
+    "rotate": "Rotate tyres",
     "kinds": {
-      "tires": "Tires",
+      "tires": "Tyres",
       "trailer": "Trailer",
       "roof_rack": "Roof rack",
       "accessory": "Accessory",

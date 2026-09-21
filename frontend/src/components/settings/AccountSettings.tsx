@@ -50,6 +50,7 @@ export function AccountSettings() {
     void run(async () => {
       const user = await auth.profile({ name: name.trim() || null, locale, timezone });
       if (me) setMe({ ...me, user });
+      await i18n.changeLanguage(user.locale);
       setSuccess(t("account.saved"));
     });
   }
@@ -82,7 +83,7 @@ export function AccountSettings() {
         <h2 className="font-semibold">{t("settings.preferences")}</h2>
         <label className="block text-sm">{t("appearance.theme")}<select className={input} value={theme} onChange={(event) => setTheme(event.target.value as Theme)}>{(["system", "light", "dark"] as const).map((value) => <option key={value} value={value}>{t(`appearance.${value}`)}</option>)}</select></label>
         <label className="block text-sm">{t("account.name")}<input maxLength={200} className={input} value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" /></label>
-        <label className="block text-sm">{t("settings.language")}<select className={input} value={locale} onChange={(event) => setLocale(event.target.value)}><option value="pt-PT">Português</option><option value="en">English</option></select></label>
+        <label className="block text-sm">{t("settings.language")}<select className={input} value={locale} onChange={(event) => setLocale(event.target.value)}><option value="pt-PT">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select></label>
         <label className="block text-sm">{t("account.timezone")}<input required maxLength={50} className={input} value={timezone} onChange={(event) => setTimezone(event.target.value)} list="timezones" /><datalist id="timezones">{["Europe/Lisbon", "Atlantic/Azores", "Europe/London", "Europe/Paris", "America/New_York", "UTC"].map((zone) => <option key={zone} value={zone} />)}</datalist></label>
         <button disabled={busy} className={button}>{t("garage.save")}</button>
       </form>
