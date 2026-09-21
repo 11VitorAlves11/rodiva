@@ -3,7 +3,7 @@
 Covers RF-VEI-005/006/007/008/012, RF-INT-002/003/009 and RF-DES-002/004/005/007.
 """
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 from httpx import AsyncClient
@@ -268,7 +268,9 @@ async def test_a_pending_expense_past_its_due_date_reads_as_overdue(
     user_client: AsyncClient,
 ) -> None:
     vehicle_id = await _vehicle(user_client)
-    yesterday = (date.today() - timedelta(days=1)).isoformat()
+    # The API judges "overdue" against the UTC date, so naming yesterday by the
+    # machine's local one fails for the hour the two disagree.
+    yesterday = (datetime.now(UTC).date() - timedelta(days=1)).isoformat()
 
     created = await user_client.post(
         f"/api/vehicles/{vehicle_id}/expenses",
@@ -287,7 +289,7 @@ async def test_a_pending_expense_past_its_due_date_reads_as_overdue(
 async def test_overdue_is_never_written_to_the_row(user_client: AsyncClient) -> None:
     """It is worked out on read; storing it would leave it stale by morning."""
     vehicle_id = await _vehicle(user_client)
-    yesterday = (date.today() - timedelta(days=1)).isoformat()
+    yesterday = (datetime.now(UTC).date() - timedelta(days=1)).isoformat()
     created = await user_client.post(
         f"/api/vehicles/{vehicle_id}/expenses",
         json={
