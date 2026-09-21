@@ -159,7 +159,7 @@ function FuelForm({
   return (
     <form
       onSubmit={submit}
-      className="grid gap-3 rounded-lg bg-sunken p-4 sm:grid-cols-2"
+      className="grid grid-cols-1 gap-3 rounded-lg bg-sunken p-4 sm:grid-cols-2"
     >
       <label className="text-sm">
         <span className="mb-1 block font-medium text-ink-muted">

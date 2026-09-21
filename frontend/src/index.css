@@ -140,7 +140,10 @@ textarea {
 }
 
 @media (max-width: 639px) {
-  input:not([type="checkbox"]):not([type="radio"]),
+  /* Unlayered, so this beats every Tailwind utility — including .sr-only, whose 1px
+     would otherwise lose and stretch a hidden file input across the viewport, widening
+     the document and pushing the fixed bottom navigation off screen. */
+  input:not([type="checkbox"]):not([type="radio"]):not(.sr-only),
   select,
   textarea {
     width: 100%;

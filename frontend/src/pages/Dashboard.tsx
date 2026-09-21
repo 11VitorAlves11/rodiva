@@ -264,7 +264,7 @@ export function Dashboard() {
             </div>
           </section>
 
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold text-ink">{t("dashboard.recentHistory")}</h2>
@@ -318,7 +318,7 @@ export function Dashboard() {
                     <span key={step}>{compactCurrency(step)}</span>
                   ))}
                 </div>
-                <div className="relative flex-1">
+                <div className="relative min-w-0 flex-1">
                   <div className="pointer-events-none absolute inset-0 flex h-36 flex-col justify-between">
                     {axisSteps.map((step) => (
                       <div key={step} className="border-t border-line" />
@@ -352,9 +352,9 @@ export function Dashboard() {
                       );
                     })}
                   </div>
-                  <div className="mt-1 flex gap-1.5">
+                  <div className="mt-1 grid grid-cols-12 gap-1.5">
                     {months.map((month) => (
-                      <span key={month} className="flex-1 text-center text-[10px] uppercase text-ink-subtle">
+                      <span key={month} className="min-w-0 text-center text-[8px] uppercase text-ink-subtle sm:text-[10px]">
                         {monthLabels.format(new Date(year, month, 1))}
                       </span>
                     ))}
@@ -378,7 +378,7 @@ export function Dashboard() {
             </section>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             <section className="rounded-xl border border-line bg-raised p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold text-ink">{t("dashboard.upcomingMaintenance")}</h2>
