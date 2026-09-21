@@ -263,8 +263,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </NavLink>
         ))}
         <Link
-          to="/garage?new=1"
-          aria-label={t("nav.quickAdd")}
+          to={vehicleId ? `/vehicles/${vehicleId}?section=fuel&new=1` : "/garage?action=fuel"}
+          aria-label={t("fuel.add")}
           className="-mt-6 grid h-14 w-14 place-items-center justify-self-center rounded-full bg-copper text-white shadow-lg shadow-copper/40 ring-4 ring-cream dark:ring-surface-dark"
         >
           <Icon name="plus" className="h-6 w-6" />

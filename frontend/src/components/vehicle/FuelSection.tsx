@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
@@ -20,7 +21,17 @@ export function FuelSection({
 }) {
   const { t, i18n } = useTranslation();
   const confirm = useConfirm();
-  const [showForm, setShowForm] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [formOpen, setFormOpen] = useState(false);
+  const showForm = formOpen || searchParams.get("new") === "1";
+  const setShowForm = (open: boolean) => {
+    setFormOpen(open);
+    if (searchParams.has("new")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("new");
+      setSearchParams(next, { replace: true });
+    }
+  };
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat(i18n.language).format(
       new Date(`${value}T12:00:00`),
@@ -36,7 +47,7 @@ export function FuelSection({
           <p className="text-sm text-ink-subtle">{t("fuel.description")}</p>
         </div>
         <button
-          onClick={() => setShowForm((value) => !value)}
+          onClick={() => setShowForm(!showForm)}
           className="self-start rounded-md bg-copper px-3 py-2 text-sm font-medium text-white hover:bg-copper-dark"
         >
           {t("fuel.add")}

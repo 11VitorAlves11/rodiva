@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 
 import { vehicles as vehiclesApi } from "../lib/api";
 import { ApiError } from "../lib/api/client";
@@ -18,6 +18,7 @@ export function Garage() {
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const addingFuel = searchParams.get("action") === "fuel";
   const [showForm, setShowForm] = useState(searchParams.get("new") === "1");
 
   const load = () => {
@@ -48,11 +49,15 @@ export function Garage() {
   if (error) return <ErrorState onRetry={load} />;
   if (vehicles === null) return <Skeleton lines={4} />;
 
+  if (addingFuel && vehicles.length === 1) {
+    return <Navigate to={`/vehicles/${vehicles[0].id}?section=fuel&new=1`} replace />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold text-ink">{t("garage.title")}</h1>
-        {canManage && <button
+        <h1 className="text-xl font-semibold text-ink">{t(addingFuel ? "fuel.add" : "garage.title")}</h1>
+        {canManage && !addingFuel && <button
           onClick={() => {
             setShowForm((value) => !value);
             setSearchParams({}, { replace: true });
@@ -63,13 +68,17 @@ export function Garage() {
         </button>}
       </div>
 
-      {showForm && (
+      {showForm && !addingFuel && (
         <VehicleForm
           onCreated={(vehicle) => {
             setVehicles((current) => [...(current ?? []), vehicle]);
             setShowForm(false);
           }}
         />
+      )}
+
+      {addingFuel && vehicles.length > 1 && (
+        <p className="text-sm text-ink-subtle">{t("import.chooseVehicle")}</p>
       )}
 
       {vehicles.length === 0 ? (
@@ -80,13 +89,13 @@ export function Garage() {
             <li key={vehicle.id} className="overflow-hidden rounded-xl border border-line bg-raised shadow-sm">
               {vehicle.photo_url && <img src={vehicle.photo_url} alt="" className="h-36 w-full object-cover" />}
               <div className="p-4">
-              <Link to={`/vehicles/${vehicle.id}`} className="font-medium text-ink hover:text-copper">
+              <Link to={`/vehicles/${vehicle.id}${addingFuel ? "?section=fuel&new=1" : ""}`} className="font-medium text-ink hover:text-copper">
                 {vehicle.name}
               </Link>
               <p className="text-sm text-ink-subtle">
                 {[vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(" · ") || "—"}
               </p>
-              {canReorder && vehicles.length > 1 && (
+              {canReorder && !addingFuel && vehicles.length > 1 && (
                 <div className="mt-2 flex gap-1">
                   <button
                     type="button"
