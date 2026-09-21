@@ -66,7 +66,7 @@ async def instance_status(
 
     return InstanceStatus(
         app_name=settings.app_name,
-        version="0.1.0",
+        version="0.2.0",
         environment=settings.environment,
         auth_mode=settings.auth_mode,
         public_registration=settings.allow_public_registration,

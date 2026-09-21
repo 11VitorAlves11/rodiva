@@ -12,4 +12,4 @@ async def test_root_reports_name_and_version(client: AsyncClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["name"] == "Rodiva"
-    assert body["version"] == "0.1.0"
+    assert body["version"] == "0.2.0"

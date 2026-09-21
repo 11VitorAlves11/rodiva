@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await dispose_engine()
 
 
-app = FastAPI(title=f"{settings.app_name} API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title=f"{settings.app_name} API", version="0.2.0", lifespan=lifespan)
 install_error_handlers(app)
 install_security_headers(app, hsts=settings.hsts_enabled)
 
@@ -107,4 +107,4 @@ app.include_router(storage.router)
 
 @app.get("/api")
 async def root() -> dict[str, str]:
-    return {"name": settings.app_name, "version": "0.1.0"}
+    return {"name": settings.app_name, "version": "0.2.0"}
