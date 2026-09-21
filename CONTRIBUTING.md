@@ -10,7 +10,7 @@ cp .env.example .env
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-Sem Docker, ver a secção "Sem Docker" do `README.md`.
+Sem Docker, ver "Running without Docker" no [`README.md`](README.md).
 
 ## Convenções
 
