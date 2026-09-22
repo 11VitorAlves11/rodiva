@@ -45,9 +45,9 @@ and the documents stay on whatever infrastructure you install it on.
 ## The interface
 
 Get to know the application without installing anything. The images below are **real
-screenshots of the interface with fictional demonstration data**, in European Portuguese —
-the default language, alongside English, French and Spanish. Click an image to open it full
-size.
+screenshots of the interface with fictional demonstration data**, in English. The
+application also ships European Portuguese — its default — plus French and Spanish. Click an
+image to open it full size.
 
 ### On a phone
 

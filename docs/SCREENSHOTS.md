@@ -6,6 +6,15 @@ The images in `docs/images/` are captures of the running application, with ficti
 created through the API. The logo is the same SVG the interface uses, from
 `frontend/public/icons/`. They are neither mockups nor photographs of a physical iPhone.
 
+The gallery runs the interface in English: the script sets the demonstration account's
+language to `en` after registering it.
+
+`frontend/scripts/demo-vehicle.jpg` is the vehicle photograph the script uploads. It comes
+from [Volvo V60 (48566713551).jpg](https://commons.wikimedia.org/wiki/File:Volvo_V60_(48566713551).jpg)
+on Wikimedia Commons, released under **CC0** — no attribution is required, and the credit
+here is courtesy. It was cropped to the car and its number plate was pixelated, since the
+interface shows a fictional plate and the original belongs to someone.
+
 ## Recreating the gallery
 
 Use a local, disposable database. The script creates a fresh account and household on every
@@ -54,9 +63,9 @@ node scripts/readme-screenshots.mjs
 `SCREENSHOT_BASE_URL` picks another local address. The script refuses remote hosts. It needs
 access to Google Fonts to use the typography the application loads.
 
-It launches the browser with `LANG=pt_PT.UTF-8`, because Chromium renders
+It launches the browser with `LANG=en_GB.UTF-8`, because Chromium renders
 `<input type="date">` in its own UI language rather than the page's: without it every form
-in the gallery would read `mm/dd/yyyy`.
+in the gallery would read `mm/dd/yyyy` instead of `dd/mm/yyyy`.
 
 ## The images produced
 
