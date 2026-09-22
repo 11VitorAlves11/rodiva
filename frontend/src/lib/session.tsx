@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 
 import { auth } from "./api";
-import i18n from "./i18n";
+import { applyLocale } from "./i18n";
 import { ApiError } from "./api/client";
 import type { Me } from "./api/types";
 
@@ -50,7 +50,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   useEffect(() => {
-    if (me?.user.locale) void i18n.changeLanguage(me.user.locale);
+    if (me?.user.locale) void applyLocale(me.user.locale);
   }, [me?.user.locale]);
 
   const signOut = useCallback(async () => {

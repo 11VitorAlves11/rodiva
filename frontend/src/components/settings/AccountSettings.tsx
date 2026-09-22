@@ -6,6 +6,7 @@ import type { AuthSession, Membership } from "../../lib/api/types";
 import { useTheme } from "../../lib/theme";
 import type { Theme } from "../../lib/theme";
 import { useSession } from "../../lib/session";
+import { applyLocale } from "../../lib/i18n";
 import { useConfirm } from "../../components/ui/confirm-context";
 
 const panel = "space-y-4 rounded-xl border border-line bg-raised p-5 shadow-sm";
@@ -50,7 +51,7 @@ export function AccountSettings() {
     void run(async () => {
       const user = await auth.profile({ name: name.trim() || null, locale, timezone });
       if (me) setMe({ ...me, user });
-      await i18n.changeLanguage(user.locale);
+      await applyLocale(user.locale);
       setSuccess(t("account.saved"));
     });
   }

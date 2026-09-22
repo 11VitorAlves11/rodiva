@@ -15,11 +15,13 @@ const profile = {
 
 afterEach(async () => { cleanup(); await i18n.changeLanguage("pt-PT"); });
 
+// The account stores "en"; the interface runs it as "en-GB" so dates and numbers are
+// British alongside the British catalogue.
 it.each([
-  ["en", "Preferences", "Preferences saved."],
-  ["fr", "Préférences", "Préférences enregistrées."],
-  ["es", "Preferencias", "Preferencias guardadas."],
-])("saves %s from the language selector and restores it on a new session", async (locale, heading, saved) => {
+  ["en", "en-GB", "Preferences", "Preferences saved."],
+  ["fr", "fr", "Préférences", "Préférences enregistrées."],
+  ["es", "es", "Preferencias", "Preferencias guardadas."],
+])("saves %s from the language selector and restores it on a new session", async (locale, tag, heading, saved) => {
   vi.spyOn(auth, "me").mockResolvedValue(profile);
   vi.spyOn(auth, "sessions").mockResolvedValue([]);
   vi.spyOn(auth, "households").mockResolvedValue([]);
@@ -44,5 +46,5 @@ it.each([
   vi.mocked(auth.me).mockResolvedValue({ ...profile, user: { ...profile.user, locale } });
   render(<Settings />);
   expect(await screen.findByRole("heading", { name: heading })).toBeInTheDocument();
-  expect(document.documentElement.lang).toBe(locale);
+  expect(document.documentElement.lang).toBe(tag);
 });

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import i18n from "./index";
+import i18n, { applyLocale } from "./index";
 import pt from "../../locales/pt-PT/common.json";
 import en from "../../locales/en/common.json";
 import fr from "../../locales/fr/common.json";
@@ -20,7 +20,7 @@ const placeholders = (value: string) => value.match(/{{.*?}}/g)?.sort() ?? [];
 
 afterEach(async () => { await i18n.changeLanguage("pt-PT"); });
 
-describe.each(Object.entries({ en, fr, es }))("%s catalog", (locale, catalog) => {
+describe.each(Object.entries({ "en-GB": en, fr, es }))("%s catalog", (locale, catalog) => {
   it("covers every Portuguese key and preserves interpolation variables", () => {
     const translated = flatten(catalog);
     for (const [key, value] of Object.entries(reference)) {
@@ -45,8 +45,16 @@ describe.each(Object.entries({ en, fr, es }))("%s catalog", (locale, catalog) =>
   });
 });
 
+it("runs the account's English as en-GB, so a date reads 18/09/2026 and not 9/18/2026", async () => {
+  await applyLocale("en");
+
+  expect(i18n.language).toBe("en-GB");
+  expect(new Intl.DateTimeFormat(i18n.language).format(new Date("2026-09-18T12:00:00"))).toBe("18/09/2026");
+  expect(i18n.t("nav.garage")).toBe("Garage");
+});
+
 it.each([
-  ["en", "Garage", "Have a good trip, Ana"],
+  ["en-GB", "Garage", "Have a good trip, Ana"],
   ["fr", "Garage", "Bonne route, Ana"],
   ["es", "Garaje", "Buen viaje, Ana"],
 ])("switches to %s and updates the document language", async (locale, garage, greeting) => {
