@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import ScalarResult, select
 
 from app.api.deps import AppSettings, CurrentMembership, CurrentUser, DbSession
 from app.db.filters import mark_restored
@@ -124,7 +124,7 @@ async def list_trash(
             if model is Vehicle
             else model.vehicle_id.in_(household_vehicles)
         )
-        rows = await db.scalars(
+        rows: ScalarResult[Any] = await db.scalars(
             select(model)
             .where(model.deleted_at.is_not(None), scope)
             .order_by(model.deleted_at.desc())
