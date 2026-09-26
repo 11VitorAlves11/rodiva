@@ -39,6 +39,7 @@ import type {
 } from "../lib/api/types";
 import { useSession } from "../lib/session";
 import { useConfirm } from "../components/ui/confirm-context";
+import { ApiError } from "../lib/api/client";
 
 export function Vehicle() {
   const { vehicleId = "" } = useParams();
@@ -59,6 +60,9 @@ export function Vehicle() {
   const [noteRecords, setNoteRecords] = useState<Note[] | null>(null);
   const [documents, setDocuments] = useState<Attachment[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoVersion, setPhotoVersion] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -126,21 +130,28 @@ export function Vehicle() {
     );
 
   async function uploadPhoto(file: File) {
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
-    });
+    setUploadingPhoto(true);
+    setPhotoError(null);
     try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.onabort = () => reject(new Error("Photo read aborted"));
+        reader.readAsDataURL(file);
+      });
       setVehicle(
         await vehicles.uploadPhoto(vehicleId, {
           content_base64: dataUrl.split(",", 2)[1],
           content_type: file.type,
         }),
       );
+      // The API overwrites the same URL when the image format is unchanged.
+      setPhotoVersion((version) => version + 1);
     } catch (cause) {
-      setError(cause instanceof Error ? cause : new Error(t("common.error")));
+      setPhotoError(cause instanceof ApiError ? cause.message : t("common.error"));
+    } finally {
+      setUploadingPhoto(false);
     }
   }
 
@@ -156,7 +167,7 @@ export function Vehicle() {
         <div className="flex min-w-0 items-center gap-4">
           {vehicle.photo_url && (
             <img
-              src={vehicle.photo_url}
+              src={`${vehicle.photo_url}?v=${photoVersion}`}
               alt=""
               className="h-20 w-28 rounded-lg object-cover"
             />
@@ -172,20 +183,28 @@ export function Vehicle() {
             </h1>
             {canManage && (
               <label className="mt-2 inline-block cursor-pointer text-sm font-medium text-copper">
-                {vehicle.photo_url
+                {uploadingPhoto
+                  ? t("documents.uploading")
+                  : vehicle.photo_url
                   ? t("vehicle.changePhoto")
                   : t("vehicle.addPhoto")}
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  capture="environment"
+                  disabled={uploadingPhoto}
                   className="sr-only"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
+                    event.target.value = "";
                     if (file) void uploadPhoto(file);
                   }}
                 />
               </label>
+            )}
+            {photoError && (
+              <p role="alert" className="mt-2 text-sm text-danger">
+                {photoError}
+              </p>
             )}
           </div>
         </div>
