@@ -1,3 +1,5 @@
+import uuid
+
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
@@ -66,3 +68,27 @@ async def test_logout_clears_session(user_client: AsyncClient) -> None:
     assert response.status_code == 204
     response = await user_client.get("/auth/me")
     assert response.status_code == 401
+
+
+async def test_email_is_matched_regardless_of_case(register: RegisterFn) -> None:
+    """A phone capitalising the first letter must not lock the account out or fork it."""
+    email = f"Mixed.{uuid.uuid4().hex}@example.com"
+    await register(email=email)
+    ac = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
+    try:
+        login = await ac.post(
+            "/auth/login", json={"email": email.lower(), "password": TEST_PASSWORD}
+        )
+        assert login.status_code == 200, login.text
+
+        duplicate = await ac.post(
+            "/auth/register",
+            json={
+                "email": email.lower(),
+                "password": TEST_PASSWORD,
+                "household_name": "Another household",
+            },
+        )
+        assert duplicate.status_code == 409
+    finally:
+        await ac.aclose()

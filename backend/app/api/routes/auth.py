@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 
 from app.api.deps import AppSettings, CurrentMembership, CurrentSession, CurrentUser, DbSession
 from app.core.config import Settings
@@ -89,6 +89,12 @@ async def _set_session_cookie(
     )
 
 
+async def _user_by_email(email: str, db: DbSession) -> User | None:
+    """Email addresses are matched without regard to case, as mail servers do."""
+    user: User | None = await db.scalar(select(User).where(func.lower(User.email) == email.lower()))
+    return user
+
+
 def _check_invite_email(invite: Invite, email: str) -> None:
     if invite.email and invite.email.casefold() != email.casefold():
         raise HTTPException(status_code=403, detail="Invite is for a different email address")
@@ -101,7 +107,7 @@ async def register(
     if not settings.allow_public_registration and not payload.invite_token:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Registration is closed")
 
-    existing = await db.scalar(select(User).where(User.email == payload.email))
+    existing = await _user_by_email(str(payload.email), db)
     if existing is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
@@ -159,7 +165,7 @@ async def login(
     await throttle(request, str(payload.email), "login", db)
     invalid = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    user = await db.scalar(select(User).where(User.email == payload.email))
+    user = await _user_by_email(str(payload.email), db)
     if user is None:
         verify_password(payload.password, _DUMMY_HASH)
         raise invalid
@@ -473,7 +479,7 @@ async def oidc_callback(
     if user is None:
         # Fall back to the email so an existing local account is adopted rather
         # than shadowed by a second account for the same person.
-        user = await db.scalar(select(User).where(User.email == identity.email))
+        user = await _user_by_email(identity.email, db)
         if user is not None:
             user.oidc_subject = identity.subject
     if user is None:
@@ -502,7 +508,7 @@ async def forgot_password(
     await throttle(request, str(payload.email), "recovery", db)
     if not settings.smtp_host or not settings.smtp_from:
         raise HTTPException(status_code=503, detail="Password recovery is not configured")
-    user = await db.scalar(select(User).where(User.email == payload.email))
+    user = await _user_by_email(str(payload.email), db)
     if user is not None:
         token = secrets.token_urlsafe(32)
         await db.execute(delete(PasswordReset).where(PasswordReset.expires_at < datetime.now(UTC)))
