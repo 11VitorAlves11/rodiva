@@ -177,6 +177,7 @@ async def create_invite(
         expires_at=datetime.now(UTC) + timedelta(hours=payload.expires_in_hours),
     )
     db.add(invite)
+    await db.flush()
     await audit.record_and_emit(
         db,
         household_id=membership.household_id,

@@ -40,6 +40,16 @@ async def test_api_key_lifecycle_is_recorded(register: RegisterFn) -> None:
     assert events[1]["context"]["scope"] == "read"
     # Summaries carry data only: the wording is the client's, in its own locale.
     assert events[1]["summary"] == "n8n"
+    assert events[1]["entity_id"] == key["id"]
+
+
+async def test_created_invite_is_recorded_against_its_id(register: RegisterFn) -> None:
+    owner, _ = await register()
+    invite = (await owner.post("/api/household/invites", json={"role": "reader"})).json()
+
+    events = (await owner.get("/api/v1/audit")).json()["items"]
+    assert events[0]["action"] == "invite.created"
+    assert events[0]["entity_id"] == invite["id"]
 
 
 async def test_trail_is_scoped_to_the_household(register: RegisterFn) -> None:

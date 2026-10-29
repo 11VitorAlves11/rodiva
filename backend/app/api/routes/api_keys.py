@@ -70,6 +70,7 @@ async def create_key(
         expires_at=datetime.now(UTC) + timedelta(days=payload.expires_in_days),
     )
     db.add(key)
+    await db.flush()
     audit.record(
         db,
         household_id=membership.household_id,
