@@ -79,3 +79,20 @@ async def test_editing_a_reading_recalculates_its_successor(user_client: AsyncCl
     history = await user_client.get(f"/api/vehicles/{vehicle_id}/odometer-readings")
     assert history.status_code == 200
     assert history.json()[0]["distance"] == 400
+
+
+async def test_same_day_readings_keep_the_order_they_were_entered(
+    user_client: AsyncClient,
+) -> None:
+    """Readings sharing a date must not be ordered by their random UUIDs."""
+    vehicle_id = await _vehicle(user_client)
+    for reading in range(10_000, 10_800, 100):
+        response = await user_client.post(
+            f"/api/vehicles/{vehicle_id}/odometer-readings",
+            json={"recorded_on": "2026-01-10", "reading": reading},
+        )
+        assert response.status_code == 201, response.text
+
+    history = await user_client.get(f"/api/vehicles/{vehicle_id}/odometer-readings")
+    assert [item["reading"] for item in history.json()] == list(range(10_700, 9_900, -100))
+    assert [item["distance"] for item in history.json()] == [100] * 7 + [None]

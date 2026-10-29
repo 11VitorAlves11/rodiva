@@ -29,14 +29,14 @@ async def _vehicle_in_household(
 async def _recalculate(vehicle_id: uuid.UUID, db: AsyncSession) -> list[OdometerReading]:
     """Rebuild deltas in date/id order after every write.
 
-    The UUID is generated before insertion and makes readings entered on the same
-    date deterministic too. An adjustment begins a new baseline, so it has no
+    Readings sharing a date keep the order they were entered in; the random UUID
+    only breaks ties within one transaction. An adjustment begins a new baseline, so it has no
     distance itself; later readings use that adjusted value as their baseline.
     """
     result = await db.scalars(
         select(OdometerReading)
         .where(OdometerReading.vehicle_id == vehicle_id, active(OdometerReading))
-        .order_by(OdometerReading.recorded_on, OdometerReading.id)
+        .order_by(OdometerReading.recorded_on, OdometerReading.created_at, OdometerReading.id)
         .with_for_update()
     )
     readings = list(result)
@@ -71,7 +71,11 @@ async def list_readings(
     result = await db.scalars(
         select(OdometerReading)
         .where(OdometerReading.vehicle_id == vehicle_id, active(OdometerReading))
-        .order_by(OdometerReading.recorded_on.desc(), OdometerReading.id.desc())
+        .order_by(
+            OdometerReading.recorded_on.desc(),
+            OdometerReading.created_at.desc(),
+            OdometerReading.id.desc(),
+        )
     )
     return list(result)
 

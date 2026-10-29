@@ -23,7 +23,7 @@ async def _recalculate_consumption(vehicle_id: uuid.UUID, db: AsyncSession) -> l
     result = await db.scalars(
         select(FuelRecord)
         .where(FuelRecord.vehicle_id == vehicle_id, active(FuelRecord))
-        .order_by(FuelRecord.recorded_on, FuelRecord.id)
+        .order_by(FuelRecord.recorded_on, FuelRecord.created_at, FuelRecord.id)
         .with_for_update()
     )
     records = list(result)
@@ -60,7 +60,7 @@ async def list_fuel_records(
     result = await db.scalars(
         select(FuelRecord)
         .where(FuelRecord.vehicle_id == vehicle_id, active(FuelRecord))
-        .order_by(FuelRecord.recorded_on.desc(), FuelRecord.id.desc())
+        .order_by(FuelRecord.recorded_on.desc(), FuelRecord.created_at.desc(), FuelRecord.id.desc())
     )
     return list(result)
 

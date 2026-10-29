@@ -176,3 +176,24 @@ async def test_a_run_of_partial_fills_accumulates(user_client: AsyncClient) -> N
 
     # 45 litres of partials plus 20 at the end, across 1000 km.
     assert (await _consumptions(user_client, vehicle_id))[-1] == "6.500"
+
+
+async def test_same_day_fills_are_measured_in_the_order_they_were_entered(
+    user_client: AsyncClient,
+) -> None:
+    """Fills sharing a date must not be ordered by their random UUIDs."""
+    vehicle_id = await _vehicle(user_client)
+    for step in range(8):
+        await _fill(
+            user_client,
+            vehicle_id,
+            on="2026-01-10",
+            odometer=10_000 + step * 100,
+            litres="6.000",
+        )
+
+    listed = await user_client.get(f"/api/vehicles/{vehicle_id}/fuel-records")
+    rows = listed.json()
+    assert [row["odometer_reading"] for row in rows] == list(range(10_700, 9_900, -100))
+    # 6 litres over every 100 km after the first fill.
+    assert [row["consumption_l_per_100km"] for row in rows] == ["6.000"] * 7 + [None]
