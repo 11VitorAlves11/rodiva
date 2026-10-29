@@ -9,6 +9,7 @@ import { equipment, odometer, vehicles } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type { Equipment as EquipmentType, EquipmentKind, Reminder, Vehicle } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { localIsoDate } from "../lib/dates";
 import { useConfirm } from "../components/ui/confirm-context";
 
 type Item = EquipmentType & { vehicleName: string; unit: string; current: number };
@@ -39,7 +40,7 @@ function EquipmentForm({ vehicles, onSaved }: { vehicles: Vehicle[]; onSaved: ()
 }
 
 function EquipmentAction({ action, onCancel, onSaved }: { action: Action; onCancel: () => void; onSaved: () => void }) {
-  const { t } = useTranslation(); const [on, setOn] = useState(new Date().toISOString().slice(0, 10)); const [odo, setOdo] = useState(action.item.current.toString()); const [positions, setPositions] = useState(["A", "B", "C", "D"]); const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation(); const [on, setOn] = useState(localIsoDate()); const [odo, setOdo] = useState(action.item.current.toString()); const [positions, setPositions] = useState(["A", "B", "C", "D"]); const [error, setError] = useState<string | null>(null);
   async function submit(event: FormEvent) { event.preventDefault(); const body = { on, odometer: Number(odo), positions: action.kind === "unmount" ? undefined : { front_left: positions[0], front_right: positions[1], rear_left: positions[2], rear_right: positions[3] } }; try { await equipment[action.kind](action.item.vehicle_id, action.item.id, body); onSaved(); } catch (cause) { setError(cause instanceof ApiError ? cause.message : t("common.error")); } }
   return <form onSubmit={submit} className="grid gap-3 rounded-xl border border-copper/20 bg-raised p-4 sm:grid-cols-2"><h2 className="font-semibold sm:col-span-2">{t(`equipment.${action.kind}`)} · {action.item.name}</h2><input required type="date" value={on} onChange={(e) => setOn(e.target.value)} className="rounded-lg border px-3 py-2.5 bg-raised" /><input required type="number" inputMode="numeric" value={odo} onChange={(e) => setOdo(e.target.value)} className="rounded-lg border px-3 py-2.5 bg-raised" />{action.kind !== "unmount" && positions.map((value, index) => <input key={index} aria-label={t(`equipment.positions.${index}`)} value={value} onChange={(e) => setPositions((current) => current.map((entry, i) => i === index ? e.target.value : entry))} className="rounded-lg border px-3 py-2.5 bg-raised" />)}{error && <p className="text-sm text-danger sm:col-span-2">{error}</p>}<div className="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end"><button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2.5">{t("common.cancel")}</button><button className="rounded-lg bg-copper px-4 py-2.5 font-semibold text-white">{t("garage.save")}</button></div></form>;
 }

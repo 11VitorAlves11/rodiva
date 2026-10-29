@@ -16,6 +16,7 @@ import type {
   Vehicle,
 } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { localIsoDate } from "../lib/dates";
 
 const fieldTypes: InspectionFieldType[] = [
   "text",
@@ -98,7 +99,7 @@ export function Inspections() {
     try {
       const item = await inspections.create(vehicleId, {
         template_id: template.id,
-        recorded_on: new Date().toISOString().slice(0, 10),
+        recorded_on: localIsoDate(),
       });
       setRunning(item);
       loadRecords();

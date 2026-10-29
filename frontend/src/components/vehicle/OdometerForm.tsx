@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { odometer } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
+import { localIsoDate } from "../../lib/dates";
 import type { OdometerReading } from "../../lib/api/types";
 export function OdometerForm({
   vehicleId,
@@ -16,7 +17,7 @@ export function OdometerForm({
 }) {
   const { t } = useTranslation();
   const [recordedOn, setRecordedOn] = useState(
-    new Date().toISOString().slice(0, 10),
+    localIsoDate(),
   );
   const [reading, setReading] = useState("");
   const [notes, setNotes] = useState("");

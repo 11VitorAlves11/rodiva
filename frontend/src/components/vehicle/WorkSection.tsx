@@ -5,6 +5,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 
 import { workRecords } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
+import { localIsoDate } from "../../lib/dates";
 import type { WorkKind, WorkRecord, WorkRecordItemInput } from "../../lib/api/types";
 import { useConfirm } from "../../components/ui/confirm-context";
 
@@ -44,7 +45,7 @@ export function WorkSection({
     try {
       const decimal = (value: string) => value.replace(",", ".") || undefined;
       await workRecords.create(vehicleId, {
-        recorded_on: new Date().toISOString().slice(0, 10),
+        recorded_on: localIsoDate(),
         kind,
         description,
         total_cost: decimal(cost),

@@ -11,6 +11,7 @@ import { inventory, odometer, plans, vehicles } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type { InventoryItem, Plan, PlanInput, PlanPriority, PlanStage, Vehicle, WorkKind } from "../lib/api/types";
 import { useSession } from "../lib/session";
+import { localIsoDate } from "../lib/dates";
 import { useConfirm } from "../components/ui/confirm-context";
 
 type PlanWithVehicle = Plan & { vehicleName: string; currentOdometer: number; distanceUnit: string };
@@ -276,7 +277,7 @@ function PlanForm({ vehicles, initial, onSaved, onCancel }: { vehicles: Vehicle[
 
 function CompletePlanForm({ plan, inventoryItems, onSaved, onCancel }: { plan: PlanWithVehicle; inventoryItems: InventoryItem[]; onSaved: () => void; onCancel: () => void }) {
   const { t } = useTranslation();
-  const [recordedOn, setRecordedOn] = useState(new Date().toISOString().slice(0, 10));
+  const [recordedOn, setRecordedOn] = useState(localIsoDate());
   const [odometerReading, setOdometerReading] = useState(plan.currentOdometer ? plan.currentOdometer.toString() : "");
   const [totalCost, setTotalCost] = useState(plan.estimated_cost ?? "");
   const [supplier, setSupplier] = useState("");

@@ -6,6 +6,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 
 import { fuel } from "../../lib/api";
 import { ApiError } from "../../lib/api/client";
+import { localIsoDate } from "../../lib/dates";
 import type { FuelRecord } from "../../lib/api/types";
 import { useConfirm } from "../../components/ui/confirm-context";
 export function FuelSection({
@@ -122,7 +123,7 @@ function FuelForm({
 }) {
   const { t } = useTranslation();
   const [recordedOn, setRecordedOn] = useState(
-    new Date().toISOString().slice(0, 10),
+    localIsoDate(),
   );
   const [odometerReading, setOdometerReading] = useState(
     currentReading?.toString() ?? "",

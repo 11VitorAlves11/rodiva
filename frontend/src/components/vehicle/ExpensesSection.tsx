@@ -11,21 +11,15 @@ import type {
   RecurrenceUnit,
 } from "../../lib/api/types";
 import { useSession } from "../../lib/session";
+import { localIsoDate } from "../../lib/dates";
 import { useConfirm } from "../../components/ui/confirm-context";
 
 const PRESET_CATEGORIES = ["insurance", "tax", "inspection", "tolls", "other"];
 const STATUSES: ExpenseStatus[] = ["paid", "pending", "planned", "cancelled"];
 const UNITS: RecurrenceUnit[] = ["day", "month", "year"];
 
-function today(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${now.getFullYear()}-${month}-${day}`;
-}
-
 function blank(): ExpenseRecordInput {
-  return { issued_on: today(), category: "insurance", amount: "", status: "paid", supplier: "" };
+  return { issued_on: localIsoDate(), category: "insurance", amount: "", status: "paid", supplier: "" };
 }
 
 /**

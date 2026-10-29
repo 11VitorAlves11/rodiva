@@ -7,6 +7,7 @@ import { ErrorState } from "../components/ui/ErrorState";
 import { Skeleton } from "../components/ui/Skeleton";
 import { calendarFeed, expenses, plans, reminders, vehicles } from "../lib/api";
 import type { CalendarFeedStatus } from "../lib/api/types";
+import { localIsoDate } from "../lib/dates";
 
 type CalendarEvent = {
   id: string;
@@ -24,13 +25,6 @@ const eventStyles: Record<CalendarEvent["type"], string> = {
   expense: "border-copper/40 bg-copper/10 text-brand",
   plan: "border-warning/40 bg-warning-soft text-warning",
 };
-
-function isoDate(value: Date) {
-  const year = value.getFullYear();
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 export function Calendar() {
   const { t, i18n } = useTranslation();
@@ -122,7 +116,7 @@ export function Calendar() {
   const weekdayLabels = Array.from({ length: 7 }, (_, index) =>
     new Intl.DateTimeFormat(i18n.language, { weekday: "short" }).format(new Date(2024, 0, index + 1)),
   );
-  const today = isoDate(new Date());
+  const today = localIsoDate(new Date());
   const changeMonth = (offset: number) => setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
 
   const createFeed = async () => {
@@ -180,7 +174,7 @@ export function Calendar() {
         </div>
         <div className="grid grid-cols-7">
           {monthData.cells.map((day, index) => {
-            const key = day ? isoDate(day) : `empty-${index}`;
+            const key = day ? localIsoDate(day) : `empty-${index}`;
             const dayEvents = day ? monthData.events.filter((item) => item.date === key) : [];
             return (
               <div key={key} className="min-h-32 min-w-0 border-b border-r border-graphite/5 p-2 dark:border-white/5">

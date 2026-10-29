@@ -4,12 +4,12 @@ import { useTranslation } from "react-i18next";
 import { charging } from "../../lib/api";
 import type { ChargingInput, ChargingRecord } from "../../lib/api/types";
 import { useSession } from "../../lib/session";
+import { localIsoDate } from "../../lib/dates";
 import { useConfirm } from "../../components/ui/confirm-context";
 
 const inputClass = "mt-1 w-full rounded-lg border border-line px-3 py-2 bg-raised";
 function blank(): ChargingInput {
-  const today = new Date();
-  return { recorded_on: `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`, energy_kwh: "", total_cost: "", charger_type: "home" };
+  return { recorded_on: localIsoDate(), energy_kwh: "", total_cost: "", charger_type: "home" };
 }
 
 export function ChargingSection({ vehicleId, unit }: { vehicleId: string; unit: string }) {
