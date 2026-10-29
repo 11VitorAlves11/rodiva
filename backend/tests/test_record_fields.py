@@ -427,6 +427,43 @@ def test_a_month_step_clamps_to_the_end_of_a_shorter_month() -> None:
     assert next_occurrence_date(date(2026, 3, 31), 1, "month") == date(2026, 4, 30)
 
 
+def test_a_clamped_date_returns_to_the_day_the_series_started_on() -> None:
+    """Stepping from a clamped 28 Feb must not leave a bill due on the 31st on the 28th."""
+    assert next_occurrence_date(date(2026, 2, 28), 1, "month", anchor_day=31) == date(2026, 3, 31)
+    assert next_occurrence_date(date(2027, 2, 28), 1, "year", anchor_day=29) == date(2028, 2, 29)
+    # A date moved by hand to mid-month was chosen, not clamped, so it is kept.
+    assert next_occurrence_date(date(2026, 3, 15), 1, "month", anchor_day=31) == date(2026, 4, 15)
+
+
+async def test_a_monthly_series_keeps_its_day_through_a_short_month(
+    user_client: AsyncClient,
+) -> None:
+    vehicle_id = await _vehicle(user_client)
+    created = await user_client.post(
+        f"/api/vehicles/{vehicle_id}/expenses",
+        json={
+            "issued_on": "2026-01-31",
+            "due_on": "2026-01-31",
+            "category": "Seguro",
+            "amount": "40.00",
+            "recurrence_interval": 1,
+            "recurrence_unit": "month",
+        },
+    )
+    record_id = created.json()["id"]
+
+    due_dates = []
+    for _ in range(3):
+        following = await user_client.post(
+            f"/api/vehicles/{vehicle_id}/expenses/{record_id}/next-occurrence"
+        )
+        assert following.status_code == 201, following.text
+        record_id = following.json()["id"]
+        due_dates.append(following.json()["due_on"])
+
+    assert due_dates == ["2026-02-28", "2026-03-31", "2026-04-30"]
+
+
 def test_a_year_step_handles_a_leap_day() -> None:
     assert next_occurrence_date(date(2024, 2, 29), 1, "year") == date(2025, 2, 28)
 

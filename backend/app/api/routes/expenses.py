@@ -3,6 +3,7 @@ from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import aliased
 
 from app.api.deps import CurrentMembership, CurrentUser, DbSession
 from app.api.routes.odometer import _vehicle_in_household
@@ -127,6 +128,28 @@ async def delete_expense(
     await db.commit()
 
 
+async def _series_anchor_day(record: ExpenseRecord, db: DbSession) -> int:
+    """The day of the month the recurring series was first due on."""
+    chain = (
+        select(ExpenseRecord.recurrence_parent_id, ExpenseRecord.due_on, ExpenseRecord.issued_on)
+        .where(ExpenseRecord.id == record.id)
+        .cte(recursive=True)
+    )
+    parent = aliased(ExpenseRecord)
+    chain = chain.union_all(
+        select(parent.recurrence_parent_id, parent.due_on, parent.issued_on).join(
+            chain, parent.id == chain.c.recurrence_parent_id
+        )
+    )
+    root = (
+        await db.execute(
+            select(chain.c.due_on, chain.c.issued_on).where(chain.c.recurrence_parent_id.is_(None))
+        )
+    ).one()
+    first: date = root.due_on or root.issued_on
+    return first.day
+
+
 def _check_recurrence(interval: int | None, unit: str | None) -> None:
     """An interval without a unit, or a unit without one, says nothing about when."""
     if (interval is None) != (unit is None):
@@ -175,7 +198,12 @@ async def create_next_occurrence(
             detail="The next occurrence of this expense already exists",
         )
     base: date = record.due_on or record.issued_on
-    following = next_occurrence_date(base, record.recurrence_interval, record.recurrence_unit)
+    following = next_occurrence_date(
+        base,
+        record.recurrence_interval,
+        record.recurrence_unit,
+        anchor_day=await _series_anchor_day(record, db),
+    )
     nxt = ExpenseRecord(
         vehicle_id=vehicle_id,
         created_by=user.id,
